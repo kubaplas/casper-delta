@@ -1,0 +1,1030 @@
+{
+  "casper_contract_schema_version": 1,
+  "toolchain": "rustc 1.85.0-nightly (d117b7f21 2024-12-31)",
+  "authors": [],
+  "repository": null,
+  "homepage": null,
+  "contract_name": "Market",
+  "contract_version": "0.2.0",
+  "types": [
+    {
+      "struct": {
+        "name": "AddressMarketState",
+        "description": null,
+        "members": [
+          {
+            "name": "market_state",
+            "description": null,
+            "ty": "MarketState"
+          },
+          {
+            "name": "is_paused",
+            "description": null,
+            "ty": "Bool"
+          },
+          {
+            "name": "fee",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "wcspr_balance",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "long_token_balance",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "short_token_balance",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "market_allowance",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "long_position_value",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "short_position_value",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "total_position_value",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "long_share_percentage",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "short_share_percentage",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "config",
+            "description": null,
+            "ty": "Config"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "Config",
+        "description": null,
+        "members": [
+          {
+            "name": "long_token",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "short_token",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "wcspr_token",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "fee_collector",
+            "description": null,
+            "ty": "Key"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "ConfigUpdated",
+        "description": null,
+        "members": [
+          {
+            "name": "admin",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "long_token",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "short_token",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "wcspr_token",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "fee_collector",
+            "description": null,
+            "ty": "Key"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "FeeCollected",
+        "description": null,
+        "members": [
+          {
+            "name": "amount",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "fee_collector",
+            "description": null,
+            "ty": "Key"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "LongDeposited",
+        "description": null,
+        "members": [
+          {
+            "name": "user",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "wcspr_amount",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "long_tokens_minted",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "fee_collected",
+            "description": null,
+            "ty": "U256"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "LongWithdrawn",
+        "description": null,
+        "members": [
+          {
+            "name": "user",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "long_tokens_burned",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "wcspr_amount",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "fee_collected",
+            "description": null,
+            "ty": "U256"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "MarketState",
+        "description": null,
+        "members": [
+          {
+            "name": "long_total_supply",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "short_total_supply",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "long_liquidity",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "short_liquidity",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "price",
+            "description": null,
+            "ty": "U256"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "Paused",
+        "description": null,
+        "members": [
+          {
+            "name": "account",
+            "description": null,
+            "ty": "Key"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "PriceFeedUpdated",
+        "description": null,
+        "members": [
+          {
+            "name": "admin",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "price_feed_address",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "price_feed_id",
+            "description": null,
+            "ty": "String"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "PriceUpdated",
+        "description": null,
+        "members": [
+          {
+            "name": "new_price",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "previous_price",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "timestamp",
+            "description": null,
+            "ty": "U64"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "RoleAdminChanged",
+        "description": null,
+        "members": [
+          {
+            "name": "role",
+            "description": null,
+            "ty": {
+              "ByteArray": 32
+            }
+          },
+          {
+            "name": "previous_admin_role",
+            "description": null,
+            "ty": {
+              "ByteArray": 32
+            }
+          },
+          {
+            "name": "new_admin_role",
+            "description": null,
+            "ty": {
+              "ByteArray": 32
+            }
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "RoleGranted",
+        "description": null,
+        "members": [
+          {
+            "name": "role",
+            "description": null,
+            "ty": {
+              "ByteArray": 32
+            }
+          },
+          {
+            "name": "address",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "sender",
+            "description": null,
+            "ty": "Key"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "RoleRevoked",
+        "description": null,
+        "members": [
+          {
+            "name": "role",
+            "description": null,
+            "ty": {
+              "ByteArray": 32
+            }
+          },
+          {
+            "name": "address",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "sender",
+            "description": null,
+            "ty": "Key"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "ShortDeposited",
+        "description": null,
+        "members": [
+          {
+            "name": "user",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "wcspr_amount",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "short_tokens_minted",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "fee_collected",
+            "description": null,
+            "ty": "U256"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "ShortWithdrawn",
+        "description": null,
+        "members": [
+          {
+            "name": "user",
+            "description": null,
+            "ty": "Key"
+          },
+          {
+            "name": "short_tokens_burned",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "wcspr_amount",
+            "description": null,
+            "ty": "U256"
+          },
+          {
+            "name": "fee_collected",
+            "description": null,
+            "ty": "U256"
+          }
+        ]
+      }
+    },
+    {
+      "struct": {
+        "name": "Unpaused",
+        "description": null,
+        "members": [
+          {
+            "name": "account",
+            "description": null,
+            "ty": "Key"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "name": "CallerNotTheNewOwner",
+      "description": "The caller is not the new owner.",
+      "discriminant": 20002
+    },
+    {
+      "name": "CallerNotTheOwner",
+      "description": "The caller is not the owner.",
+      "discriminant": 20001
+    },
+    {
+      "name": "LastPriceNotSet",
+      "description": "",
+      "discriminant": 8001
+    },
+    {
+      "name": "LongShareNotSet",
+      "description": "",
+      "discriminant": 8004
+    },
+    {
+      "name": "LongTokenContractNotACallerOnDeposit",
+      "description": "",
+      "discriminant": 8006
+    },
+    {
+      "name": "LongTokenContractNotACallerOnWithdrawal",
+      "description": "",
+      "discriminant": 8008
+    },
+    {
+      "name": "Misconfigured",
+      "description": "",
+      "discriminant": 8010
+    },
+    {
+      "name": "MissingRole",
+      "description": "The role is missing.",
+      "discriminant": 20003
+    },
+    {
+      "name": "NewPriceIsFromTheFuture",
+      "description": "",
+      "discriminant": 8003
+    },
+    {
+      "name": "NewPriceIsTooOld",
+      "description": "",
+      "discriminant": 8002
+    },
+    {
+      "name": "OwnerNotSet",
+      "description": "The owner is not set.",
+      "discriminant": 20000
+    },
+    {
+      "name": "PausedRequired",
+      "description": "Contract needs to be paused first.",
+      "discriminant": 21000
+    },
+    {
+      "name": "PriceFeedError",
+      "description": "",
+      "discriminant": 8011
+    },
+    {
+      "name": "RoleRenounceForAnotherAddress",
+      "description": "The role cannot be renounced for another address.",
+      "discriminant": 20004
+    },
+    {
+      "name": "ShortTokenContractNotACallerOnDeposit",
+      "description": "",
+      "discriminant": 8007
+    },
+    {
+      "name": "ShortTokenContractNotACallerOnWithdrawal",
+      "description": "",
+      "discriminant": 8009
+    },
+    {
+      "name": "TotalDepositNotSet",
+      "description": "",
+      "discriminant": 8005
+    },
+    {
+      "name": "Unauthorized",
+      "description": "",
+      "discriminant": 8401
+    },
+    {
+      "name": "UnpausedRequired",
+      "description": "Contract needs to be unpaused first.",
+      "discriminant": 21001
+    }
+  ],
+  "entry_points": [
+    {
+      "name": "pause",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "unpause",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "is_paused",
+      "description": "",
+      "is_mutable": false,
+      "arguments": [],
+      "return_ty": "Bool",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "update_price",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "deposit_long",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "wcspr_amount",
+          "description": null,
+          "ty": "U256",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "deposit_long_from",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "sender",
+          "description": null,
+          "ty": "Key",
+          "optional": false
+        },
+        {
+          "name": "wcspr_amount",
+          "description": null,
+          "ty": "U256",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "deposit_short",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "wcspr_amount",
+          "description": null,
+          "ty": "U256",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "deposit_short_from",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "sender",
+          "description": null,
+          "ty": "Key",
+          "optional": false
+        },
+        {
+          "name": "wcspr_amount",
+          "description": null,
+          "ty": "U256",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "withdraw_long",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "long_token_amount",
+          "description": null,
+          "ty": "U256",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "withdraw_long_from",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "sender",
+          "description": null,
+          "ty": "Key",
+          "optional": false
+        },
+        {
+          "name": "long_token_amount",
+          "description": null,
+          "ty": "U256",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "withdraw_short",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "short_token_amount",
+          "description": null,
+          "ty": "U256",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "withdraw_short_from",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "sender",
+          "description": null,
+          "ty": "Key",
+          "optional": false
+        },
+        {
+          "name": "short_token_amount",
+          "description": null,
+          "ty": "U256",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "get_market_state",
+      "description": "",
+      "is_mutable": false,
+      "arguments": [],
+      "return_ty": "MarketState",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "set_config",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "cfg",
+          "description": null,
+          "ty": "Config",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "get_config",
+      "description": "",
+      "is_mutable": false,
+      "arguments": [],
+      "return_ty": "Config",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "set_price_feed",
+      "description": "",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "price_feed_address",
+          "description": null,
+          "ty": "Key",
+          "optional": false
+        },
+        {
+          "name": "price_feed_id",
+          "description": null,
+          "ty": "String",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "get_address_market_state",
+      "description": "Returns comprehensive market and user data in a single call for frontend efficiency.",
+      "is_mutable": false,
+      "arguments": [
+        {
+          "name": "address",
+          "description": null,
+          "ty": "Key",
+          "optional": false
+        }
+      ],
+      "return_ty": "AddressMarketState",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "has_role",
+      "description": "Delegated. See `self.access_control.has_role()` for details.",
+      "is_mutable": false,
+      "arguments": [
+        {
+          "name": "role",
+          "description": null,
+          "ty": {
+            "ByteArray": 32
+          },
+          "optional": false
+        },
+        {
+          "name": "address",
+          "description": null,
+          "ty": "Key",
+          "optional": false
+        }
+      ],
+      "return_ty": "Bool",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "grant_role",
+      "description": "Delegated. See `self.access_control.grant_role()` for details.",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "role",
+          "description": null,
+          "ty": {
+            "ByteArray": 32
+          },
+          "optional": false
+        },
+        {
+          "name": "address",
+          "description": null,
+          "ty": "Key",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "revoke_role",
+      "description": "Delegated. See `self.access_control.revoke_role()` for details.",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "role",
+          "description": null,
+          "ty": {
+            "ByteArray": 32
+          },
+          "optional": false
+        },
+        {
+          "name": "address",
+          "description": null,
+          "ty": "Key",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "get_role_admin",
+      "description": "Delegated. See `self.access_control.get_role_admin()` for details.",
+      "is_mutable": false,
+      "arguments": [
+        {
+          "name": "role",
+          "description": null,
+          "ty": {
+            "ByteArray": 32
+          },
+          "optional": false
+        }
+      ],
+      "return_ty": {
+        "ByteArray": 32
+      },
+      "is_contract_context": true,
+      "access": "public"
+    },
+    {
+      "name": "renounce_role",
+      "description": "Delegated. See `self.access_control.renounce_role()` for details.",
+      "is_mutable": true,
+      "arguments": [
+        {
+          "name": "role",
+          "description": null,
+          "ty": {
+            "ByteArray": 32
+          },
+          "optional": false
+        },
+        {
+          "name": "address",
+          "description": null,
+          "ty": "Key",
+          "optional": false
+        }
+      ],
+      "return_ty": "Unit",
+      "is_contract_context": true,
+      "access": "public"
+    }
+  ],
+  "events": [
+    {
+      "name": "ConfigUpdated",
+      "ty": "ConfigUpdated"
+    },
+    {
+      "name": "FeeCollected",
+      "ty": "FeeCollected"
+    },
+    {
+      "name": "LongDeposited",
+      "ty": "LongDeposited"
+    },
+    {
+      "name": "LongWithdrawn",
+      "ty": "LongWithdrawn"
+    },
+    {
+      "name": "Paused",
+      "ty": "Paused"
+    },
+    {
+      "name": "PriceFeedUpdated",
+      "ty": "PriceFeedUpdated"
+    },
+    {
+      "name": "PriceUpdated",
+      "ty": "PriceUpdated"
+    },
+    {
+      "name": "RoleAdminChanged",
+      "ty": "RoleAdminChanged"
+    },
+    {
+      "name": "RoleGranted",
+      "ty": "RoleGranted"
+    },
+    {
+      "name": "RoleRevoked",
+      "ty": "RoleRevoked"
+    },
+    {
+      "name": "ShortDeposited",
+      "ty": "ShortDeposited"
+    },
+    {
+      "name": "ShortWithdrawn",
+      "ty": "ShortWithdrawn"
+    },
+    {
+      "name": "Unpaused",
+      "ty": "Unpaused"
+    }
+  ],
+  "call": {
+    "wasm_file_name": "Market.wasm",
+    "description": "",
+    "arguments": [
+      {
+        "name": "odra_cfg_package_hash_key_name",
+        "description": "The arg name for the package hash key name.",
+        "ty": "String",
+        "optional": false
+      },
+      {
+        "name": "odra_cfg_allow_key_override",
+        "description": "If true and the key specified in odra_cfg_package_hash_key_name already exists, it will be overwritten.",
+        "ty": "Bool",
+        "optional": false
+      },
+      {
+        "name": "odra_cfg_is_upgradable",
+        "description": "The arg name for the contract upgradeability setting.",
+        "ty": "Bool",
+        "optional": false
+      },
+      {
+        "name": "odra_cfg_is_upgrade",
+        "description": "The arg name for telling the installer that the contract is being upgraded.",
+        "ty": "Bool",
+        "optional": false
+      },
+      {
+        "name": "price_feed_address",
+        "description": null,
+        "ty": "Key",
+        "optional": false
+      },
+      {
+        "name": "price_feed_id",
+        "description": null,
+        "ty": "String",
+        "optional": false
+      }
+    ]
+  }
+}

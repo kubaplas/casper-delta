@@ -1,0 +1,8 @@
+[[contracts]]
+fqn = "casper_delta_contracts::market::Market"
+
+[[contracts]]
+fqn = "casper_delta_contracts::position_token::PositionToken"
+
+[[contracts]]
+fqn = "casper_delta_contracts::faucetable_wcspr::FaucetableWcspr"

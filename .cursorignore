@@ -1,0 +1,93 @@
+# Standard exclusions
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# IDE and editor files
+.vscode/
+**/.vscode/
+.idea/
+**/.idea/
+*.sublime-*
+**/*.sublime-*
+.atom/
+**/.atom/
+.brackets.json
+**/.brackets.json
+
+# Resources directories
+resources/
+**/resources/
+
+# Rust build artifacts
+target/
+**/target/
+Cargo.lock
+**/Cargo.lock
+*.pdb
+
+# TypeScript/JavaScript build artifacts
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# NPM artifacts
+package-lock.json
+**/package-lock.json
+yarn.lock
+**/yarn.lock
+.npm/
+**/.npm/
+.pnpm-debug.log*
+**/.pnpm-debug.log*
+
+# WebAssembly artifacts
+*.wasm
+**/*.wasm
+*.wasm.d.ts
+**/*.wasm.d.ts
+*.wasm.js
+**/*.wasm.js
+pkg-web/
+**/pkg-web/
+wasm/
+**/wasm/
+
+# Rust specific
+**/Cargo.lock
+**/target/
+**/wasm/
+
+# Temporary files
+tmp/
+**/tmp/
+temp/
+**/temp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Coverage reports
+coverage/
+**/coverage/
+*.lcov
+
+# Dependency directories
+vendor/
+**/vendor/

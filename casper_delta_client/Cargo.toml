@@ -1,0 +1,26 @@
+[package]
+name = "casper-delta-wasm-client"
+description = "Wasm client"
+edition = "2021"
+
+[dependencies]
+odra-wasm-client = { workspace = true }
+odra-core = { workspace = true }
+odra-wasm-client-builder = { workspace = true, optional = true, default-features = false }
+serde = { version = "1.0.195", default-features = false }
+serde_json = { version = "1.0.113", default-features = false }
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "casper_delta_wasm_client"
+path = "src/lib.rs"
+
+[features]
+default = ["client"]
+codegen = ["odra-wasm-client-builder"]
+client = []
+
+[[bin]]
+name = "codegen"
+path = "src/main.rs"
+required-features = ["codegen"]

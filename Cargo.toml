@@ -1,0 +1,80 @@
+[workspace]
+members = ["casper-delta-contracts", "casper-delta-cli", "casper_delta_client"]
+exclude = ["casper_delta_client", "casper_delta_example_client"]
+resolver = "2"
+
+[workspace.dependencies.cucumber]
+version = "0.21.0"
+features = []
+
+[workspace.dependencies.odra]
+git = "https://github.com/odradev/odra.git"
+branch = "release/2.4.1"
+features = []
+
+[workspace.dependencies.odra-bdd]
+git = "https://github.com/odradev/odra.git"
+branch = "release/2.4.1"
+features = []
+
+[workspace.dependencies.odra-build]
+git = "https://github.com/odradev/odra.git"
+branch = "release/2.4.1"
+features = []
+
+[workspace.dependencies.odra-cli]
+git = "https://github.com/odradev/odra.git"
+branch = "release/2.4.1"
+features = []
+
+[workspace.dependencies.odra-core]
+git = "https://github.com/odradev/odra.git"
+branch = "release/2.4.1"
+features = []
+
+[workspace.dependencies.odra-modules]
+git = "https://github.com/odradev/odra.git"
+branch = "release/2.4.1"
+features = []
+
+[workspace.dependencies.odra-test]
+git = "https://github.com/odradev/odra.git"
+branch = "release/2.4.1"
+features = []
+
+[workspace.dependencies.odra-wasm-client]
+git = "https://github.com/odradev/odra.git"
+branch = "release/2.4.1"
+features = []
+
+[workspace.dependencies.odra-wasm-client-builder]
+git = "https://github.com/odradev/odra.git"
+branch = "release/2.4.1"
+features = []
+
+[workspace.dependencies.odra-wcspr]
+git = "https://github.com/odradev/wcspr.git"
+branch = "master"
+features = []
+
+[workspace.dependencies.styks-contracts]
+git = "https://github.com/odradev/styks.git"
+branch = "feature/casper-shorts-client"
+features = []
+
+[workspace.dependencies.styks-core]
+git = "https://github.com/odradev/styks.git"
+branch = "feature/casper-shorts-client"
+features = []
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.release.package]
+
+[profile.dev.package."*"]
+opt-level = 3

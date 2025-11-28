@@ -1,0 +1,37 @@
+[package]
+name = "casper-delta-contracts"
+version = "0.2.0"
+edition = "2021"
+
+[dependencies]
+odra = { workspace = true }
+odra-modules = { workspace = true }
+styks-contracts = { workspace = true }
+styks-core = { workspace = true }
+
+[dev-dependencies]
+odra-test = { workspace = true }
+odra-bdd = { workspace = true }
+odra-modules = { workspace = true }
+cucumber = { workspace = true }
+styks-contracts = { workspace = true } 
+
+[build-dependencies]
+odra-build = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+odra-build = { workspace = true }
+
+[[bin]]
+name = "casper_delta_contracts_build_contract"
+path = "bin/build_contract.rs"
+test = false
+
+[[bin]]
+name = "casper_delta_contracts_build_schema"
+path = "bin/build_schema.rs"
+test = false
+
+[[test]]
+name = "test_casper_delta"
+harness = false

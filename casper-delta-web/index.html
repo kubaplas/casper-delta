@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Casper Delta - Trading Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="cspr-click.js"></script>
+  <script defer src="https://cdn.cspr.click/ui/v1.10.1/csprclick-client-1.10.1.js"></script>
+  <script type="importmap">
+    {
+        "imports": {
+            "casper-delta-wasm-client": "./node_modules/casper-delta-wasm-client/casper_delta_wasm_client.js"
+        }
+    }
+  </script>
+</head>
+<body class="bg-gradient-to-br from-orange-50 to-amber-100">
+  <div id="csprclick-ui"></div>
+  <div class="bg-orange-50/90 backdrop-blur-md rounded-none shadow-none border-none p-4 sm:p-6 sm:rounded-2xl sm:shadow-xl sm:border sm:border-orange-200 sm:max-w-6xl sm:mx-auto">
+      <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold text-orange-800">Casper Delta</h1>
+          <p class="text-orange-700 mt-1 text-sm sm:text-base">Long/Short Trading Platform</p>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <button id="connect-btn" class="px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">Connect Wallet</button>
+          <div class="relative hidden" id="disconnect-section">
+            <button id="address-dropdown-btn" class="flex items-center gap-2 px-3 py-2 rounded-lg border border-orange-300 hover:bg-orange-50 text-orange-700 text-xs sm:text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+              <span id="address" class="text-orange-700 font-mono"></span>
+              <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div id="address-dropdown-menu" class="absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10 hidden">
+              <button id="switch-account-btn" class="w-full px-4 py-2 text-left text-sm text-orange-700 hover:bg-orange-50 flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:bg-orange-50">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                </svg>
+                Switch Account
+              </button>
+              <button id="disconnect-btn" class="w-full px-4 py-2 text-left text-sm text-orange-700 hover:bg-orange-50 flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:bg-orange-50">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Disconnect
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+
+      <!-- Market Overview & Portfolio -->
+      <section class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Market Price -->
+        <div class="lg:col-span-1 bg-gradient-to-br from-amber-50 to-orange-100 p-6 rounded-xl border border-amber-200 shadow-sm">
+          <div class="text-sm text-amber-700 font-medium mb-2">WCSPR Price</div>
+          <div id="current-price" class="text-3xl font-bold text-amber-800">—</div>
+          <div id="price-loader" class="text-sm text-amber-600 hidden">Loading...</div>
+        </div>
+
+        <!-- Account & Market Overview -->
+        <div class="lg:col-span-3 bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-xl border border-orange-200 shadow-sm">
+          <div class="text-sm text-orange-700 font-medium mb-4">Account Overview</div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <div class="text-xs text-amber-600 mb-2">WCSPR Token</div>
+              <div id="wcspr-balance" class="text-lg font-bold text-amber-800">—</div>
+              <div id="wcspr-balance-loader" class="text-xs text-amber-500 hidden">Loading...</div>
+            </div>
+            <div>
+              <div class="text-xs text-green-600 mb-2">Long Position</div>
+              <div id="long-token-balance-portfolio" class="text-lg font-bold text-green-700">—</div>
+              <div id="long-position-loader" class="text-xs text-green-500 hidden">Loading...</div>
+            </div>
+            <div>
+              <div class="text-xs text-red-600 mb-2">Short Position</div>
+              <div id="short-token-balance-portfolio" class="text-lg font-bold text-red-700">—</div>
+              <div id="short-position-loader" class="text-xs text-red-500 hidden">Loading...</div>
+            </div>
+            <div>
+              <div class="text-xs text-orange-600 mb-2">Your Total Value</div>
+              <div id="total-position-value" class="text-lg font-bold text-orange-700">—</div>
+              <div id="total-position-loader" class="text-xs text-orange-500 hidden">Loading...</div>
+            </div>
+            <div>
+            </div>
+            <div>
+              <div class="text-xs text-green-700 mb-2">Long Liquidity</div>
+              <div id="long-liquidity" class="text-lg font-semibold text-green-600">—</div>
+              <div id="long-liquidity-loader" class="text-xs text-orange-400 hidden">Loading...</div>
+            </div>
+            <div>
+              <div class="text-xs text-red-700 mb-2">Short Liquidity</div>
+              <div id="short-liquidity" class="text-lg font-semibold text-red-600">—</div>
+              <div id="short-liquidity-loader" class="text-xs text-orange-400 hidden">Loading...</div>
+            </div>
+            <div>
+              <div class="text-xs text-blue-700 mb-2">Total Market Value</div>
+              <div id="total-market-value" class="text-lg font-semibold text-blue-600">—</div>
+              <div id="total-market-value-loader" class="text-xs text-orange-400 hidden">Loading...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Show Trading Info Button (shown when trading info is dismissed) -->
+      <section id="show-trading-info-section" class="mb-6 hidden">
+        <button id="show-trading-info" class="text-sm text-orange-600 hover:text-orange-800 underline transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded">
+          ℹ️ Show trading guide
+        </button>
+      </section>
+
+      <!-- Trading Info -->
+      <section id="trading-info-section" class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 hidden shadow-sm">
+        <div class="flex items-start justify-between">
+          <div class="flex items-start space-x-3 flex-1">
+            <div class="text-orange-600 mt-0.5">ℹ️</div>
+            <div class="text-sm text-orange-800">
+              <div class="font-medium mb-2">How Trading Works:</div>
+              <div class="space-y-2 text-orange-700">
+                <div>• <strong>Faucet:</strong> Get 1000WCSPR from the faucet using "Use WCSPR faucet" button</div>
+                <div>• <strong>Approve:</strong> Approve market to use WCSPR using "Approve market to use WCSPR" button</div>
+                <div>• <strong>Open Long:</strong> Go long with WCSPR to profit when price goes up</div>
+                <div>• <strong>Open Short:</strong> Go short with WCSPR to profit when price goes down</div>
+                <div>• <strong>Close Positions:</strong> Close your positions to get WCSPR back</div>
+                <div>• <strong>Trading Fees:</strong> 0.5% fee on all deposits and withdrawals (automatically deducted)</div>
+              </div>
+            </div>
+          </div>
+          <button id="close-trading-info" class="text-orange-400 hover:text-orange-600 transition-colors duration-200 ml-4 p-1 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded" title="Close this info panel">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </section>
+      <!-- Trading Interface -->
+      <!-- Long and Short Positions -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Long Position -->
+        <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 shadow-sm">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-green-800">🟢 Long Position</h3>
+          </div>
+          
+          <!-- Open Long Form -->
+          <div class="bg-white p-4 rounded-lg border border-green-200 mb-4 shadow-sm">
+            <div class="text-sm font-medium text-green-800 mb-4">💰 Open Long Position</div>
+            <div class="mb-4 p-3 bg-green-50 rounded border border-green-200">
+              <div class="text-xs text-green-600 mb-2">Available WCSPR (balance & allowance)</div>
+              <div id="wcspr-balance-long" class="text-sm font-semibold text-green-700 cursor-pointer hover:text-green-800 transition-colors duration-200" title="Click to set amount">—</div>
+              <div id="wcspr-balance-long-loader" class="text-xs text-green-500 hidden">Loading...</div>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <input id="long-open-amount" inputmode="decimal" class="w-full p-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white transition-colors duration-200" placeholder="0.0" disabled />
+                <div class="text-xs text-green-600 mt-2 px-1">
+                  Enter WCSPR amount to go long
+                </div>
+              </div>
+              <button id="deposit-long-btn" class="w-full px-4 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" disabled>
+                Open Long Position
+              </button>
+            </div>
+          </div>
+
+          <!-- Close Long Form -->
+          <div class="bg-white p-4 rounded-lg border border-green-200 mb-4 shadow-sm">
+            <div class="text-sm font-medium text-green-800 mb-4">🪙 Close Long Position</div>
+            <div class="mb-4 p-3 bg-green-50 rounded border border-green-200">
+              <div class="text-xs text-green-600 mb-2">Your Long Position Value</div>
+              <div id="long-position-value-display" class="text-sm font-semibold text-green-700">— WCSPR</div>
+              <div id="long-position-value-loader" class="text-xs text-green-500 hidden">Loading...</div>
+            </div>
+            <div class="space-y-4">
+              <div class="grid grid-cols-4 gap-2 mb-4">
+                <button id="long-close-25" class="px-3 py-2 text-xs font-medium rounded-lg border border-green-300 text-green-700 hover:bg-green-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" disabled>25%</button>
+                <button id="long-close-50" class="px-3 py-2 text-xs font-medium rounded-lg border border-green-300 text-green-700 hover:bg-green-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" disabled>50%</button>
+                <button id="long-close-75" class="px-3 py-2 text-xs font-medium rounded-lg border border-green-300 text-green-700 hover:bg-green-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" disabled>75%</button>
+                <button id="long-close-100" class="px-3 py-2 text-xs font-medium rounded-lg border border-green-300 text-green-700 hover:bg-green-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" disabled>100%</button>
+              </div>
+              <div>
+                <input id="long-close-amount-input" inputmode="decimal" class="w-full p-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white transition-colors duration-200" placeholder="0.0" disabled />
+                <div class="text-xs text-green-600 mt-2 px-1">
+                  Enter WCSPR value to close (max: <span id="long-close-amount-display">—</span>)
+                </div>
+              </div>
+              <button id="withdraw-long-btn" class="w-full px-4 py-3 rounded-lg border-2 border-green-600 text-green-700 hover:bg-green-600 hover:text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" disabled>
+                <div class="text-sm">Close Long Position</div>
+                <div class="text-xs opacity-75">Sell <span id="long-close-percentage">—</span> of Position</div>
+              </button>
+            </div>
+          </div>
+
+          <div class="text-xs text-green-600 bg-green-50 p-3 rounded border border-green-200">
+            <strong>Long Position:</strong> You profit when WCSPR price goes up. Go long with WCSPR, close your position when price rises.
+          </div>
+        </div>
+
+        <!-- Short Position -->
+        <div class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border border-red-200 shadow-sm">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-red-800">🔴 Short Position</h3>
+          </div>
+          
+          <!-- Open Short Form -->
+          <div class="bg-white p-4 rounded-lg border border-red-200 mb-4 shadow-sm">
+            <div class="text-sm font-medium text-red-800 mb-4">💰 Open Short Position</div>
+            <div class="mb-4 p-3 bg-red-50 rounded border border-red-200">
+              <div class="text-xs text-red-600 mb-2">Available WCSPR (balance & allowance)</div>
+              <div id="wcspr-balance-short" class="text-sm font-semibold text-red-700 cursor-pointer hover:text-red-800 transition-colors duration-200" title="Click to set amount">—</div>
+              <div id="wcspr-balance-short-loader" class="text-xs text-red-500 hidden">Loading...</div>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <input id="short-open-amount" inputmode="decimal" class="w-full p-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white transition-colors duration-200" placeholder="0.0" disabled />
+                <div class="text-xs text-red-600 mt-2 px-1">
+                  Enter WCSPR amount to go short
+                </div>
+              </div>
+              <button id="deposit-short-btn" class="w-full px-4 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" disabled>
+                Open Short Position
+              </button>
+            </div>
+          </div>
+
+          <!-- Close Short Form -->
+          <div class="bg-white p-4 rounded-lg border border-red-200 mb-4 shadow-sm">
+            <div class="text-sm font-medium text-red-800 mb-4">🪙 Close Short Position</div>
+            <div class="mb-4 p-3 bg-red-50 rounded border border-red-200">
+              <div class="text-xs text-red-600 mb-2">Your Short Position Value</div>
+              <div id="short-position-value-display" class="text-sm font-semibold text-red-700">— WCSPR</div>
+              <div id="short-position-value-loader" class="text-xs text-red-500 hidden">Loading...</div>
+            </div>
+            <div class="space-y-4">
+              <div class="grid grid-cols-4 gap-2 mb-4">
+                <button id="short-close-25" class="px-3 py-2 text-xs font-medium rounded-lg border border-red-300 text-red-700 hover:bg-red-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" disabled>25%</button>
+                <button id="short-close-50" class="px-3 py-2 text-xs font-medium rounded-lg border border-red-300 text-red-700 hover:bg-red-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" disabled>50%</button>
+                <button id="short-close-75" class="px-3 py-2 text-xs font-medium rounded-lg border border-red-300 text-red-700 hover:bg-red-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" disabled>75%</button>
+                <button id="short-close-100" class="px-3 py-2 text-xs font-medium rounded-lg border border-red-300 text-red-700 hover:bg-red-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" disabled>100%</button>
+              </div>
+              <div>
+                <input id="short-close-amount-input" inputmode="decimal" class="w-full p-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white transition-colors duration-200" placeholder="0.0" disabled />
+                <div class="text-xs text-red-600 mt-2 px-1">
+                  Enter WCSPR value to close (max: <span id="short-close-amount-display">—</span>)
+                </div>
+              </div>
+              <button id="withdraw-short-btn" class="w-full px-4 py-3 rounded-lg border-2 border-red-600 text-red-700 hover:bg-red-600 hover:text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" disabled>
+                <div class="text-sm">Close Short Position</div>
+                <div class="text-xs opacity-75">Sell <span id="short-close-percentage">—</span> of Position</div>
+              </button>
+            </div>
+          </div>
+
+          <div class="text-xs text-red-600 bg-red-50 p-3 rounded border border-red-200">
+            <strong>Short Position:</strong> You profit when WCSPR price goes down. Go short with WCSPR, close your position when price falls.
+          </div>
+        </div>
+      </section>
+
+      <!-- Initialize trading info visibility immediately -->
+      <script>
+        (function() {
+          const DISMISSED_KEY = 'casper-delta-trading-info-dismissed';
+          const isDismissed = localStorage.getItem(DISMISSED_KEY) === 'true';
+          
+          const tradingInfo = document.getElementById('trading-info-section');
+          const showButton = document.getElementById('show-trading-info-section');
+          
+          if (isDismissed) {
+            // Keep trading info hidden, show the button
+            tradingInfo.classList.add('hidden');
+            showButton.classList.remove('hidden');
+          } else {
+            // Show trading info, hide the button
+            tradingInfo.classList.remove('hidden');
+            showButton.classList.add('hidden');
+          }
+        })();
+      </script>
+
+      <!-- Market Tools -->
+      <section class="mb-8">
+        <div class="bg-gradient-to-br from-amber-50 to-orange-100 p-6 rounded-xl border border-amber-200 shadow-sm">
+          <h3 class="text-lg font-bold text-amber-800 mb-6">⚙️ Market Tools</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Market Allowance -->
+            <div class="bg-white p-4 rounded-lg border border-amber-200 shadow-sm">
+              <div class="text-xs text-amber-600 mb-3">Market Allowance</div>
+              <div class="text-xs text-amber-600 mb-2">Current amount:</div>
+              <div id="market-allowance" class="text-sm font-semibold text-amber-700 mb-3">—</div>
+              <div id="market-allowance-loader" class="text-xs text-amber-500 hidden mb-3">Loading...</div>
+              <input id="approve-amount" inputmode="decimal" class="w-full p-3 text-sm border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white transition-colors duration-200 mb-3" placeholder="Approve amount (empty = max)" disabled />
+              <button id="approve-market-btn" class="w-full px-4 py-3 text-sm rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2" disabled>Approve market to use WCSPR</button>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="bg-white p-4 rounded-lg border border-amber-200 shadow-sm">
+              <div class="text-xs text-amber-600 mb-3">Quick Actions</div>
+              <div class="space-y-3">
+                <button id="update-price-btn" class="w-full px-4 py-3 text-sm rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2" disabled>Update WCSPR Price</button>
+                <button id="faucet-btn" class="w-full px-4 py-3 text-sm rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2" disabled>Use WCSPR faucet</button>
+                <button id="refresh-btn" class="w-full px-4 py-3 text-sm rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">Refresh Data</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      
+
+
+      <!-- Notifications -->
+      <section id="tx-section" class="mt-6 p-4 rounded-lg bg-amber-50 border border-amber-200 hidden shadow-sm">
+        <div class="text-sm font-medium text-amber-800 mb-2">Transaction submitted</div>
+        <a id="tx-link" class="text-sm text-amber-600 underline break-all hover:text-amber-800 transition-colors duration-200" target="_blank" rel="noopener noreferrer">View on explorer</a>
+      </section>
+
+      <!-- Transaction Progress Modal Overlay -->
+      <div id="tx-progress-overlay" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 hidden overflow-y-auto">
+        <div class="min-h-[100dvh] flex items-center justify-center p-4 sm:p-6">
+          <div id="tx-progress-panel" tabindex="-1" class="bg-orange-50 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full border border-orange-200 my-8 max-h-[90dvh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="tx-progress-title" aria-describedby="tx-progress-status">
+          <!-- Modal Header -->
+          <div class="text-center mb-8">
+            <div id="tx-progress-spinner" class="animate-spin rounded-full h-12 w-12 border-4 border-orange-200 border-t-orange-600 mx-auto mb-6"></div>
+            <h3 id="tx-progress-title" class="text-xl font-bold text-orange-900 mb-3">Processing Transaction</h3>
+            <div class="text-sm text-orange-600">
+              <span id="tx-progress-status">Monitoring transaction...</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="mb-8">
+            <div class="w-full bg-orange-200 rounded-full h-3 overflow-hidden">
+              <div id="tx-progress-bar" class="bg-gradient-to-r from-orange-500 to-orange-600 h-3 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+            <div class="text-xs text-orange-500 mt-3 text-center">
+              <span id="tx-progress-time">Started monitoring...</span>
+            </div>
+          </div>
+
+          <!-- Transaction Details -->
+          <div class="bg-orange-100 rounded-lg p-4 border border-orange-200">
+            <div class="text-xs text-orange-600 mb-2">Transaction Hash</div>
+            <div id="tx-progress-hash" class="text-sm font-mono text-orange-800 break-all leading-relaxed">—</div>
+          </div>
+
+          <!-- Warning Message -->
+          <div class="mt-8 text-center">
+            <div class="text-xs text-orange-500">
+              ⚠️ Please don't close this window while transaction is processing
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Modal -->
+      <div id="error-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 hidden overflow-y-auto">
+        <div class="min-h-[100dvh] flex items-center justify-center p-4 sm:p-6">
+          <div id="error-modal-panel" tabindex="-1" class="bg-red-50 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full border border-red-200 my-8 max-h-[90dvh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="error-modal-title" aria-describedby="error-modal-message">
+            <div class="text-center mb-8">
+              <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.29 3.86l-7.5 12.99A2 2 0 004.5 20h15a2 2 0 001.71-3.15l-7.5-12.99a2 2 0 00-3.42 0z"></path>
+                </svg>
+              </div>
+              <h3 id="error-modal-title" class="text-xl font-bold text-red-900 mb-3">An error occurred</h3>
+              <p id="error-modal-message" class="text-sm text-red-700"></p>
+            </div>
+            <div class="space-y-4">
+              <button id="error-modal-close" class="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-red-500 to-red-600 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section id="error-section" class="mt-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 hidden shadow-sm">
+        <div class="text-sm font-medium mb-2">Error</div>
+        <div id="error-text" class="text-sm"></div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="mt-12 p-6 bg-orange-50 rounded-lg border border-orange-200 text-sm text-orange-700 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-6">
+            <a href="whitepaper.html" target="_blank" rel="noopener noreferrer" class="underline hover:text-orange-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded">Whitepaper</a>
+          </div>
+        </div>
+      </footer>
+  </div>
+  <script type="module" src="dist/trading.js"></script>
+</body>
+</html>
+
