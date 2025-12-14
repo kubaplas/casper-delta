@@ -8,63 +8,51 @@ version = "0.21.0"
 features = []
 
 [workspace.dependencies.odra]
-git = "https://github.com/odradev/odra.git"
-branch = "release/2.4.1"
+path = "../odra/odra/odra"
 features = []
 
 [workspace.dependencies.odra-bdd]
-git = "https://github.com/odradev/odra.git"
-branch = "release/2.4.1"
+path = "../odra/odra/odra-bdd"
 features = []
 
 [workspace.dependencies.odra-build]
-git = "https://github.com/odradev/odra.git"
-branch = "release/2.4.1"
+path = "../odra/odra/odra-build"
 features = []
 
 [workspace.dependencies.odra-cli]
-git = "https://github.com/odradev/odra.git"
-branch = "release/2.4.1"
+path = "../odra/odra/odra-cli"
 features = []
 
 [workspace.dependencies.odra-core]
-git = "https://github.com/odradev/odra.git"
-branch = "release/2.4.1"
+path = "../odra/odra/core"
 features = []
 
 [workspace.dependencies.odra-modules]
-git = "https://github.com/odradev/odra.git"
-branch = "release/2.4.1"
+path = "../odra/odra/modules"
 features = []
 
 [workspace.dependencies.odra-test]
-git = "https://github.com/odradev/odra.git"
-branch = "release/2.4.1"
+path = "../odra/odra/odra-test"
 features = []
 
 [workspace.dependencies.odra-wasm-client]
-git = "https://github.com/odradev/odra.git"
-branch = "release/2.4.1"
+path = "../odra/odra/odra-wasm-client"
 features = []
 
 [workspace.dependencies.odra-wasm-client-builder]
-git = "https://github.com/odradev/odra.git"
-branch = "release/2.4.1"
+path = "../odra/odra/odra-wasm-client-builder"
 features = []
 
 [workspace.dependencies.odra-wcspr]
-git = "https://github.com/odradev/wcspr.git"
-branch = "master"
+path = "../odra/odra/odra-wcspr"
 features = []
 
 [workspace.dependencies.styks-contracts]
-git = "https://github.com/odradev/styks.git"
-branch = "feature/casper-shorts-client"
+path = "../styks/styks-contracts"
 features = []
 
 [workspace.dependencies.styks-core]
-git = "https://github.com/odradev/styks.git"
-branch = "feature/casper-shorts-client"
+path = "../styks/styks-core"
 features = []
 
 [profile.release]

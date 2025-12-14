@@ -66,6 +66,10 @@ impl Default for CasperShortsWorld {
             MarketInitArgs {
                 price_feed_address: price_feed.address(),
                 price_feed_id,
+                contract_name: None,
+                contract_description: None,
+                contract_icon_uri: None,
+                contract_project_uri: None,
             },
         );
 
@@ -73,6 +77,10 @@ impl Default for CasperShortsWorld {
             &odra_env,
             FaucetableWcsprInitArgs {
                 market: market.address(),
+                contract_name: None,
+                contract_description: None,
+                contract_icon_uri: None,
+                contract_project_uri: None,
             },
         );
 
@@ -86,6 +94,10 @@ impl Default for CasperShortsWorld {
                 long_or_short: LongOrShort::Short,
                 wcspr: wcspr_token.address(),
                 market: market.address(),
+                contract_name: None,
+                contract_description: None,
+                contract_icon_uri: None,
+                contract_project_uri: None,
             },
         );
 
@@ -99,6 +111,10 @@ impl Default for CasperShortsWorld {
                 long_or_short: LongOrShort::Long,
                 wcspr: wcspr_token.address(),
                 market: market.address(),
+                contract_name: None,
+                contract_description: None,
+                contract_icon_uri: None,
+                contract_project_uri: None,
             },
         );
 

@@ -4,13 +4,20 @@ use odra::casper_types::U256;
 use odra::prelude::*;
 use odra_modules::access::{AccessControl, Role};
 use odra_modules::cep18_token::Cep18;
+use odra_modules::cep96::{Cep96, Cep96ContractMetadata};
 
 pub const FAUCET_AMOUNT: u64 = 1_000_000_000_000; // 1000 WCSPR
+
+const CONTRACT_NAME: &str = "Casper Delta Wrapped CSPR";
+const CONTRACT_DESCRIPTION: &str = "Faucetable Wrapped CSPR used by the Casper Delta's test version.";
+const CONTRACT_ICON_URI: &str = "https://casper-delta.kubaplas.pl/icon.png";
+const CONTRACT_PROJECT_URI: &str = "https://casper-delta.kubaplas.pl/";
 
 #[odra::module]
 pub struct FaucetableWcspr {
     access_control: SubModule<AccessControl>,
     wcspr: SubModule<Cep18>,
+    metadata: SubModule<Cep96>,
     fauceted_accounts: Mapping<Address, bool>,
     participants: List<Address>,
 }
@@ -30,6 +37,12 @@ impl FaucetableWcspr {
             .unchecked_grant_role(&FaucetRole::Admin.role_id(), &caller);
         self.access_control
             .unchecked_grant_role(&FaucetRole::TransferManager.role_id(), &market);
+        self.metadata.init(
+            Some(CONTRACT_NAME.to_string()),
+            Some(CONTRACT_DESCRIPTION.to_string()),
+            Some(CONTRACT_ICON_URI.to_string()),
+            Some(CONTRACT_PROJECT_URI.to_string()),
+        );
     }
 
     delegate! {
@@ -51,6 +64,15 @@ impl FaucetableWcspr {
             fn balance_of(&self, address: &Address) -> U256;
             fn allowance(&self, owner: &Address, spender: &Address) -> U256;
             fn approve(&mut self, spender: &Address, amount: &U256);
+        }
+    }
+
+    delegate! {
+        to self.metadata {
+            fn contract_name(&self) -> Option<String>;
+            fn contract_description(&self) -> Option<String>;
+            fn contract_icon_uri(&self) -> Option<String>;
+            fn contract_project_uri(&self) -> Option<String>;
         }
     }
 

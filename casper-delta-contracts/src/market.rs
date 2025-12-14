@@ -14,11 +14,17 @@ use odra::prelude::*;
 use odra::ContractRef;
 use odra_modules::access::{AccessControl, Role};
 use odra_modules::cep18_token::Cep18ContractRef;
+use odra_modules::cep96::{Cep96, Cep96ContractMetadata};
 use odra_modules::security::Pauseable;
 use odra_modules::wrapped_native::WrappedNativeTokenContractRef;
 use styks_contracts::styks_price_feed::StyksPriceFeedContractRef;
 
 const DEFAULT_FEE: u64 = 200; // 1/200 = 0.5%
+
+const CONTRACT_NAME: &str = "Casper Delta Market";
+const CONTRACT_DESCRIPTION: &str = "Main Market Contract for the Casper Delta project";
+const CONTRACT_ICON_URI: &str = "https://casper-trade.kubaplas.pl/icon.png";
+const CONTRACT_PROJECT_URI: &str = "https://casper-trade.kubaplas.pl/";
 
 /// Comprehensive data structure containing all frontend-needed information for a specific address
 #[odra::odra_type]
@@ -57,6 +63,7 @@ pub struct AddressMarketState {
 pub struct Market {
     access_control: SubModule<AccessControl>,
     pauseable: SubModule<Pauseable>,
+    metadata: SubModule<Cep96>,
     state: Var<MarketState>,
     price_feed: Var<Address>,
     price_feed_id: Var<String>,
@@ -84,6 +91,12 @@ impl Market {
             .unchecked_grant_role(&ShortsRole::Admin.role_id(), &caller);
 
         self.fee.set(U256::from(DEFAULT_FEE));
+        self.metadata.init(
+            Some(CONTRACT_NAME.to_string()),
+            Some(CONTRACT_DESCRIPTION.to_string()),
+            Some(CONTRACT_ICON_URI.to_string()),
+            Some(CONTRACT_PROJECT_URI.to_string()),
+        );
     }
 
     delegate! {
@@ -93,6 +106,15 @@ impl Market {
             fn revoke_role(&mut self, role: &Role, address: &Address);
             fn get_role_admin(&self, role: &Role) -> Role;
             fn renounce_role(&mut self, role: &Role, address: &Address);
+        }
+    }
+
+    delegate! {
+        to self.metadata {
+            fn contract_name(&self) -> Option<String>;
+            fn contract_description(&self) -> Option<String>;
+            fn contract_icon_uri(&self) -> Option<String>;
+            fn contract_project_uri(&self) -> Option<String>;
         }
     }
 

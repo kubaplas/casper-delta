@@ -6,7 +6,7 @@ use casper_delta_contracts::config::Config;
 use casper_delta_contracts::faucetable_wcspr::{FaucetableWcspr, FaucetableWcsprInitArgs};
 use casper_delta_contracts::market::{Market, MarketInitArgs};
 use casper_delta_contracts::position_token::{LongOrShort, PositionToken, PositionTokenInitArgs};
-use odra::host::{HostEnv, InstallConfig, NoArgs};
+use odra::host::{HostEnv, InstallConfig};
 use odra::prelude::{Address, Addressable};
 use odra_cli::{cspr, deploy::DeployScript, DeployedContractsContainer, DeployerExt, OdraCli};
 use styks_contracts::styks_price_feed::StyksPriceFeed;
@@ -53,8 +53,10 @@ impl DeployScript for ContractsDeployScript {
             env,
             Some("CD_SHORT".to_string()),
             PositionTokenInitArgs {
-                name: "CD_SHORT".to_string(),
-                symbol: "SHORT".to_string(),
+                name: "Casper Delta Short Token".to_string(),
+                symbol: "CD_SHORT".to_string(),
+                contract_name: "Casper Delta Short Token".to_string(),
+                contract_description: "Short position token used by Casper Delta.".to_string(),
                 decimals: 9,
                 initial_supply: 0u64.into(),
                 long_or_short: LongOrShort::Short,
@@ -74,8 +76,10 @@ impl DeployScript for ContractsDeployScript {
             env,
             Some("CD_LONG".to_string()),
             PositionTokenInitArgs {
-                name: "CD_LONG".to_string(),
-                symbol: "LONG".to_string(),
+                name: "Casper Delta Long Token".to_string(),
+                symbol: "CD_LONG".to_string(),
+                contract_name: "Casper Delta Long Token".to_string(),
+                contract_description: "Long position Token used by Casper Delta".to_string(),
                 decimals: 9,
                 initial_supply: 0u64.into(),
                 long_or_short: LongOrShort::Long,

@@ -1,10 +1,14 @@
 use odra::{casper_types::U256, prelude::*, ContractRef};
 use odra_modules::access::AccessControl;
+use odra_modules::cep96::{Cep96, Cep96ContractMetadata};
 use odra_modules::{cep18::errors::Error as Cep18Error, cep18_token::Cep18};
 
 use crate::market::{MarketContractRef, MarketError};
 use crate::position_token::PositionTokenError::Misconfigured;
 use crate::roles::ShortsRole;
+
+const CONTRACT_ICON_URI: &str = "https://casper-delta.kubaplas.pl/icon.png";
+const CONTRACT_PROJECT_URI: &str = "https://casper-delta.kubaplas.pl/";
 
 #[odra::odra_type]
 pub enum LongOrShort {
@@ -26,6 +30,7 @@ pub struct PositionToken {
     token_type: Var<LongOrShort>,
     token: SubModule<Cep18>,
     access_control: SubModule<AccessControl>,
+    metadata: SubModule<Cep96>,
     market: Var<Address>,
     wcspr: Var<Address>,
     peer_transfers_enabled: Var<bool>,
@@ -42,6 +47,8 @@ impl PositionToken {
         &mut self,
         name: String,
         symbol: String,
+        contract_name: String,
+        contract_description: String,
         decimals: u8,
         initial_supply: U256,
         long_or_short: LongOrShort,
@@ -56,6 +63,12 @@ impl PositionToken {
         self.wcspr.set(wcspr);
         self.market.set(market);
         self.peer_transfers_enabled.set(true);
+        self.metadata.init(
+            Some(contract_name),
+            Some(contract_description),
+            Some(CONTRACT_ICON_URI.to_string()),
+            Some(CONTRACT_PROJECT_URI.to_string()),
+        );
     }
 
     pub fn transfer(&mut self, recipient: &Address, amount: &U256) {
@@ -150,6 +163,15 @@ impl PositionToken {
 
             /// Increases the allowance of the spender by the given amount.
             fn increase_allowance(&mut self, spender: &Address, inc_by: &U256);
+        }
+    }
+
+    delegate! {
+        to self.metadata {
+            fn contract_name(&self) -> Option<String>;
+            fn contract_description(&self) -> Option<String>;
+            fn contract_icon_uri(&self) -> Option<String>;
+            fn contract_project_uri(&self) -> Option<String>;
         }
     }
 
