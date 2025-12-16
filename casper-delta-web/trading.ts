@@ -452,10 +452,10 @@ function onTransactionCancelled(): void {
 
 // Contract addresses - these would be configured based on deployment
 const CONTRACT_ADDRESSES = {
-    market: "hash-f4eaeef229602465588fb95c1aa160d6c2a8de9c106f23af77b4483bc9b9adfc",
-    wcspr: "hash-37dcac0abbf125d5da92a06c55278f5bad1323c34d5425c704b84a79fcbf69ce",
-    shortToken: "hash-3476939f2f4e8b4b8a7ae3f2354e0bcc3e1e076027fbe9fb9c5614b4b6387d3f",
-    longToken: "hash-5b78b51c9d86763191d3fb5a1b0289158b7d23c07b95e1b1ec7a81b5ec73ff64",
+    market: "hash-3aaede19ed8b270d96f0fccf79d9dbb14307ea853de00f2f0835f5958f396bbd",
+    wcspr: "hash-a2fc55eda5bf7e724520d36536c32ac19e0b75dbdf16b4bf85a4234f21d6aaf0",
+    shortToken: "hash-51809ec40e24515f38f2b3d7c87f76358269428ca35bc79f732a52eac62fea5e",
+    longToken: "hash-e374d41cf3b6405ba4c344bc15f12a1c6fdc201b51054479facfee1eaff30524",
 };
 
 // ---------- State ----------

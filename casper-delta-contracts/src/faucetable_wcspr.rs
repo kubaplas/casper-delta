@@ -9,8 +9,9 @@ use odra_modules::cep96::{Cep96, Cep96ContractMetadata};
 pub const FAUCET_AMOUNT: u64 = 1_000_000_000_000; // 1000 WCSPR
 
 const CONTRACT_NAME: &str = "Casper Delta Wrapped CSPR";
-const CONTRACT_DESCRIPTION: &str = "Faucetable Wrapped CSPR used by the Casper Delta's test version.";
-const CONTRACT_ICON_URI: &str = "https://casper-delta.kubaplas.pl/icon.png";
+const CONTRACT_DESCRIPTION: &str =
+    "Faucetable Wrapped CSPR used by the Casper Delta's test version.";
+const CONTRACT_ICON_URI: &str = "https://casper-delta.kubaplas.pl/favicon.png";
 const CONTRACT_PROJECT_URI: &str = "https://casper-delta.kubaplas.pl/";
 
 #[odra::module]

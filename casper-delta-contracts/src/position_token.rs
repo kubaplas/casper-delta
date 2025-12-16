@@ -7,7 +7,7 @@ use crate::market::{MarketContractRef, MarketError};
 use crate::position_token::PositionTokenError::Misconfigured;
 use crate::roles::ShortsRole;
 
-const CONTRACT_ICON_URI: &str = "https://casper-delta.kubaplas.pl/icon.png";
+const CONTRACT_ICON_URI: &str = "https://casper-delta.kubaplas.pl/favicon.png";
 const CONTRACT_PROJECT_URI: &str = "https://casper-delta.kubaplas.pl/";
 
 #[odra::odra_type]

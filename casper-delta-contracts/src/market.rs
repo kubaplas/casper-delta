@@ -23,8 +23,8 @@ const DEFAULT_FEE: u64 = 200; // 1/200 = 0.5%
 
 const CONTRACT_NAME: &str = "Casper Delta Market";
 const CONTRACT_DESCRIPTION: &str = "Main Market Contract for the Casper Delta project";
-const CONTRACT_ICON_URI: &str = "https://casper-trade.kubaplas.pl/icon.png";
-const CONTRACT_PROJECT_URI: &str = "https://casper-trade.kubaplas.pl/";
+const CONTRACT_ICON_URI: &str = "https://casper-delta.kubaplas.pl/favicon.png";
+const CONTRACT_PROJECT_URI: &str = "https://casper-delta.kubaplas.pl/";
 
 /// Comprehensive data structure containing all frontend-needed information for a specific address
 #[odra::odra_type]
