@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "start": "APP_MODE=production node dist/index.js",
     "dev": "APP_MODE=${APP_MODE:-competition} tsx watch --clear-screen=false index.ts",
     "dev:production": "APP_MODE=production tsx watch --clear-screen=false index.ts",
     "dev:competition": "APP_MODE=competition tsx watch --clear-screen=false index.ts"

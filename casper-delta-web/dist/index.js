@@ -4,6 +4,9 @@ import { fileURLToPath } from 'url';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+// Correctly handle paths when running from dist or root
+const isDist = __dirname.endsWith('dist');
+const baseDir = isDist ? path.join(__dirname, '..') : __dirname;
 const port = 3003;
 const app = express();
 // Proxy for Casper RPC endpoints
@@ -24,7 +27,7 @@ app.use('/speculative/rpc', createProxyMiddleware({
 // Serve the main application
 app.get('/', (req, res) => {
     const appMode = process.env.APP_MODE || 'competition';
-    const htmlPath = path.join(__dirname, 'index.html');
+    const htmlPath = path.join(baseDir, 'index.html');
     // Read and inject APP_MODE into HTML
     import('fs').then(fs => {
         fs.promises.readFile(htmlPath, 'utf-8').then(html => {
@@ -35,7 +38,7 @@ app.get('/', (req, res) => {
     });
 });
 // Serve static files (after the custom / handler)
-app.use(express.static(__dirname, { index: false }));
+app.use(express.static(baseDir, { index: false }));
 app.listen(port, () => {
     console.log(`🚀 Casper Delta Client is running at http://localhost:${port}`);
 });
