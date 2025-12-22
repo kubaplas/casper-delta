@@ -9,7 +9,7 @@ export const TRADING_INFO_DISMISSED_KEY = "casper-delta-trading-info-dismissed";
 // Contract addresses - these would be configured based on deployment
 export const CONTRACT_ADDRESSES = {
     market: "hash-3aaede19ed8b270d96f0fccf79d9dbb14307ea853de00f2f0835f5958f396bbd",
-    wcspr: "hash-a2fc55eda5bf7e724520d36536c32ac19e0b75dbdf16b4bf85a4234f21d6aaf0",
+    wcspr: "hash-24e51b5a7a2977fd15f2d0aa4c0ba56d77b4f0db9574be74b5559a61372cfeec",
     shortToken: "hash-51809ec40e24515f38f2b3d7c87f76358269428ca35bc79f732a52eac62fea5e",
     longToken: "hash-e374d41cf3b6405ba4c344bc15f12a1c6fdc201b51054479facfee1eaff30524",
 };

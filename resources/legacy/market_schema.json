@@ -759,6 +759,46 @@
       "return_ty": "Unit",
       "ty": "Public",
       "attributes": []
+    },
+    {
+      "name": "contract_name",
+      "args": [],
+      "is_mutable": false,
+      "return_ty": {
+        "Option": "String"
+      },
+      "ty": "Public",
+      "attributes": []
+    },
+    {
+      "name": "contract_description",
+      "args": [],
+      "is_mutable": false,
+      "return_ty": {
+        "Option": "String"
+      },
+      "ty": "Public",
+      "attributes": []
+    },
+    {
+      "name": "contract_icon_uri",
+      "args": [],
+      "is_mutable": false,
+      "return_ty": {
+        "Option": "String"
+      },
+      "ty": "Public",
+      "attributes": []
+    },
+    {
+      "name": "contract_project_uri",
+      "args": [],
+      "is_mutable": false,
+      "return_ty": {
+        "Option": "String"
+      },
+      "ty": "Public",
+      "attributes": []
     }
   ]
 }
