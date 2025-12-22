@@ -27,9 +27,13 @@
   <div
     class="bg-orange-50/90 backdrop-blur-md rounded-none shadow-none border-none p-4 sm:p-6 sm:rounded-2xl sm:shadow-xl sm:border sm:border-orange-200 sm:max-w-6xl sm:mx-auto">
     <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-      <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-orange-800">Casper Delta</h1>
-        <p class="text-orange-700 mt-1 text-sm sm:text-base">Long/Short Trading Platform</p>
+      <div class="flex items-center gap-3">
+        <img src="logo.png" alt="Casper Delta" class="h-10 sm:h-12 w-auto" />
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold text-orange-800 leading-tight">Casper Delta</h1>
+          <p class="text-orange-700 text-[10px] sm:text-xs uppercase tracking-wider font-semibold">Long/Short Trading
+            Platform</p>
+        </div>
       </div>
       <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         <button id="connect-btn"
@@ -140,13 +144,17 @@
           <div class="text-sm text-orange-800">
             <div class="font-medium mb-2">How Trading Works:</div>
             <div class="space-y-2 text-orange-700">
-              <div>• <strong>Faucet:</strong> Get 1000WCSPR from the faucet using "Use WCSPR faucet" button</div>
-              <div>• <strong>Approve:</strong> Approve market to use WCSPR using "Approve market to use WCSPR" button
-              </div>
-              <div>• <strong>Open Long:</strong> Go long with WCSPR to profit when price goes up</div>
-              <div>• <strong>Open Short:</strong> Go short with WCSPR to profit when price goes down</div>
-              <div>• <strong>Close Positions:</strong> Close your positions to get WCSPR back</div>
-              <div>• <strong>Trading Fees:</strong> 0.5% fee on all deposits and withdrawals (automatically deducted)
+              <div id="guide-faucet" style="display: none;">• <strong>Faucet:</strong> Get testnet WCSPR using the <span
+                  class="italic">Use WCSPR faucet</span> button</div>
+              <div id="guide-wrap" style="display: none;">• <strong>Wrap:</strong> Convert CSPR to WCSPR using the <span
+                  class="italic">Wrap</span> tool in Market Tools</div>
+              <div>• <strong>Approve:</strong> Authorize the market to use your WCSPR using the <span
+                  class="italic">Approve</span> button</div>
+              <div>• <strong>Open Long:</strong> Profit by going long when you expect the WCSPR price to rise</div>
+              <div>• <strong>Open Short:</strong> Profit by going short when you expect the WCSPR price to fall</div>
+              <div>• <strong>Close Positions:</strong> Exit your positions at any time to reclaim your WCSPR</div>
+              <div class="text-[10px] opacity-75 mt-2 border-t border-orange-200 pt-2 italic">
+                A 0.5% fee applies to all market deposits and withdrawals.
               </div>
             </div>
           </div>
@@ -166,7 +174,10 @@
       <!-- Long Position -->
       <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 shadow-sm">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-bold text-green-800">🟢 Long Position</h3>
+          <div class="flex items-center gap-2">
+            <img src="long.png" alt="Long" class="h-6 w-auto" />
+            <h3 class="text-lg font-bold text-green-800">Long Position</h3>
+          </div>
         </div>
 
         <!-- Open Long Form -->
@@ -245,7 +256,10 @@
       <!-- Short Position -->
       <div class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border border-red-200 shadow-sm">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-bold text-red-800">🔴 Short Position</h3>
+          <div class="flex items-center gap-2">
+            <img src="short.png" alt="Short" class="h-6 w-auto" />
+            <h3 class="text-lg font-bold text-red-800">Short Position</h3>
+          </div>
         </div>
 
         <!-- Open Short Form -->
@@ -442,13 +456,19 @@
             const isProduction = window.APP_MODE === 'production';
             const faucetSection = document.getElementById('faucet-section');
             const wrapUnwrapSection = document.getElementById('wrap-unwrap-section');
+            const guideFaucet = document.getElementById('guide-faucet');
+            const guideWrap = document.getElementById('guide-wrap');
 
             if (isProduction) {
               wrapUnwrapSection.style.display = 'block';
               faucetSection.style.display = 'none';
+              if (guideWrap) guideWrap.style.display = 'block';
+              if (guideFaucet) guideFaucet.style.display = 'none';
             } else {
               faucetSection.style.display = 'block';
               wrapUnwrapSection.style.display = 'none';
+              if (guideFaucet) guideFaucet.style.display = 'block';
+              if (guideWrap) guideWrap.style.display = 'none';
             }
           })();
         </script>
