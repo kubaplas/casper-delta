@@ -81,38 +81,39 @@ export function formatDollarPrice(value, decimals = TOKEN_DECIMALS) {
         const rawValueString = value.toString();
         // Try multiple decimal interpretations to find the right scaling
         const interpretations = [];
-        // Test different decimal places: 0, 3, 6, 9, 12
-        for (const testDecimals of [0, 3, 6, 9, 12]) {
+        // Test every decimal from 0 to 18 to find the most likely precision
+        for (let testDecimals = 0; testDecimals <= 18; testDecimals++) {
             try {
                 const testFormatter = value.formatter(testDecimals);
-                const testValue = parseFloat(testFormatter.fmtWithPrecision(Math.min(testDecimals + 3, 12)));
-                interpretations.push({
-                    decimals: testDecimals,
-                    value: testValue,
-                    formatted: testFormatter.fmtWithPrecision(Math.min(testDecimals + 3, 12))
-                });
+                const testValue = parseFloat(testFormatter.fmtWithPrecision(9));
+                if (testValue >= 0.0001 && testValue <= 1000000) {
+                    interpretations.push({
+                        decimals: testDecimals,
+                        value: testValue
+                    });
+                }
             }
             catch (e) {
             }
         }
-        // Find the interpretation that gives a reasonable USD price (between $0.0001 and $1000)
-        let bestInterpretation = interpretations.find(interp => interp.value >= 0.0001 && interp.value <= 1000);
-        // If no reasonable interpretation found, try manual scaling
-        if (!bestInterpretation) {
-            // Based on your example: 0.0000009 should be 0.009133
-            // That's roughly 10,000x scaling, let's try that
-            const manualScaling = parseFloat(rawValueString) / Math.pow(10, decimals) * 10000;
-            if (manualScaling >= 0.0001 && manualScaling <= 1000) {
-                bestInterpretation = {
-                    decimals: decimals,
-                    value: manualScaling,
-                    formatted: manualScaling.toString()
-                };
-            }
+        // Selection heuristic:
+        // 1. If 9 decimals (Casper standard) gives a reasonable price, use it.
+        // 2. Otherwise, pick the interpretation with the highest decimal count that gives a value >= 0.0001.
+        //    This favors precision which is typical for crypto prices.
+        let bestInterpretation = interpretations.find(interp => interp.decimals === 9);
+        if (!bestInterpretation && interpretations.length > 0) {
+            // Sort by decimals descending to pick the most precise valid interpretation
+            const sorted = [...interpretations].sort((a, b) => b.decimals - a.decimals);
+            bestInterpretation = sorted[0];
         }
-        // Fall back to the most reasonable interpretation or default to 9 decimals
+        // If no reasonable interpretation found via searching, try manual fallback
         if (!bestInterpretation) {
-            bestInterpretation = interpretations.find(interp => interp.decimals === 9) || interpretations[0];
+            const rawValueNum = parseFloat(rawValueString);
+            const fallbackValue = rawValueNum / Math.pow(10, decimals);
+            bestInterpretation = {
+                decimals: decimals,
+                value: fallbackValue
+            };
         }
         const numericValue = bestInterpretation.value;
         // Format as dollar amount with appropriate precision
