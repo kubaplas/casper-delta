@@ -20,6 +20,7 @@ import * as dom from "./dom.js";
 // UI utilities and modals
 import { sanitizeNumericInput } from "./ui/utils.js";
 import { initializeTradingInfo, showTradingInfo, closeTradingInfo, clearError } from "./ui/modals.js";
+import { initTheme, toggleTheme } from "./ui/theme.js";
 
 // State management
 import {
@@ -206,6 +207,11 @@ function setupEventListeners(): void {
     dom.closeTradingInfoBtn.addEventListener("click", closeTradingInfo);
     dom.showTradingInfoBtn.addEventListener("click", showTradingInfo);
 
+    // Theme toggle
+    if (dom.themeToggle) {
+        dom.themeToggle.addEventListener("click", toggleTheme);
+    }
+
     // Error modal events
     if (dom.errorModalClose) {
         dom.errorModalClose.addEventListener("click", () => {
@@ -247,6 +253,9 @@ function setupEventListeners(): void {
 // ---------- Application Entry Point ----------
 async function run(): Promise<void> {
     try {
+        // Initialize theme
+        initTheme();
+
         // Ensure buttons are disabled by default (in case HTML disabled attributes aren't enough)
         enableDisconnectedMode();
 

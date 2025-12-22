@@ -10,6 +10,9 @@ export const addressDropdownBtn = document.getElementById("address-dropdown-btn"
 export const addressDropdownMenu = document.getElementById("address-dropdown-menu") as HTMLDivElement;
 export const switchAccountBtn = document.getElementById("switch-account-btn") as HTMLButtonElement;
 
+// Theme toggle
+export const themeToggle = document.getElementById("theme-toggle") as HTMLButtonElement;
+
 // Market state elements
 export const currentPriceSpan = document.getElementById("current-price") as HTMLSpanElement;
 export const totalMarketValueSpan = document.getElementById("total-market-value") as HTMLDivElement;

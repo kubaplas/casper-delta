@@ -7,6 +7,7 @@ import * as dom from "./dom.js";
 // UI utilities and modals
 import { sanitizeNumericInput } from "./ui/utils.js";
 import { initializeTradingInfo, showTradingInfo, closeTradingInfo, clearError } from "./ui/modals.js";
+import { initTheme, toggleTheme } from "./ui/theme.js";
 // State management
 import { setClient, setMarket, setWcspr, setLongToken, setShortToken, } from "./data/state.js";
 // Data fetching
@@ -141,6 +142,10 @@ function setupEventListeners() {
     // Add event listeners for trading info management
     dom.closeTradingInfoBtn.addEventListener("click", closeTradingInfo);
     dom.showTradingInfoBtn.addEventListener("click", showTradingInfo);
+    // Theme toggle
+    if (dom.themeToggle) {
+        dom.themeToggle.addEventListener("click", toggleTheme);
+    }
     // Error modal events
     if (dom.errorModalClose) {
         dom.errorModalClose.addEventListener("click", () => {
@@ -178,6 +183,8 @@ function setupEventListeners() {
 // ---------- Application Entry Point ----------
 async function run() {
     try {
+        // Initialize theme
+        initTheme();
         // Ensure buttons are disabled by default (in case HTML disabled attributes aren't enough)
         enableDisconnectedMode();
         // Initialize with CSPR.click integration

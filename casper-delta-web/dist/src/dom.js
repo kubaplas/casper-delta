@@ -8,6 +8,8 @@ export const addressSpan = document.getElementById("address");
 export const addressDropdownBtn = document.getElementById("address-dropdown-btn");
 export const addressDropdownMenu = document.getElementById("address-dropdown-menu");
 export const switchAccountBtn = document.getElementById("switch-account-btn");
+// Theme toggle
+export const themeToggle = document.getElementById("theme-toggle");
 // Market state elements
 export const currentPriceSpan = document.getElementById("current-price");
 export const totalMarketValueSpan = document.getElementById("total-market-value");
