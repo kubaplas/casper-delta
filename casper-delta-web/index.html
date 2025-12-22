@@ -346,83 +346,112 @@
     <!-- Market Tools -->
     <section class="mb-8">
       <div class="bg-gradient-to-br from-amber-50 to-orange-100 p-6 rounded-xl border border-amber-200 shadow-sm">
-        <h3 class="text-lg font-bold text-amber-800 mb-6">⚙️ Market Tools</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Market Allowance -->
-          <div class="bg-white p-4 rounded-lg border border-amber-200 shadow-sm">
-            <div class="text-xs text-amber-600 mb-3">Market Allowance</div>
-            <div class="text-xs text-amber-600 mb-2">Current amount:</div>
-            <div id="market-allowance" class="text-sm font-semibold text-amber-700 mb-3">—</div>
-            <div id="market-allowance-loader" class="text-xs text-amber-500 hidden mb-3">Loading...</div>
-            <input id="approve-amount" inputmode="decimal"
-              class="w-full p-3 text-sm border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white transition-colors duration-200 mb-3"
-              placeholder="Approve amount (empty = max)" disabled />
-            <button id="approve-market-btn"
-              class="w-full px-4 py-3 text-sm rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-              disabled>Approve market to use WCSPR</button>
-          </div>
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-bold text-amber-800">⚙️ Market Tools</h3>
+        </div>
 
-          <!-- Quick Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Token Management (Wrap/Unwrap or Faucet) -->
           <div class="bg-white p-4 rounded-lg border border-amber-200 shadow-sm">
-            <div class="text-xs text-amber-600 mb-3">Quick Actions</div>
-            <div class="space-y-3">
-              <button id="update-price-btn"
-                class="w-full px-4 py-3 text-sm rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                disabled>Update WCSPR Price</button>
+            <div class="text-sm font-medium text-amber-800 mb-4">🪙 Token Management</div>
 
-              <!-- Competition mode: Faucet -->
-              <div id="faucet-section" style="display: none;">
-                <button id="faucet-btn"
-                  class="w-full px-4 py-3 text-sm rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-                  disabled>Use WCSPR faucet</button>
+            <!-- Competition mode: Faucet -->
+            <div id="faucet-section" style="display: none;">
+              <div class="mb-4 p-3 bg-amber-50 rounded border border-amber-200">
+                <div class="text-xs text-amber-600 mb-1">Get testnet WCSPR</div>
+                <div class="text-[10px] text-amber-500">Available only in competition mode</div>
               </div>
+              <button id="faucet-btn"
+                class="w-full px-4 py-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+                disabled>
+                Use WCSPR faucet
+              </button>
+            </div>
 
-              <!-- Production mode: Wrap/Unwrap -->
-              <div id="wrap-unwrap-section" style="display: none;">
-                <div class="space-y-3">
-                  <!-- Wrap CSPR -->
-                  <div>
-                    <input id="wrap-amount" inputmode="decimal"
-                      class="w-full p-3 text-sm border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white transition-colors duration-200 mb-2"
-                      placeholder="CSPR amount to wrap" disabled />
-                    <button id="wrap-cspr-btn"
-                      class="w-full px-4 py-3 text-sm rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                      disabled>Wrap CSPR → WCSPR</button>
-                  </div>
-                  <!-- Unwrap CSPR -->
-                  <div>
-                    <input id="unwrap-amount" inputmode="decimal"
-                      class="w-full p-3 text-sm border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white transition-colors duration-200 mb-2"
-                      placeholder="WCSPR amount to unwrap" disabled />
-                    <button id="unwrap-cspr-btn"
-                      class="w-full px-4 py-3 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      disabled>Unwrap WCSPR → CSPR</button>
-                  </div>
+            <!-- Production mode: Wrap/Unwrap -->
+            <div id="wrap-unwrap-section" style="display: none;" class="space-y-6">
+              <!-- Wrap CSPR -->
+              <div class="p-3 bg-green-50 rounded border border-green-100">
+                <div class="text-xs font-medium text-green-700 mb-2">Wrap CSPR → WCSPR</div>
+                <div class="flex gap-2">
+                  <input id="wrap-amount" inputmode="decimal"
+                    class="flex-1 p-2 text-sm border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
+                    placeholder="0.0" disabled />
+                  <button id="wrap-cspr-btn"
+                    class="px-4 py-2 text-sm rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium transition-colors duration-200 disabled:opacity-50"
+                    disabled>Wrap</button>
                 </div>
               </div>
 
-              <button id="refresh-btn"
-                class="w-full px-4 py-3 text-sm rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">Refresh
-                Data</button>
+              <!-- Unwrap CSPR -->
+              <div class="p-3 bg-blue-50 rounded border border-blue-100">
+                <div class="text-xs font-medium text-blue-700 mb-2">Unwrap WCSPR → CSPR</div>
+                <div class="flex gap-2">
+                  <input id="unwrap-amount" inputmode="decimal"
+                    class="flex-1 p-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    placeholder="0.0" disabled />
+                  <button id="unwrap-cspr-btn"
+                    class="px-4 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors duration-200 disabled:opacity-50"
+                    disabled>Unwrap</button>
+                </div>
+              </div>
             </div>
           </div>
-          <script>
-            // Show/hide faucet or wrap/unwrap based on APP_MODE
-            (function () {
-              const isProduction = window.APP_MODE === 'production';
-              const faucetSection = document.getElementById('faucet-section');
-              const wrapUnwrapSection = document.getElementById('wrap-unwrap-section');
 
-              if (isProduction) {
-                wrapUnwrapSection.style.display = 'block';
-                faucetSection.style.display = 'none'; // Ensure faucet is hidden in production
-              } else {
-                faucetSection.style.display = 'block';
-                wrapUnwrapSection.style.display = 'none'; // Ensure wrap/unwrap is hidden in non-production
-              }
-            })();
-          </script>
+          <!-- Market Controls -->
+          <div class="bg-white p-4 rounded-lg border border-amber-200 shadow-sm flex flex-col">
+            <div class="text-sm font-medium text-amber-800 mb-4">🛡️ Market Controls</div>
+
+            <div class="space-y-4 flex-1">
+              <!-- Market Allowance -->
+              <div class="p-3 bg-amber-50 rounded border border-amber-200">
+                <div class="flex justify-between items-center mb-2">
+                  <div class="text-xs text-amber-600">Market Allowance</div>
+                  <div id="market-allowance" class="text-xs font-bold text-amber-700">—</div>
+                </div>
+                <div id="market-allowance-loader" class="text-[10px] text-amber-500 hidden mb-2 text-center">Loading
+                  allowance...</div>
+                <div class="flex gap-2">
+                  <input id="approve-amount" inputmode="decimal"
+                    class="flex-1 p-2 text-sm border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white transition-colors duration-200"
+                    placeholder="Max" disabled />
+                  <button id="approve-market-btn"
+                    class="px-4 py-2 text-sm rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium transition-colors duration-200 disabled:opacity-50"
+                    disabled>Approve</button>
+                </div>
+              </div>
+
+              <!-- Quick Actions -->
+              <div class="grid grid-cols-2 gap-3">
+                <button id="update-price-btn"
+                  class="px-4 py-3 text-xs rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 shadow-sm"
+                  disabled>Update Price</button>
+
+                <button id="refresh-btn"
+                  class="px-4 py-3 text-xs rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 bg-white shadow-sm">
+                  Refresh Data
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <script>
+          // Show/hide faucet or wrap/unwrap based on APP_MODE
+          (function () {
+            const isProduction = window.APP_MODE === 'production';
+            const faucetSection = document.getElementById('faucet-section');
+            const wrapUnwrapSection = document.getElementById('wrap-unwrap-section');
+
+            if (isProduction) {
+              wrapUnwrapSection.style.display = 'block';
+              faucetSection.style.display = 'none';
+            } else {
+              faucetSection.style.display = 'block';
+              wrapUnwrapSection.style.display = 'none';
+            }
+          })();
+        </script>
       </div>
     </section>
 
