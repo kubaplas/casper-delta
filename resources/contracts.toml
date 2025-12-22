@@ -1,0 +1,21 @@
+last_updated = "2025-10-06T08:53:19Z"
+
+[[contracts]]
+name = "Market"
+package_name = "Market"
+package_hash = "hash-f4eaeef229602465588fb95c1aa160d6c2a8de9c106f23af77b4483bc9b9adfc"
+
+[[contracts]]
+name = "FaucetableWcspr"
+package_name = "FaucetableWcspr"
+package_hash = "hash-37dcac0abbf125d5da92a06c55278f5bad1323c34d5425c704b84a79fcbf69ce"
+
+[[contracts]]
+name = "PositionToken"
+package_name = "CD_SHORT"
+package_hash = "hash-3476939f2f4e8b4b8a7ae3f2354e0bcc3e1e076027fbe9fb9c5614b4b6387d3f"
+
+[[contracts]]
+name = "PositionToken"
+package_name = "CD_LONG"
+package_hash = "hash-5b78b51c9d86763191d3fb5a1b0289158b7d23c07b95e1b1ec7a81b5ec73ff64"

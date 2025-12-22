@@ -4,9 +4,6 @@ target
 Cargo.lock
 .backend*
 .builder*
-/wasm
-/casper-delta-contracts/wasm
-/resources/contracts.toml
 .node-keys
 .env
 .DS_Store

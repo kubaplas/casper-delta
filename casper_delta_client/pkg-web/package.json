@@ -1,0 +1,16 @@
+{
+  "name": "casper-delta-wasm-client",
+  "type": "module",
+  "description": "Wasm client",
+  "version": "0.0.0",
+  "files": [
+    "casper_delta_wasm_client_bg.wasm",
+    "casper_delta_wasm_client.js",
+    "casper_delta_wasm_client.d.ts"
+  ],
+  "main": "casper_delta_wasm_client.js",
+  "types": "casper_delta_wasm_client.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
