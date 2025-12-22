@@ -190,6 +190,11 @@ export async function requestFaucet() {
     if (!transactionPreCheck("Please connect your wallet to use the faucet")) {
         return;
     }
+    // Check if wcspr is FaucetableWcsprWasmClient (has faucet method)
+    if (!('faucet' in wcspr)) {
+        showError("Faucet is only available in competition mode");
+        return;
+    }
     // Show popup immediately when user clicks the button
     showTransactionPopup("Faucet request");
     // Disable all buttons immediately before wallet interaction
@@ -200,5 +205,79 @@ export async function requestFaucet() {
     }
     catch (e) {
         onTransactionSentFailure(e, "Failed to request faucet");
+    }
+}
+/**
+ * Wrap CSPR to WCSPR (production mode only)
+ */
+export async function wrapCspr() {
+    if (!transactionPreCheck("Please connect your wallet to wrap CSPR")) {
+        return;
+    }
+    const amount = parseAmount(dom.wrapAmountInput);
+    if (!amount) {
+        showError("Please enter a valid amount");
+        return;
+    }
+    // Convert U256 to U512 for the payable deposit call
+    const amountU512 = amount.toBigInt();
+    const attachedValue = new (await import("casper-delta-wasm-client")).U512(amountU512.toString());
+    // Show popup immediately when user clicks the button
+    showTransactionPopup("Wrap CSPR");
+    // Disable all buttons immediately before wallet interaction
+    disableTransactionButtons();
+    try {
+        setGas(DEFAULT_GAS_AMOUNT);
+        // Check if wcspr is WrappedNativeTokenWasmClient (has deposit method)
+        if ('deposit' in wcspr && typeof wcspr.deposit === 'function') {
+            await wcspr.deposit(attachedValue);
+            dom.wrapAmountInput.value = "";
+        }
+        else {
+            throw new Error("Wrap functionality not available in this mode");
+        }
+    }
+    catch (e) {
+        onTransactionSentFailure(e, "Failed to wrap CSPR");
+    }
+}
+/**
+ * Unwrap WCSPR to CSPR (production mode only)
+ */
+export async function unwrapCspr() {
+    if (!transactionPreCheck("Please connect your wallet to unwrap WCSPR")) {
+        return;
+    }
+    const amount = parseAmount(dom.unwrapAmountInput);
+    if (!amount) {
+        showError("Please enter a valid amount");
+        return;
+    }
+    // Check balance
+    if (!balances) {
+        showError("Balances not loaded yet. Please refresh.");
+        return;
+    }
+    if (amount.gt(balances.wcspr)) {
+        showError(`Insufficient WCSPR balance. You have ${formatNumber(balances.wcspr)} WCSPR.`);
+        return;
+    }
+    // Show popup immediately when user clicks the button
+    showTransactionPopup("Unwrap CSPR");
+    // Disable all buttons immediately before wallet interaction
+    disableTransactionButtons();
+    try {
+        setGas(DEFAULT_GAS_AMOUNT);
+        // Check if wcspr is WrappedNativeTokenWasmClient (has withdraw method)
+        if ('withdraw' in wcspr && typeof wcspr.withdraw === 'function') {
+            await wcspr.withdraw(amount);
+            dom.unwrapAmountInput.value = "";
+        }
+        else {
+            throw new Error("Unwrap functionality not available in this mode");
+        }
+    }
+    catch (e) {
+        onTransactionSentFailure(e, "Failed to unwrap CSPR");
     }
 }

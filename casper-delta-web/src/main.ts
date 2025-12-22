@@ -7,11 +7,12 @@ import init, {
 import {
     MarketWasmClient,
     FaucetableWcsprWasmClient,
+    WrappedNativeTokenWasmClient,
     PositionTokenWasmClient,
 } from "casper-delta-wasm-client";
 
 // Configuration and constants
-import { CONTRACT_ADDRESSES } from "./config.js";
+import { CONTRACT_ADDRESSES, isProductionMode } from "./config.js";
 
 // DOM elements
 import * as dom from "./dom.js";
@@ -44,6 +45,8 @@ import {
     withdrawShort,
     updatePrice,
     requestFaucet,
+    wrapCspr,
+    unwrapCspr,
 } from "./trading/operations.js";
 
 import { approveMarket } from "./trading/approval.js";
@@ -99,7 +102,17 @@ async function initializeClients(): Promise<void> {
 
     // Initialize contract clients with deployed contract addresses
     const market = new MarketWasmClient(client, new Address(CONTRACT_ADDRESSES.market));
-    const wcspr = new FaucetableWcsprWasmClient(client, new Address(CONTRACT_ADDRESSES.wcspr));
+
+    // Initialize WCSPR client based on mode
+    let wcspr;
+    if (isProductionMode()) {
+        // Production mode: Use WrappedNativeTokenWasmClient
+        wcspr = new WrappedNativeTokenWasmClient(client, new Address(CONTRACT_ADDRESSES.wcspr));
+    } else {
+        // Competition mode: Use FaucetableWcsprWasmClient
+        wcspr = new FaucetableWcsprWasmClient(client, new Address(CONTRACT_ADDRESSES.wcspr));
+    }
+
     const longToken = new PositionTokenWasmClient(client, new Address(CONTRACT_ADDRESSES.longToken));
     const shortToken = new PositionTokenWasmClient(client, new Address(CONTRACT_ADDRESSES.shortToken));
 
@@ -169,11 +182,15 @@ function setupEventListeners(): void {
     // Action buttons
     dom.updatePriceBtn.addEventListener("click", updatePrice);
     dom.faucetBtn.addEventListener("click", requestFaucet);
+    dom.wrapCsprBtn.addEventListener("click", wrapCspr);
+    dom.unwrapCsprBtn.addEventListener("click", unwrapCspr);
     dom.approveMarketBtn.addEventListener("click", approveMarket);
 
     // Sanitize numeric inputs on the fly
     dom.longOpenAmountInput.addEventListener('input', sanitizeNumericInput);
     dom.shortOpenAmountInput.addEventListener('input', sanitizeNumericInput);
+    dom.wrapAmountInput.addEventListener('input', sanitizeNumericInput);
+    dom.unwrapAmountInput.addEventListener('input', sanitizeNumericInput);
 
     // Position closing input event listeners
     dom.longCloseAmountInput.addEventListener('input', (e) => {

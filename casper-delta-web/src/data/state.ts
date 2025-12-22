@@ -2,6 +2,7 @@ import type {
     OdraWasmClient,
     MarketWasmClient,
     FaucetableWcsprWasmClient,
+    WrappedNativeTokenWasmClient,
     PositionTokenWasmClient,
     MarketState,
     AccountInfo,
@@ -20,7 +21,9 @@ export let account: AccountInfo;
 // Contract client instances
 export let client: OdraWasmClient;
 export let market: MarketWasmClient;
-export let wcspr: FaucetableWcsprWasmClient;
+// WCSPR client can be either FaucetableWcsprWasmClient (competition mode)
+// or WrappedNativeTokenWasmClient (production mode)
+export let wcspr: FaucetableWcsprWasmClient | WrappedNativeTokenWasmClient;
 export let longToken: PositionTokenWasmClient;
 export let shortToken: PositionTokenWasmClient;
 
@@ -59,7 +62,7 @@ export function setMarket(value: MarketWasmClient): void {
     market = value;
 }
 
-export function setWcspr(value: FaucetableWcsprWasmClient): void {
+export function setWcspr(value: FaucetableWcsprWasmClient | WrappedNativeTokenWasmClient): void {
     wcspr = value;
 }
 

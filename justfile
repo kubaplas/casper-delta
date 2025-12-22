@@ -13,7 +13,10 @@ check-lint: clippy
     cargo fmt -- --check
 
 run-web:
-    cd casper-delta-web && npm run build && npm run dev
+    cd casper-delta-web && npm run build && npm run dev:production
+
+run-web-competition:
+    cd casper-delta-web && npm run build && npm run dev:competition
 
 run-nctl:
     docker run --rm -it --name mynctl -d -p 11101:11101 -p 14101:14101 -p 18101:18101 -p 25101:25101 makesoftware/casper-nctl:v203

@@ -7,6 +7,8 @@ export let account;
 // Contract client instances
 export let client;
 export let market;
+// WCSPR client can be either FaucetableWcsprWasmClient (competition mode)
+// or WrappedNativeTokenWasmClient (production mode)
 export let wcspr;
 export let longToken;
 export let shortToken;

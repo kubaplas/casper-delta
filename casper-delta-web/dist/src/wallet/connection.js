@@ -148,6 +148,7 @@ function disableTradingControls(message) {
     const tradingButtons = [
         'deposit-long-btn', 'withdraw-long-btn', 'deposit-short-btn', 'withdraw-short-btn',
         'faucet-btn', 'approve-market-btn', 'update-price-btn',
+        'wrap-cspr-btn', 'unwrap-cspr-btn',
         'long-close-25', 'long-close-50', 'long-close-75', 'long-close-100',
         'short-close-25', 'short-close-50', 'short-close-75', 'short-close-100'
     ];
@@ -162,7 +163,8 @@ function disableTradingControls(message) {
     // Disable all trading input fields
     const tradingInputs = [
         'long-open-amount', 'short-open-amount',
-        'approve-amount', 'long-close-amount-input', 'short-close-amount-input'
+        'approve-amount', 'long-close-amount-input', 'short-close-amount-input',
+        'wrap-amount', 'unwrap-amount'
     ];
     tradingInputs.forEach(inputId => {
         const input = document.getElementById(inputId);
@@ -181,6 +183,7 @@ function enableTradingControls() {
     const tradingButtons = [
         'deposit-long-btn', 'withdraw-long-btn', 'deposit-short-btn', 'withdraw-short-btn',
         'faucet-btn', 'approve-market-btn', 'update-price-btn',
+        'wrap-cspr-btn', 'unwrap-cspr-btn',
         'long-close-25', 'long-close-50', 'long-close-75', 'long-close-100',
         'short-close-25', 'short-close-50', 'short-close-75', 'short-close-100'
     ];
@@ -195,7 +198,8 @@ function enableTradingControls() {
     // Re-enable all trading input fields
     const tradingInputs = [
         'long-open-amount', 'short-open-amount',
-        'approve-amount', 'long-close-amount-input', 'short-close-amount-input'
+        'approve-amount', 'long-close-amount-input', 'short-close-amount-input',
+        'wrap-amount', 'unwrap-amount'
     ];
     tradingInputs.forEach(inputId => {
         const input = document.getElementById(inputId);
@@ -208,6 +212,8 @@ function enableTradingControls() {
                 case 'long-close-amount-input':
                 case 'short-open-amount':
                 case 'short-close-amount-input':
+                case 'wrap-amount':
+                case 'unwrap-amount':
                     input.placeholder = '0.0';
                     break;
                 case 'approve-amount':

@@ -32,15 +32,27 @@ app.use(
   })
 );
 
-// Serve static files
-app.use(express.static(__dirname));
-
 // Serve the main application
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  const appMode = process.env.APP_MODE || 'competition';
+  const htmlPath = path.join(__dirname, 'index.html');
+
+  // Read and inject APP_MODE into HTML
+  import('fs').then(fs => {
+    fs.promises.readFile(htmlPath, 'utf-8').then(html => {
+      // Inject APP_MODE as a global variable before other scripts
+      const injectedHtml = html.replace(
+        '<head>',
+        `<head>\n  <script>window.APP_MODE = '${appMode}';</script>`
+      );
+      res.send(injectedHtml);
+    });
+  });
 });
+
+// Serve static files (after the custom / handler)
+app.use(express.static(__dirname, { index: false }));
 
 app.listen(port, () => {
   console.log(`🚀 Casper Delta Client is running at http://localhost:${port}`);
 });
-

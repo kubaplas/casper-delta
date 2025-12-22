@@ -6,11 +6,13 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && node dist/index.js",
-    "dev": "tsx watch --clear-screen=false index.ts"
+    "dev": "APP_MODE=${APP_MODE:-competition} tsx watch --clear-screen=false index.ts",
+    "dev:production": "APP_MODE=production tsx watch --clear-screen=false index.ts",
+    "dev:competition": "APP_MODE=competition tsx watch --clear-screen=false index.ts"
   },
   "dependencies": {
     "casper-delta-wasm-client": "file:../casper_delta_client/pkg-web",
+    "dotenv": "^17.2.3",
     "express": "^4.18.2"
   },
   "devDependencies": {

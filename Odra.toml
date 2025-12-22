@@ -6,3 +6,6 @@ fqn = "casper_delta_contracts::position_token::PositionToken"
 
 [[contracts]]
 fqn = "casper_delta_contracts::faucetable_wcspr::FaucetableWcspr"
+
+[[contracts]]
+fqn = "casper_delta_contracts::wrapped_native::WrappedNativeToken"

@@ -72,7 +72,13 @@ export const withdrawShortBtn = document.getElementById("withdraw-short-btn") as
 export const updatePriceBtn = document.getElementById("update-price-btn") as HTMLButtonElement;
 export const refreshBtn = document.getElementById("refresh-btn") as HTMLButtonElement;
 export const faucetBtn = document.getElementById("faucet-btn") as HTMLButtonElement;
+export const wrapCsprBtn = document.getElementById("wrap-cspr-btn") as HTMLButtonElement;
+export const unwrapCsprBtn = document.getElementById("unwrap-cspr-btn") as HTMLButtonElement;
 export const approveMarketBtn = document.getElementById("approve-market-btn") as HTMLButtonElement;
+
+// Wrap/Unwrap inputs
+export const wrapAmountInput = document.getElementById("wrap-amount") as HTMLInputElement;
+export const unwrapAmountInput = document.getElementById("unwrap-amount") as HTMLInputElement;
 
 // Approve input and display
 export const approveAmountInput = document.getElementById("approve-amount") as HTMLInputElement;
