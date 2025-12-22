@@ -16,7 +16,8 @@
   <script type="importmap">
     {
         "imports": {
-            "casper-delta-wasm-client": "./node_modules/casper-delta-wasm-client/casper_delta_wasm_client.js"
+            "casper-delta-wasm-client": "./node_modules/casper-delta-wasm-client/casper_delta_wasm_client.js",
+            "lightweight-charts": "./node_modules/lightweight-charts/dist/lightweight-charts.standalone.production.mjs"
         }
     }
   </script>
@@ -145,6 +146,7 @@
         </div>
       </div>
     </section>
+
 
     <!-- Show Trading Info Button (shown when trading info is dismissed) -->
     <section id="show-trading-info-section" class="mb-6 hidden">
@@ -473,15 +475,28 @@
               </div>
 
               <!-- Quick Actions -->
-              <div class="grid grid-cols-2 gap-3">
-                <button id="update-price-btn"
-                  class="px-4 py-3 text-xs rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 shadow-sm"
-                  disabled>Update Price</button>
+              <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                  <button id="update-price-btn"
+                    class="px-4 py-3 text-xs rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 shadow-sm"
+                    disabled>Update Price</button>
 
-                <button id="refresh-btn"
-                  class="px-4 py-3 text-xs rounded-lg border border-amber-300 dark:border-slate-700 text-amber-700 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 bg-white dark:bg-slate-900 shadow-sm">
-                  Refresh Data
-                </button>
+                  <button id="refresh-btn"
+                    class="px-4 py-3 text-xs rounded-lg border border-amber-300 dark:border-slate-700 text-amber-700 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 bg-white dark:bg-slate-900 shadow-sm">
+                    Refresh Data
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-[10px] leading-tight text-amber-700 dark:text-amber-500/80">
+                  <div
+                    class="p-2 bg-orange-50/50 dark:bg-slate-900/30 rounded border border-orange-100 dark:border-slate-800">
+                    Queries the oracle for a price update. Performed automatically during trading actions.
+                  </div>
+                  <div
+                    class="p-2 bg-orange-50/50 dark:bg-slate-900/30 rounded border border-orange-100 dark:border-slate-800">
+                    Manually reloads all data from the blockchain.
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -509,6 +524,15 @@
             }
           })();
         </script>
+      </div>
+    </section>
+
+    <!-- Market Chart Section -->
+    <section class="mb-8">
+      <div
+        class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-800/50 dark:to-slate-900/50 p-6 rounded-xl border border-orange-200 dark:border-slate-700 shadow-sm transition-colors duration-300">
+        <div class="text-sm text-orange-700 dark:text-slate-300 font-medium mb-4">WCSPR Price History</div>
+        <div id="market-chart" class="w-full h-[300px] sm:h-[400px]"></div>
       </div>
     </section>
 

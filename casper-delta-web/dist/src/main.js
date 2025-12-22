@@ -1,13 +1,14 @@
 import init, { Address, OdraWasmClient, U256, } from "casper-delta-wasm-client";
 import { MarketWasmClient, FaucetableWcsprWasmClient, WrappedNativeTokenWasmClient, PositionTokenWasmClient, } from "casper-delta-wasm-client";
 // Configuration and constants
-import { CONTRACT_ADDRESSES, isProductionMode } from "./config.js";
+import { CONTRACT_ADDRESSES, isProductionMode, isMarketGraphVisible } from "./config.js";
 // DOM elements
 import * as dom from "./dom.js";
 // UI utilities and modals
 import { sanitizeNumericInput } from "./ui/utils.js";
 import { initializeTradingInfo, showTradingInfo, closeTradingInfo, clearError } from "./ui/modals.js";
 import { initTheme, toggleTheme } from "./ui/theme.js";
+import { MarketChart } from "./ui/Chart.js";
 // State management
 import { setClient, setMarket, setWcspr, setLongToken, setShortToken, } from "./data/state.js";
 // Data fetching
@@ -195,6 +196,29 @@ async function run() {
         setupEventListeners();
         if (dom.marketStatusSpan)
             dom.marketStatusSpan.textContent = "Ready";
+        // Initialize and refresh chart
+        if (isMarketGraphVisible()) {
+            try {
+                const chart = new MarketChart('market-chart');
+                await chart.refresh();
+                // Refresh chart whenever data is refreshed
+                const originalRefreshAllData = refreshAllData;
+                window.refreshAllData = async () => {
+                    await originalRefreshAllData();
+                    await chart.refresh();
+                };
+            }
+            catch (chartError) {
+                console.warn("Failed to initialize chart:", chartError);
+            }
+        }
+        else {
+            // Hide chart section if not enabled
+            const chartSection = document.querySelector('#market-chart')?.closest('section');
+            if (chartSection) {
+                chartSection.style.display = 'none';
+            }
+        }
     }
     catch (err) {
         console.error("Failed to initialize:", err);

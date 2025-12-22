@@ -2,9 +2,13 @@
 // Application mode: 'production' or 'competition' (default)
 // Injected by server as window.APP_MODE
 export const APP_MODE = window.APP_MODE || 'competition';
+export const SHOW_MARKET_GRAPH = window.SHOW_MARKET_GRAPH || false;
 // Helper to check if running in production mode
 export function isProductionMode() {
     return APP_MODE === 'production';
+}
+export function isMarketGraphVisible() {
+    return SHOW_MARKET_GRAPH;
 }
 export const EXPLORER_BASE = "https://testnet.cspr.live/";
 export const TOKEN_DECIMALS = 9;
@@ -13,13 +17,13 @@ export const HIGH_GAS_AMOUNT = BigInt(10000000000); // 10 CSPR for complex opera
 export const TRADING_INFO_DISMISSED_KEY = "casper-delta-trading-info-dismissed";
 // Contract addresses - these would be configured based on deployment
 export const CONTRACT_ADDRESSES = {
-    market: "hash-3aaede19ed8b270d96f0fccf79d9dbb14307ea853de00f2f0835f5958f396bbd",
+    market: "hash-412764be7266d8431b5381ca1cbf840dbb93640ccc1b5c0393e40eb3c4aae519",
     // In production mode, use regular WCSPR; in competition mode, use faucetable WCSPR
     wcspr: isProductionMode()
-        ? "hash-24e51b5a7a2977fd15f2d0aa4c0ba56d77b4f0db9574be74b5559a61372cfeec" // Regular WCSPR for production
-        : "hash-a2fc55eda5bf7e724520d36536c32ac19e0b75dbdf16b4bf85a4234f21d6aaf0", // Faucetable WCSPR for competition
-    shortToken: "hash-51809ec40e24515f38f2b3d7c87f76358269428ca35bc79f732a52eac62fea5e",
-    longToken: "hash-e374d41cf3b6405ba4c344bc15f12a1c6fdc201b51054479facfee1eaff30524",
+        ? "hash-3d80df21ba4ee4d66a2a1f60c32570dd5685e4b279f6538162a5fd1314847c1e" // Regular WCSPR for production
+        : "hash-6c09a60d42b35329f20941bceb4bdb5b2104dd96ad2ff608b2784bef2c71a3f0", // Faucetable WCSPR for competition
+    shortToken: "hash-48f1fe2756bd9d66b1102c58e87a9ca6b2e33990571d9904b71c39df72417d11",
+    longToken: "hash-226ef7940f010c57dcc2dd1e7d8c06e126472e28a11319aec8cd8d56bad162cb",
 };
 // Map common error codes to user-friendly messages
 export function getErrorDescription(code) {

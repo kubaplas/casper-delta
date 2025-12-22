@@ -8,3 +8,4 @@ Cargo.lock
 .env
 .DS_Store
 casper-delta-example/node_modules
+market_data.db

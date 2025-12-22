@@ -1,6 +1,15 @@
 [workspace]
-members = ["casper-delta-contracts", "casper-delta-cli", "casper_delta_client"]
-exclude = ["casper_delta_client", "casper_delta_example_client"]
+members = [
+    "casper-delta-contracts",
+    "casper-delta-cli",
+    "casper_delta_client",
+    "casper-delta-collector",
+]
+exclude = [
+    "casper_delta_client",
+    "casper_delta_example_client",
+    "casper-delta-collector",
+]
 resolver = "2"
 
 [workspace.dependencies.cucumber]

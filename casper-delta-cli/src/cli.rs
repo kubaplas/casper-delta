@@ -24,6 +24,11 @@ impl DeployScript for ContractsDeployScript {
             "hash-2879d6e927289197aab0101cc033f532fe22e4ab4686e44b5743cb1333031acc",
         )
         .unwrap();
+
+        let wcspr_token_address = Address::from_str(
+            "hash-3d80df21ba4ee4d66a2a1f60c32570dd5685e4b279f6538162a5fd1314847c1e",
+        )
+        .unwrap();
         env.set_gas(50_000_000_000);
 
         let mut market = Market::load_or_deploy_with_cfg(
@@ -60,7 +65,7 @@ impl DeployScript for ContractsDeployScript {
                 decimals: 9,
                 initial_supply: 0u64.into(),
                 long_or_short: LongOrShort::Short,
-                wcspr: wcspr_token.address(),
+                wcspr: wcspr_token_address,
                 market: market.address(),
             },
             InstallConfig {
@@ -83,7 +88,7 @@ impl DeployScript for ContractsDeployScript {
                 decimals: 9,
                 initial_supply: 0u64.into(),
                 long_or_short: LongOrShort::Long,
-                wcspr: wcspr_token.address(),
+                wcspr: wcspr_token_address,
                 market: market.address(),
             },
             InstallConfig {
@@ -96,7 +101,7 @@ impl DeployScript for ContractsDeployScript {
         )?;
 
         let cfg = Config {
-            wcspr_token: wcspr_token.address().clone(),
+            wcspr_token: wcspr_token_address.clone(),
             short_token: short_token.address().clone(),
             long_token: long_token.address().clone(),
             fee_collector: env.get_account(0),
