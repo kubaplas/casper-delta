@@ -10,8 +10,8 @@ export class MarketChart {
                 textColor: '#94a3b8',
             },
             grid: {
-                vertLines: { color: 'rgba(51, 65, 85, 0.1)' },
-                horzLines: { color: 'rgba(51, 65, 85, 0.1)' },
+                vertLines: { color: 'rgba(51, 65, 85, 0.05)' },
+                horzLines: { color: 'rgba(51, 65, 85, 0.05)' },
             },
             width: container.clientWidth,
             height: container.clientHeight,
@@ -27,64 +27,60 @@ export class MarketChart {
             leftPriceScale: {
                 visible: true,
                 borderColor: 'rgba(51, 65, 85, 0.3)',
+                autoScale: false, // Fix scale for ratio
             },
         });
-        // Price Series (Right Axis) - Simple Jagged Line
+        // 1. Short Ratio Background (Red, constant 100%)
+        this.shortRatioSeries = this.chart.addSeries(AreaSeries, {
+            lineColor: 'transparent',
+            topColor: 'rgba(239, 68, 68, 0.8)',
+            bottomColor: 'rgba(239, 68, 68, 0.8)',
+            lineWidth: 1,
+            priceScaleId: 'left',
+            lineType: LineType.WithSteps,
+            lastValueVisible: false,
+            priceLineVisible: false,
+        });
+        // 2. Long Ratio Foreground (Green, ratio%)
+        this.longRatioSeries = this.chart.addSeries(AreaSeries, {
+            lineColor: 'transparent',
+            topColor: 'rgba(16, 185, 129, 0.8)',
+            bottomColor: 'rgba(16, 185, 129, 0.8)',
+            lineWidth: 1,
+            priceScaleId: 'left',
+            lineType: LineType.WithSteps,
+            lastValueVisible: false,
+            priceLineVisible: false,
+        });
+        // 3. Price Series (Right Axis) - Orange
         this.priceSeries = this.chart.addSeries(LineSeries, {
-            color: '#f97316', // Orange
+            color: '#f97316',
             lineWidth: 2,
             title: 'Price',
             priceScaleId: 'right',
-            lineType: LineType.Simple, // Reverted to jagged
+            lineType: LineType.Simple,
             priceFormat: {
                 type: 'price',
                 precision: 6,
                 minMove: 0.000001,
             },
         });
-        // Long Liquidity Series (Left Axis) - Filled Area
-        this.longLiquiditySeries = this.chart.addSeries(AreaSeries, {
-            lineColor: '#10b981', // Emerald/Green
-            topColor: 'rgba(16, 185, 129, 0.4)',
-            bottomColor: 'rgba(16, 185, 129, 0.05)',
-            lineWidth: 1,
-            title: 'Long Liquidity',
-            priceScaleId: 'left',
-            lineType: LineType.Simple, // Reverted to jagged
-            priceFormat: {
-                type: 'price',
-                precision: 2,
-                minMove: 0.01,
-            },
-            autoscaleInfoProvider: (original) => {
-                const res = original();
-                if (res !== null) {
-                    res.priceRange.minValue = 0;
-                }
-                return res;
+        // Apply fixed ratio scale
+        this.chart.priceScale('left').applyOptions({
+            visible: true,
+            autoScale: false,
+            scaleMargins: {
+                top: 0.1,
+                bottom: 0.1,
             },
         });
-        // Short Liquidity Series (Left Axis) - Filled Area
-        this.shortLiquiditySeries = this.chart.addSeries(AreaSeries, {
-            lineColor: '#ef4444', // Red
-            topColor: 'rgba(239, 68, 68, 0.4)',
-            bottomColor: 'rgba(239, 68, 68, 0.05)',
-            lineWidth: 1,
-            title: 'Short Liquidity',
-            priceScaleId: 'left',
-            lineType: LineType.Simple, // Reverted to jagged
-            priceFormat: {
-                type: 'price',
-                precision: 2,
-                minMove: 0.01,
-            },
-            autoscaleInfoProvider: (original) => {
-                const res = original();
-                if (res !== null) {
-                    res.priceRange.minValue = 0;
-                }
-                return res;
-            },
+        // Ensure the range is exactly 0-100
+        this.chart.priceScale('left').applyOptions({
+            autoScale: false,
+        });
+        this.chart.priceScale('left').setVisibleRange({
+            from: 0,
+            to: 100,
         });
         window.addEventListener('resize', () => {
             this.chart.applyOptions({
@@ -101,8 +97,8 @@ export class MarketChart {
                 return;
             const sortedData = [...data].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
             const priceData = [];
-            const longLiqData = [];
-            const shortLiqData = [];
+            const shortRatioData = [];
+            const longRatioData = [];
             sortedData.forEach((row) => {
                 const time = (Math.floor(new Date(row.timestamp + "Z").getTime() / 1000));
                 // Price scaling
@@ -115,15 +111,18 @@ export class MarketChart {
                     }
                 }
                 priceData.push({ time, value: price });
-                // Liquidity scaling
+                // Ratio calculation
                 const longLiq = parseFloat(row.long_liquidity) / 1e9;
                 const shortLiq = parseFloat(row.short_liquidity) / 1e9;
-                longLiqData.push({ time, value: longLiq });
-                shortLiqData.push({ time, value: shortLiq });
+                const total = longLiq + shortLiq;
+                // Default to 50% if no liquidity
+                const ratio = total > 0 ? (longLiq / total) * 100 : 50;
+                shortRatioData.push({ time, value: 100 });
+                longRatioData.push({ time, value: ratio });
             });
+            this.shortRatioSeries.setData(shortRatioData);
+            this.longRatioSeries.setData(longRatioData);
             this.priceSeries.setData(priceData);
-            this.longLiquiditySeries.setData(longLiqData);
-            this.shortLiquiditySeries.setData(shortLiqData);
             this.chart.timeScale().fitContent();
         }
         catch (error) {
