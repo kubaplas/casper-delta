@@ -54,13 +54,12 @@ app.use('/speculative/rpc', createProxyMiddleware({
 // Serve the main application
 app.get('/', (req, res) => {
     const appMode = process.env.APP_MODE || 'competition';
-    const showMarketGraph = process.env.SHOW_MARKET_GRAPH === 'true';
     const htmlPath = path.join(baseDir, 'index.html');
     // Read and inject config into HTML
     import('fs').then(fs => {
         fs.promises.readFile(htmlPath, 'utf-8').then(html => {
             // Inject config as global variables before other scripts
-            const injectedHtml = html.replace('<head>', `<head>\n  <script>window.APP_MODE = '${appMode}'; window.SHOW_MARKET_GRAPH = ${showMarketGraph};</script>`);
+            const injectedHtml = html.replace('<head>', `<head>\n  <script>window.APP_MODE = '${appMode}';</script>`);
             res.send(injectedHtml);
         });
     });

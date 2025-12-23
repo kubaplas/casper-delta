@@ -67,7 +67,6 @@ app.use(
 // Serve the main application
 app.get('/', (req, res) => {
   const appMode = process.env.APP_MODE || 'competition';
-  const showMarketGraph = process.env.SHOW_MARKET_GRAPH === 'true';
   const htmlPath = path.join(baseDir, 'index.html');
 
   // Read and inject config into HTML
@@ -76,7 +75,7 @@ app.get('/', (req, res) => {
       // Inject config as global variables before other scripts
       const injectedHtml = html.replace(
         '<head>',
-        `<head>\n  <script>window.APP_MODE = '${appMode}'; window.SHOW_MARKET_GRAPH = ${showMarketGraph};</script>`
+        `<head>\n  <script>window.APP_MODE = '${appMode}';</script>`
       );
       res.send(injectedHtml);
     });

@@ -5,6 +5,7 @@ import { showError } from "../ui/modals.js";
 
 // ---------- Transaction Monitor State ----------
 export let currentTransaction: CurrentTransaction | null = null;
+let monitoringTimeoutId: any = null;
 
 export function setCurrentTransaction(value: CurrentTransaction | null): void {
     currentTransaction = value;
@@ -90,7 +91,8 @@ export function showTransactionPopup(description: string): void {
     dom.txSection.classList.add("hidden");
 
     // Set a manual timeout as a fallback
-    setTimeout(() => {
+    if (monitoringTimeoutId) clearTimeout(monitoringTimeoutId);
+    monitoringTimeoutId = setTimeout(() => {
         console.warn('Manual timeout triggered - transaction taking too long');
         onTransactionTimeout();
     }, 3 * 60 * 1000); // 3 minutes fallback timeout
@@ -115,6 +117,12 @@ export function showTransactionHashInProgress(hash: string): void {
  * Cleanup transaction progress UI
  */
 export function cleanup(): void {
+    // Clear monitoring timeout
+    if (monitoringTimeoutId) {
+        clearTimeout(monitoringTimeoutId);
+        monitoringTimeoutId = null;
+    }
+
     // Reset progress UI and hide overlay
     dom.txProgressOverlay.classList.add("hidden");
     dom.txProgressBar.style.width = "0%";

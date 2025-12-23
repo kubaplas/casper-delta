@@ -2,13 +2,13 @@
 // Application mode: 'production' or 'competition' (default)
 // Injected by server as window.APP_MODE
 export const APP_MODE = window.APP_MODE || 'competition';
-export const SHOW_MARKET_GRAPH = window.SHOW_MARKET_GRAPH || false;
 // Helper to check if running in production mode
 export function isProductionMode() {
     return APP_MODE === 'production';
 }
 export function isMarketGraphVisible() {
-    return SHOW_MARKET_GRAPH;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('graph') === 'true';
 }
 export const EXPLORER_BASE = "https://testnet.cspr.live/";
 export const TOKEN_DECIMALS = 9;

@@ -3,6 +3,7 @@ import { lockScroll, unlockScroll, buildExplorerTxUrl } from "../ui/utils.js";
 import { showError } from "../ui/modals.js";
 // ---------- Transaction Monitor State ----------
 export let currentTransaction = null;
+let monitoringTimeoutId = null;
 export function setCurrentTransaction(value) {
     currentTransaction = value;
 }
@@ -74,7 +75,9 @@ export function showTransactionPopup(description) {
     // Hide the basic transaction section as we're now showing progress
     dom.txSection.classList.add("hidden");
     // Set a manual timeout as a fallback
-    setTimeout(() => {
+    if (monitoringTimeoutId)
+        clearTimeout(monitoringTimeoutId);
+    monitoringTimeoutId = setTimeout(() => {
         console.warn('Manual timeout triggered - transaction taking too long');
         onTransactionTimeout();
     }, 3 * 60 * 1000); // 3 minutes fallback timeout
@@ -96,6 +99,11 @@ export function showTransactionHashInProgress(hash) {
  * Cleanup transaction progress UI
  */
 export function cleanup() {
+    // Clear monitoring timeout
+    if (monitoringTimeoutId) {
+        clearTimeout(monitoringTimeoutId);
+        monitoringTimeoutId = null;
+    }
     // Reset progress UI and hide overlay
     dom.txProgressOverlay.classList.add("hidden");
     dom.txProgressBar.style.width = "0%";
