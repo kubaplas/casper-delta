@@ -75,67 +75,33 @@ export function formatAllowance(value, decimals = TOKEN_DECIMALS) {
 }
 /**
  * Formatter specifically for dollar prices (WCSPR price in USD)
+ * Simple implementation showing 3 significant decimals in the output.
  */
 export function formatDollarPrice(value, decimals = TOKEN_DECIMALS) {
     try {
-        const rawValueString = value.toString();
-        // Try multiple decimal interpretations to find the right scaling
-        const interpretations = [];
-        // Test every decimal from 0 to 18 to find the most likely precision
-        for (let testDecimals = 0; testDecimals <= 18; testDecimals++) {
-            try {
-                const testFormatter = value.formatter(testDecimals);
-                const testValue = parseFloat(testFormatter.fmtWithPrecision(9));
-                if (testValue >= 0.0001 && testValue <= 1000000) {
-                    interpretations.push({
-                        decimals: testDecimals,
-                        value: testValue
-                    });
-                }
-            }
-            catch (e) {
+        // Default to provided decimals (usually 9), but fall back to common price scales 
+        // (5 or 4 decimals) if the resulting value is suspiciously small.
+        let floatValue = parseFloat(value.formatter(decimals).fmtWithPrecision(12));
+        if (floatValue > 0 && floatValue < 0.0001) {
+            const alt5 = parseFloat(value.formatter(5).fmtWithPrecision(12));
+            if (alt5 >= 0.0001)
+                floatValue = alt5;
+            else {
+                const alt4 = parseFloat(value.formatter(4).fmtWithPrecision(12));
+                if (alt4 >= 0.0001)
+                    floatValue = alt4;
             }
         }
-        // Selection heuristic:
-        // 1. If 9 decimals (Casper standard) gives a reasonable price, use it.
-        // 2. Otherwise, pick the interpretation with the highest decimal count that gives a value >= 0.0001.
-        //    This favors precision which is typical for crypto prices.
-        let bestInterpretation = interpretations.find(interp => interp.decimals === 9);
-        if (!bestInterpretation && interpretations.length > 0) {
-            // Sort by decimals descending to pick the most precise valid interpretation
-            const sorted = [...interpretations].sort((a, b) => b.decimals - a.decimals);
-            bestInterpretation = sorted[0];
-        }
-        // If no reasonable interpretation found via searching, try manual fallback
-        if (!bestInterpretation) {
-            const rawValueNum = parseFloat(rawValueString);
-            const fallbackValue = rawValueNum / Math.pow(10, decimals);
-            bestInterpretation = {
-                decimals: decimals,
-                value: fallbackValue
-            };
-        }
-        const numericValue = bestInterpretation.value;
-        // Format as dollar amount with appropriate precision
-        if (numericValue === 0) {
-            return "$0.0000";
-        }
-        else if (numericValue >= 1) {
-            // For values >= $1, show 2 decimal places
-            return `$${numericValue.toFixed(2)}`;
-        }
-        else if (numericValue >= 0.01) {
-            // For values >= $0.01, show 4 decimal places
-            return `$${numericValue.toFixed(4)}`;
-        }
-        else {
-            // For very small values, show 6 decimal places
-            return `$${numericValue.toFixed(6)}`;
-        }
+        if (floatValue === 0)
+            return "$0.00";
+        return "$" + floatValue.toLocaleString("en-US", {
+            minimumSignificantDigits: 3,
+            maximumSignificantDigits: 3,
+        });
     }
     catch (e) {
         console.error("Error formatting dollar price:", e);
-        return "$0.0000";
+        return "$0.00";
     }
 }
 /**
