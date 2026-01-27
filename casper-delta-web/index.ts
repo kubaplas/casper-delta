@@ -67,6 +67,22 @@ app.use(
 // Serve the main application
 app.get('/', (req, res) => {
   const appMode = process.env.APP_MODE || 'competition';
+  const rpcUrl = process.env.RPC_URL;
+  const speculativeRpcUrl = process.env.SPECULATIVE_RPC_URL;
+  const chainName = process.env.CHAIN_NAME;
+  const explorerBase = process.env.EXPLORER_BASE;
+  
+  // Validate required environment variables
+  if (!rpcUrl || !speculativeRpcUrl || !chainName || !explorerBase) {
+    console.error('Missing required environment variables:', {
+      RPC_URL: !!rpcUrl,
+      SPECULATIVE_RPC_URL: !!speculativeRpcUrl,
+      CHAIN_NAME: !!chainName,
+      EXPLORER_BASE: !!explorerBase
+    });
+    return res.status(500).send('Server configuration error: Missing required environment variables');
+  }
+  
   const htmlPath = path.join(baseDir, 'index.html');
 
   // Read and inject config into HTML
@@ -75,7 +91,13 @@ app.get('/', (req, res) => {
       // Inject config as global variables before other scripts
       const injectedHtml = html.replace(
         '<head>',
-        `<head>\n  <script>window.APP_MODE = '${appMode}';</script>`
+        `<head>\n  <script>
+    window.APP_MODE = '${appMode}';
+    window.RPC_URL = '${rpcUrl}';
+    window.SPECULATIVE_RPC_URL = '${speculativeRpcUrl}';
+    window.CHAIN_NAME = '${chainName}';
+    window.EXPLORER_BASE = '${explorerBase}';
+  </script>`
       );
       res.send(injectedHtml);
     });

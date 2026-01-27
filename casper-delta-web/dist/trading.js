@@ -9,7 +9,21 @@ let longToken;
 let shortToken;
 let account;
 // ---------- Configuration ----------
-const EXPLORER_BASE = "https://testnet.cspr.live/";
+// RPC configuration - injected by server from environment variables (shared with config.ts)
+// Will throw if not configured
+if (!window.RPC_URL)
+    throw new Error('RPC_URL not configured');
+if (!window.SPECULATIVE_RPC_URL)
+    throw new Error('SPECULATIVE_RPC_URL not configured');
+if (!window.CHAIN_NAME)
+    throw new Error('CHAIN_NAME not configured');
+if (!window.EXPLORER_BASE)
+    throw new Error('EXPLORER_BASE not configured');
+const RPC_URL = window.RPC_URL;
+const SPECULATIVE_RPC_URL = window.SPECULATIVE_RPC_URL;
+const CHAIN_NAME = window.CHAIN_NAME;
+const EXPLORER_BASE = window.EXPLORER_BASE;
+// Import shared configuration constants
 const TOKEN_DECIMALS = 9;
 const DEFAULT_GAS_AMOUNT = BigInt(5000000000); // 5 CSPR
 const HIGH_GAS_AMOUNT = BigInt(10000000000); // 10 CSPR for complex operations
@@ -1877,7 +1891,7 @@ async function initializeClients() {
     // Initialize position closing state after WASM is loaded
     initializePositionClosingState();
     // Initialize the base client
-    client = new OdraWasmClient("https://testnet-rpc.odra.dev", "https://testnet-speculative-rpc.odra.dev", "casper-test");
+    client = new OdraWasmClient(RPC_URL, SPECULATIVE_RPC_URL, CHAIN_NAME);
     // Initialize contract clients with placeholder addresses
     // In a real deployment, these would be the actual deployed contract addresses
     market = new MarketWasmClient(client, new Address(CONTRACT_ADDRESSES.market));

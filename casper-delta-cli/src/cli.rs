@@ -13,6 +13,17 @@ use styks_contracts::styks_price_feed::StyksPriceFeed;
 // mod scenarios;
 
 const PRICE_FEED_ID: &str = "CSPRUSD";
+
+fn load_env_vars() -> (String, String) {
+    dotenv::dotenv().ok();
+    
+    let wcspr_token = std::env::var("WCSPR_TOKEN_ADDRESS")
+        .expect("WCSPR_TOKEN_ADDRESS not found in .env file");
+    let price_feed = std::env::var("PRICE_FEED_ADDRESS")
+        .expect("PRICE_FEED_ADDRESS not found in .env file");
+    
+    (price_feed, wcspr_token)
+}
 pub struct ContractsDeployScript;
 impl DeployScript for ContractsDeployScript {
     fn deploy(
@@ -20,15 +31,13 @@ impl DeployScript for ContractsDeployScript {
         env: &HostEnv,
         container: &mut DeployedContractsContainer,
     ) -> Result<(), odra_cli::deploy::Error> {
-        let price_feed_address = Address::from_str(
-            "hash-2879d6e927289197aab0101cc033f532fe22e4ab4686e44b5743cb1333031acc",
-        )
-        .unwrap();
+        let (price_feed_str, wcspr_token_str) = load_env_vars();
+        
+        let price_feed_address = Address::from_str(&price_feed_str)
+            .expect("Invalid PRICE_FEED_ADDRESS format in .env file");
 
-        let wcspr_token_address = Address::from_str(
-            "hash-3d80df21ba4ee4d66a2a1f60c32570dd5685e4b279f6538162a5fd1314847c1e",
-        )
-        .unwrap();
+        let wcspr_token_address = Address::from_str(&wcspr_token_str)
+            .expect("Invalid WCSPR_TOKEN_ADDRESS format in .env file");
         env.set_gas(50_000_000_000);
 
         let mut market = Market::load_or_deploy_with_cfg(

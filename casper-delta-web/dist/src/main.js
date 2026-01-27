@@ -1,7 +1,7 @@
 import init, { Address, OdraWasmClient, U256, } from "casper-delta-wasm-client";
 import { MarketWasmClient, FaucetableWcsprWasmClient, WrappedNativeTokenWasmClient, PositionTokenWasmClient, } from "casper-delta-wasm-client";
 // Configuration and constants
-import { CONTRACT_ADDRESSES, isProductionMode, isMarketGraphVisible } from "./config.js";
+import { CONTRACT_ADDRESSES, isProductionMode, isMarketGraphVisible, RPC_URL, SPECULATIVE_RPC_URL, CHAIN_NAME } from "./config.js";
 // DOM elements
 import * as dom from "./dom.js";
 // UI utilities and modals
@@ -48,7 +48,7 @@ async function initializeClients() {
     // Initialize position closing state after WASM is loaded
     initializePositionClosingState();
     // Initialize the base client
-    const client = new OdraWasmClient("https://testnet-rpc.odra.dev", "https://testnet-speculative-rpc.odra.dev", "casper-test");
+    const client = new OdraWasmClient(RPC_URL, SPECULATIVE_RPC_URL, CHAIN_NAME);
     setClient(client);
     // Initialize contract clients with deployed contract addresses
     const market = new MarketWasmClient(client, new Address(CONTRACT_ADDRESSES.market));

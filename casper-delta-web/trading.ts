@@ -45,7 +45,19 @@ interface ConsolidatedData {
 }
 
 // ---------- Configuration ----------
-const EXPLORER_BASE = "https://testnet.cspr.live/";
+// RPC configuration - injected by server from environment variables (shared with config.ts)
+// Will throw if not configured
+if (!(window as any).RPC_URL) throw new Error('RPC_URL not configured');
+if (!(window as any).SPECULATIVE_RPC_URL) throw new Error('SPECULATIVE_RPC_URL not configured');
+if (!(window as any).CHAIN_NAME) throw new Error('CHAIN_NAME not configured');
+if (!(window as any).EXPLORER_BASE) throw new Error('EXPLORER_BASE not configured');
+
+const RPC_URL = (window as any).RPC_URL;
+const SPECULATIVE_RPC_URL = (window as any).SPECULATIVE_RPC_URL;
+const CHAIN_NAME = (window as any).CHAIN_NAME;
+const EXPLORER_BASE = (window as any).EXPLORER_BASE;
+
+// Import shared configuration constants
 const TOKEN_DECIMALS = 9;
 const DEFAULT_GAS_AMOUNT = BigInt(5_000_000_000); // 5 CSPR
 const HIGH_GAS_AMOUNT = BigInt(10_000_000_000); // 10 CSPR for complex operations
@@ -2180,9 +2192,9 @@ async function initializeClients() {
 
     // Initialize the base client
     client = new OdraWasmClient(
-        "https://testnet-rpc.odra.dev", 
-        "https://testnet-speculative-rpc.odra.dev", 
-        "casper-test"
+        RPC_URL, 
+        SPECULATIVE_RPC_URL, 
+        CHAIN_NAME
     );
 
     // Initialize contract clients with placeholder addresses

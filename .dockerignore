@@ -1,0 +1,47 @@
+# Git
+.git
+.gitignore
+.github
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+.cursorignore
+
+# Rust build artifacts
+target/
+
+# Node modules (will be installed fresh in Docker)
+node_modules/
+casper-delta-web/node_modules/
+casper-delta-web/dist/
+
+# Environment files (passed at runtime)
+.env
+.env.*
+!.env.example
+
+# Local keys and secrets
+.node-keys/
+*.pem
+
+# Database files
+*.db
+
+# Logs
+*.log
+
+# Documentation and misc
+*.md
+!README.md
+whitepaper/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files
+Dockerfile
+.dockerignore

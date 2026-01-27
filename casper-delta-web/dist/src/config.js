@@ -2,6 +2,20 @@
 // Application mode: 'production' or 'competition' (default)
 // Injected by server as window.APP_MODE
 export const APP_MODE = window.APP_MODE || 'competition';
+// RPC configuration - injected by server from environment variables
+// Will throw if not configured
+if (!window.RPC_URL)
+    throw new Error('RPC_URL not configured');
+if (!window.SPECULATIVE_RPC_URL)
+    throw new Error('SPECULATIVE_RPC_URL not configured');
+if (!window.CHAIN_NAME)
+    throw new Error('CHAIN_NAME not configured');
+if (!window.EXPLORER_BASE)
+    throw new Error('EXPLORER_BASE not configured');
+export const RPC_URL = window.RPC_URL;
+export const SPECULATIVE_RPC_URL = window.SPECULATIVE_RPC_URL;
+export const CHAIN_NAME = window.CHAIN_NAME;
+export const EXPLORER_BASE = window.EXPLORER_BASE;
 // Helper to check if running in production mode
 export function isProductionMode() {
     return APP_MODE === 'production';
@@ -10,7 +24,7 @@ export function isMarketGraphVisible() {
     const params = new URLSearchParams(window.location.search);
     return params.get('graph') === 'true';
 }
-export const EXPLORER_BASE = "https://testnet.cspr.live/";
+// UI and API configuration
 export const TOKEN_DECIMALS = 9;
 export const DEFAULT_GAS_AMOUNT = BigInt(5000000000); // 5 CSPR
 export const HIGH_GAS_AMOUNT = BigInt(10000000000); // 10 CSPR for complex operations

@@ -12,7 +12,7 @@ import {
 } from "casper-delta-wasm-client";
 
 // Configuration and constants
-import { CONTRACT_ADDRESSES, isProductionMode, isMarketGraphVisible } from "./config.js";
+import { CONTRACT_ADDRESSES, isProductionMode, isMarketGraphVisible, RPC_URL, SPECULATIVE_RPC_URL, CHAIN_NAME } from "./config.js";
 
 // DOM elements
 import * as dom from "./dom.js";
@@ -96,9 +96,9 @@ async function initializeClients(): Promise<void> {
 
     // Initialize the base client
     const client = new OdraWasmClient(
-        "https://testnet-rpc.odra.dev",
-        "https://testnet-speculative-rpc.odra.dev",
-        "casper-test"
+        RPC_URL,
+        SPECULATIVE_RPC_URL,
+        CHAIN_NAME
     );
     setClient(client);
 
