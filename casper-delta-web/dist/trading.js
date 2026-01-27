@@ -373,12 +373,20 @@ function onTransactionCancelled() {
     // Hide progress after a delay
     setTimeout(cleanup, 500);
 }
-// Contract addresses - these would be configured based on deployment
+// Contract addresses - injected by server from environment variables (shared with config.ts)
+if (!window.MARKET_CONTRACT_ADDRESS)
+    throw new Error('MARKET_CONTRACT_ADDRESS not configured');
+if (!window.WCSPR_CONTRACT_ADDRESS)
+    throw new Error('WCSPR_CONTRACT_ADDRESS not configured');
+if (!window.LONG_TOKEN_CONTRACT_ADDRESS)
+    throw new Error('LONG_TOKEN_CONTRACT_ADDRESS not configured');
+if (!window.SHORT_TOKEN_CONTRACT_ADDRESS)
+    throw new Error('SHORT_TOKEN_CONTRACT_ADDRESS not configured');
 const CONTRACT_ADDRESSES = {
-    market: "hash-3aaede19ed8b270d96f0fccf79d9dbb14307ea853de00f2f0835f5958f396bbd",
-    wcspr: "hash-a2fc55eda5bf7e724520d36536c32ac19e0b75dbdf16b4bf85a4234f21d6aaf0",
-    shortToken: "hash-51809ec40e24515f38f2b3d7c87f76358269428ca35bc79f732a52eac62fea5e",
-    longToken: "hash-e374d41cf3b6405ba4c344bc15f12a1c6fdc201b51054479facfee1eaff30524",
+    market: window.MARKET_CONTRACT_ADDRESS,
+    wcspr: window.WCSPR_CONTRACT_ADDRESS,
+    longToken: window.LONG_TOKEN_CONTRACT_ADDRESS,
+    shortToken: window.SHORT_TOKEN_CONTRACT_ADDRESS,
 };
 // ---------- State ----------
 let connected = false;

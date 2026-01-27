@@ -71,14 +71,23 @@ app.get('/', (req, res) => {
   const speculativeRpcUrl = process.env.SPECULATIVE_RPC_URL;
   const chainName = process.env.CHAIN_NAME;
   const explorerBase = process.env.EXPLORER_BASE;
+  const marketContract = process.env.MARKET_CONTRACT_ADDRESS;
+  const wcsprContract = process.env.WCSPR_CONTRACT_ADDRESS;
+  const longTokenContract = process.env.LONG_TOKEN_CONTRACT_ADDRESS;
+  const shortTokenContract = process.env.SHORT_TOKEN_CONTRACT_ADDRESS;
   
   // Validate required environment variables
-  if (!rpcUrl || !speculativeRpcUrl || !chainName || !explorerBase) {
+  if (!rpcUrl || !speculativeRpcUrl || !chainName || !explorerBase || 
+      !marketContract || !wcsprContract || !longTokenContract || !shortTokenContract) {
     console.error('Missing required environment variables:', {
       RPC_URL: !!rpcUrl,
       SPECULATIVE_RPC_URL: !!speculativeRpcUrl,
       CHAIN_NAME: !!chainName,
-      EXPLORER_BASE: !!explorerBase
+      EXPLORER_BASE: !!explorerBase,
+      MARKET_CONTRACT_ADDRESS: !!marketContract,
+      WCSPR_CONTRACT_ADDRESS: !!wcsprContract,
+      LONG_TOKEN_CONTRACT_ADDRESS: !!longTokenContract,
+      SHORT_TOKEN_CONTRACT_ADDRESS: !!shortTokenContract
     });
     return res.status(500).send('Server configuration error: Missing required environment variables');
   }
@@ -97,6 +106,10 @@ app.get('/', (req, res) => {
     window.SPECULATIVE_RPC_URL = '${speculativeRpcUrl}';
     window.CHAIN_NAME = '${chainName}';
     window.EXPLORER_BASE = '${explorerBase}';
+    window.MARKET_CONTRACT_ADDRESS = '${marketContract}';
+    window.WCSPR_CONTRACT_ADDRESS = '${wcsprContract}';
+    window.LONG_TOKEN_CONTRACT_ADDRESS = '${longTokenContract}';
+    window.SHORT_TOKEN_CONTRACT_ADDRESS = '${shortTokenContract}';
   </script>`
       );
       res.send(injectedHtml);

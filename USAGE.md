@@ -8,7 +8,7 @@ just prepare
 ```
 
 Now, copy `.env.example` to `.env`, fill missing keys and set variables for the chain you want to use.
-Defaults are set for deploying and running web app on the testnet.
+Defaults are set for deploying and running web app on the testnet. Hashes of the contracts will be available after the deployment in `resources/chain-name-contracts.toml`
 
 # Building contracts and the web app
 
