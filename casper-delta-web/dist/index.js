@@ -62,9 +62,12 @@ app.get('/', (req, res) => {
     const wcsprContract = process.env.WCSPR_CONTRACT_ADDRESS;
     const longTokenContract = process.env.LONG_TOKEN_CONTRACT_ADDRESS;
     const shortTokenContract = process.env.SHORT_TOKEN_CONTRACT_ADDRESS;
+    const csprClickAppName = process.env.CSPR_CLICK_APP_NAME;
+    const csprClickAppId = process.env.CSPR_CLICK_APP_ID;
     // Validate required environment variables
     if (!rpcUrl || !speculativeRpcUrl || !chainName || !explorerBase ||
-        !marketContract || !wcsprContract || !longTokenContract || !shortTokenContract) {
+        !marketContract || !wcsprContract || !longTokenContract || !shortTokenContract ||
+        !csprClickAppName || !csprClickAppId) {
         console.error('Missing required environment variables:', {
             RPC_URL: !!rpcUrl,
             SPECULATIVE_RPC_URL: !!speculativeRpcUrl,
@@ -73,7 +76,9 @@ app.get('/', (req, res) => {
             MARKET_CONTRACT_ADDRESS: !!marketContract,
             WCSPR_CONTRACT_ADDRESS: !!wcsprContract,
             LONG_TOKEN_CONTRACT_ADDRESS: !!longTokenContract,
-            SHORT_TOKEN_CONTRACT_ADDRESS: !!shortTokenContract
+            SHORT_TOKEN_CONTRACT_ADDRESS: !!shortTokenContract,
+            CSPR_CLICK_APP_NAME: !!csprClickAppName,
+            CSPR_CLICK_APP_ID: !!csprClickAppId
         });
         return res.status(500).send('Server configuration error: Missing required environment variables');
     }
@@ -92,6 +97,8 @@ app.get('/', (req, res) => {
     window.WCSPR_CONTRACT_ADDRESS = '${wcsprContract}';
     window.LONG_TOKEN_CONTRACT_ADDRESS = '${longTokenContract}';
     window.SHORT_TOKEN_CONTRACT_ADDRESS = '${shortTokenContract}';
+    window.CSPR_CLICK_APP_NAME = '${csprClickAppName}';
+    window.CSPR_CLICK_APP_ID = '${csprClickAppId}';
   </script>`);
             res.send(injectedHtml);
         });

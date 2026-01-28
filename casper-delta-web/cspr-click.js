@@ -1,3 +1,7 @@
+// CSPR.click configuration - values injected by server from environment variables
+if (!window.CSPR_CLICK_APP_NAME) throw new Error('CSPR_CLICK_APP_NAME not configured');
+if (!window.CSPR_CLICK_APP_ID) throw new Error('CSPR_CLICK_APP_ID not configured');
+
 const clickUIOptions = {
     uiContainer: 'csprclick-ui',
     rootAppElement: 'body',
@@ -5,7 +9,7 @@ const clickUIOptions = {
 };
 
 const clickSDKOptions = {
-    appName: 'Casper Delta testnet',
-    appId: 'c0ec1653-18b0-45aa-bdb7-1bbeefac',
+    appName: window.CSPR_CLICK_APP_NAME,
+    appId: window.CSPR_CLICK_APP_ID,
     providers: ['casper-wallet', 'ledger'],
 };
