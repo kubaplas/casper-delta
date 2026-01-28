@@ -4,6 +4,7 @@ use std::str::FromStr;
 use casper_delta_cli::scenarios::{SetMarketConfig, UpdatePrice};
 use casper_delta_contracts::config::Config;
 use casper_delta_contracts::faucetable_wcspr::{FaucetableWcspr, FaucetableWcsprInitArgs};
+use casper_delta_contracts::wrapped_native::WrappedNativeToken;
 use casper_delta_contracts::market::{Market, MarketInitArgs};
 use casper_delta_contracts::position_token::{LongOrShort, PositionToken, PositionTokenInitArgs};
 use odra::host::{HostEnv, InstallConfig};
@@ -132,6 +133,7 @@ pub fn main() {
         .named_contract::<PositionToken>("CD_LONG".to_string())
         .named_contract::<PositionToken>("CD_SHORT".to_string())
         .contract::<FaucetableWcspr>()
+        .contract::<WrappedNativeToken>()
         .scenario(UpdatePrice)
         .scenario(SetMarketConfig)
         .build()

@@ -63,7 +63,21 @@ export async function onTransactionSuccessFromCsprClick(data: TransactionResult)
  * Handle failed transaction from CSPR.click
  */
 export async function onTransactionFailureFromCsprClick(data: TransactionResult): Promise<void> {
+    // Enhanced logging to debug WASM object
     console.error("Transaction failed from CSPR.click:", data);
+    try {
+        console.error("Transaction result details:", {
+            error: data.error,
+            errorCode: data.errorCode,
+            isCancelled: data.isCancelled,
+            status: data.status,
+            txHash: data.txHash,
+            data: data.data,
+            dataErrorMessage: data.data?.errorMessage,
+        });
+    } catch (logError) {
+        console.error("Could not extract transaction result details:", logError);
+    }
 
     // Update UI to show failure
     dom.txProgressBar.style.width = "100%";
@@ -81,6 +95,10 @@ export async function onTransactionFailureFromCsprClick(data: TransactionResult)
         const error = data.error;
         const errorCode = data.errorCode;
         const isCancelled = data.isCancelled;
+        
+        // Also check TransactionData's errorMessage if available
+        const transactionData = data.data;
+        const dataErrorMessage = transactionData?.errorMessage;
 
         // Check if transaction was cancelled
         if (isCancelled) {
@@ -96,6 +114,9 @@ export async function onTransactionFailureFromCsprClick(data: TransactionResult)
                     errorMsg = description;
                 }
             }
+        } else if (dataErrorMessage) {
+            // Use error message from TransactionData if available
+            errorMsg = dataErrorMessage;
         } else if (errorCode !== null && errorCode !== undefined) {
             // We have an error code but no error message
             const description = getErrorDescription(errorCode);
