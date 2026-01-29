@@ -1,4 +1,4 @@
-import { setGas } from "casper-delta-wasm-client";
+import { setGas, Address } from "casper-delta-wasm-client";
 import { HIGH_GAS_AMOUNT } from "../config.js";
 import * as dom from "../dom.js";
 import { showError } from "../ui/modals.js";
@@ -140,8 +140,16 @@ export async function refreshAllDataConsolidated(): Promise<void> {
     showAllLoaders();
 
     try {
-        // Get caller address
-        const caller = account.address;
+        // Get caller address from state (set during onConnect)
+        if (!address) {
+            console.warn("No address available for data fetch");
+            setFallbackValues();
+            return;
+        }
+        
+        // Convert public key string to Address type
+        // The address from cspr.click is a raw public key hex string
+        const caller = Address.fromPublicKey(address);
 
         // Set higher gas limit for complex data fetching operation
         setGas(HIGH_GAS_AMOUNT);

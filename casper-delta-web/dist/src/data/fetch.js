@@ -1,10 +1,10 @@
-import { setGas } from "casper-delta-wasm-client";
+import { setGas, Address } from "casper-delta-wasm-client";
 import { HIGH_GAS_AMOUNT } from "../config.js";
 import * as dom from "../dom.js";
 import { showError } from "../ui/modals.js";
 import { formatNumber, formatDollarPrice, formatAllowance } from "../ui/formatters.js";
 import { showAllLoaders, hideAllLoaders } from "../ui/loaders.js";
-import { connected, address, account, market, setBalances, setMarketState, setConsolidatedData, setMarketAllowanceValue, } from "./state.js";
+import { connected, address, market, setBalances, setMarketState, setConsolidatedData, setMarketAllowanceValue, } from "./state.js";
 import { resetLongCloseAmount, resetShortCloseAmount, updateCloseButtonsAvailability } from "../trading/positions.js";
 // ---------- Request Helper Functions ----------
 /**
@@ -108,8 +108,15 @@ export async function refreshAllDataConsolidated() {
     // Show all loaders
     showAllLoaders();
     try {
-        // Get caller address
-        const caller = account.address;
+        // Get caller address from state (set during onConnect)
+        if (!address) {
+            console.warn("No address available for data fetch");
+            setFallbackValues();
+            return;
+        }
+        // Convert public key string to Address type
+        // The address from cspr.click is a raw public key hex string
+        const caller = Address.fromPublicKey(address);
         // Set higher gas limit for complex data fetching operation
         setGas(HIGH_GAS_AMOUNT);
         // Single call to get all data
