@@ -28,8 +28,8 @@ export function isMarketGraphVisible(): boolean {
 
 // UI and API configuration
 export const TOKEN_DECIMALS = 9;
-export const DEFAULT_GAS_AMOUNT = BigInt(100_000_000_000); // 5 CSPR
-export const HIGH_GAS_AMOUNT = BigInt(200_000_000_000); // 10 CSPR for complex operations
+export const DEFAULT_GAS_AMOUNT = BigInt(5_000_000_000); // 5 CSPR
+export const HIGH_GAS_AMOUNT = BigInt(10_000_000_000); // 10 CSPR for complex operations
 export const TRADING_INFO_DISMISSED_KEY = "casper-delta-trading-info-dismissed";
 
 // Contract addresses - injected by server from environment variables
