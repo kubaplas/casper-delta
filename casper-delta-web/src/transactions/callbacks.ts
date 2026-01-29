@@ -27,8 +27,22 @@ export function setOnDisconnectCallback(fn: () => void): void {
  * Set up CSPR.click callbacks
  */
 export function setupCsprClickCallbacks(): void {
+    // Verify CsprClickCallbacks is available
+    if (!CsprClickCallbacks || typeof CsprClickCallbacks.onSignedIn !== 'function') {
+        console.error("CsprClickCallbacks not available - wallet integration may fail");
+        // Retry after a delay
+        setTimeout(() => {
+            console.log("Retrying CSPR.click callback setup...");
+            setupCsprClickCallbacks();
+        }, 1000);
+        return;
+    }
+    
+    console.log("Setting up CSPR.click callbacks...");
+    
     // Set up the callback handlers
     CsprClickCallbacks.onSignedIn(async (accountInfo: AccountInfo) => {
+        console.log("CSPR.click onSignedIn callback fired", accountInfo);
         setAccount(accountInfo);
         if (onConnectFn) {
             await onConnectFn();
@@ -36,6 +50,7 @@ export function setupCsprClickCallbacks(): void {
     });
 
     CsprClickCallbacks.onSwitchedAccount(async (accountInfo: AccountInfo) => {
+        console.log("CSPR.click onSwitchedAccount callback fired", accountInfo);
         setAccount(accountInfo);
         if (onConnectFn) {
             await onConnectFn();
@@ -43,6 +58,7 @@ export function setupCsprClickCallbacks(): void {
     });
 
     CsprClickCallbacks.onSignedOut(() => {
+        console.log("CSPR.click onSignedOut callback fired");
         if (onDisconnectFn) {
             onDisconnectFn();
         }
@@ -51,6 +67,8 @@ export function setupCsprClickCallbacks(): void {
     CsprClickCallbacks.onTransactionStatusUpdate((status: TransactionStatus, result: TransactionResult) => {
         handleCsprClickStatusUpdate(status, result);
     });
+    
+    console.log("CSPR.click callbacks setup complete");
 }
 
 /**

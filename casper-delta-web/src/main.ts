@@ -267,7 +267,11 @@ async function waitForCsprClick(maxWaitMs: number = 10000): Promise<void> {
         await new Promise(resolve => setTimeout(resolve, 100));
     }
     
-    console.log("CSPR.click SDK loaded successfully");
+    // Additional wait to ensure CSPR.click SDK is fully initialized
+    // This is especially important for production environments with network latency
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    console.log("CSPR.click SDK loaded and initialized successfully");
 }
 
 async function run(): Promise<void> {
@@ -291,6 +295,21 @@ async function run(): Promise<void> {
         setupEventListeners();
 
         if (dom.marketStatusSpan) dom.marketStatusSpan.textContent = "Ready";
+
+        // Check if user is already connected (restored session)
+        // This is important especially after page reload or redirect from wallet
+        setTimeout(async () => {
+            try {
+                // Check if there's an active session by checking the account
+                const { account: currentAccount, connected: isConnected } = await import("./data/state.js");
+                if (currentAccount && currentAccount.publicKey && !isConnected) {
+                    console.log("Detected existing active session, auto-connecting...");
+                    await onConnect();
+                }
+            } catch (err) {
+                console.log("No active session detected or failed to auto-connect:", err);
+            }
+        }, 1000);
 
         // Initialize and refresh chart
         if (isMarketGraphVisible()) {
