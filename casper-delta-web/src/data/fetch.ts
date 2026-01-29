@@ -25,24 +25,88 @@ async function delayRequest(ms: number = 2000): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// ---------- Global Rate Limiting State ----------
+// Prevents rapid-fire RPC requests, especially during error scenarios
+let lastRequestTime = 0;
+let consecutiveErrors = 0;
+const MIN_REQUEST_INTERVAL = 1000; // Minimum 1 second between requests
+const MAX_BACKOFF_DELAY = 30000; // Maximum 30 second backoff
+const ERROR_COOLDOWN_BASE = 2000; // Base cooldown after errors
+
 /**
- * Simple retry wrapper for API calls
+ * Check if we should throttle the request and wait if necessary
+ */
+async function throttleRequest(): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastRequest = now - lastRequestTime;
+    
+    // Calculate required delay based on consecutive errors
+    let requiredDelay = MIN_REQUEST_INTERVAL;
+    if (consecutiveErrors > 0) {
+        // Exponential backoff: 2s, 4s, 8s, 16s, up to MAX_BACKOFF_DELAY
+        requiredDelay = Math.min(
+            ERROR_COOLDOWN_BASE * Math.pow(2, consecutiveErrors - 1),
+            MAX_BACKOFF_DELAY
+        );
+    }
+    
+    if (timeSinceLastRequest < requiredDelay) {
+        const waitTime = requiredDelay - timeSinceLastRequest;
+        console.log(`Throttling request, waiting ${waitTime}ms (consecutive errors: ${consecutiveErrors})`);
+        await delayRequest(waitTime);
+    }
+    
+    lastRequestTime = Date.now();
+}
+
+/**
+ * Record a successful request (resets error counter)
+ */
+function recordSuccess(): void {
+    consecutiveErrors = 0;
+}
+
+/**
+ * Record a failed request (increments error counter for backoff)
+ */
+function recordError(): void {
+    consecutiveErrors = Math.min(consecutiveErrors + 1, 5); // Cap at 5 for max ~30s backoff
+}
+
+/**
+ * Simple retry wrapper for API calls with exponential backoff for all errors
  */
 async function executeWithRetry<T>(fn: () => Promise<T>, maxRetries: number = 3): Promise<T> {
+    // Apply global throttling before any attempt
+    await throttleRequest();
+    
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
-            return await fn();
+            const result = await fn();
+            recordSuccess();
+            return result;
         } catch (error: any) {
-            const isRateLimit = error.message && error.message.includes('429');
             const isLastAttempt = attempt === maxRetries;
+            const isRateLimit = error.message && error.message.includes('429');
+            const isNetworkError = error.message && (
+                error.message.includes('fetch') ||
+                error.message.includes('network') ||
+                error.message.includes('Failed to fetch') ||
+                error.message.includes('NetworkError') ||
+                error.message.includes('ECONNREFUSED') ||
+                error.message.includes('timeout')
+            );
 
-            if (isRateLimit && !isLastAttempt) {
+            // Apply backoff for rate limits and network errors (not last attempt)
+            if ((isRateLimit || isNetworkError) && !isLastAttempt) {
                 const backoffDelay = Math.pow(2, attempt) * 1000; // Exponential backoff: 1s, 2s, 4s
-                console.warn(`Rate limited, retrying in ${backoffDelay}ms (attempt ${attempt + 1}/${maxRetries + 1})`);
+                console.warn(`Request failed (${isRateLimit ? 'rate limited' : 'network error'}), retrying in ${backoffDelay}ms (attempt ${attempt + 1}/${maxRetries + 1})`);
                 await delayRequest(backoffDelay);
                 continue;
             }
 
+            // Record the error for global throttling
+            recordError();
             throw error;
         }
     }
@@ -50,6 +114,10 @@ async function executeWithRetry<T>(fn: () => Promise<T>, maxRetries: number = 3)
 }
 
 // ---------- Data Fetching Functions ----------
+
+// Guard flags to prevent re-entrant refresh calls
+let isRefreshingAllData = false;
+let isRefreshingMarketState = false;
 
 /**
  * Refresh all data using consolidated endpoint
@@ -60,6 +128,13 @@ export async function refreshAllDataConsolidated(): Promise<void> {
         await refreshMarketStateOnly();
         return;
     }
+
+    // Prevent re-entrant calls
+    if (isRefreshingAllData) {
+        console.log("Refresh already in progress, skipping duplicate call");
+        return;
+    }
+    isRefreshingAllData = true;
 
     // Show all loaders
     showAllLoaders();
@@ -100,6 +175,7 @@ export async function refreshAllDataConsolidated(): Promise<void> {
     } finally {
         // Hide all loaders and show values
         hideAllLoaders();
+        isRefreshingAllData = false;
     }
 }
 
@@ -107,6 +183,13 @@ export async function refreshAllDataConsolidated(): Promise<void> {
  * Refresh market state only (for read-only mode)
  */
 export async function refreshMarketStateOnly(): Promise<void> {
+    // Prevent re-entrant calls
+    if (isRefreshingMarketState) {
+        console.log("Market state refresh already in progress, skipping duplicate call");
+        return;
+    }
+    isRefreshingMarketState = true;
+
     // Show only market state loaders
     dom.currentPriceSpan.classList.add("hidden");
     dom.longLiquiditySpan.classList.add("hidden");
@@ -157,6 +240,7 @@ export async function refreshMarketStateOnly(): Promise<void> {
         dom.longLiquidityLoader.classList.add("hidden");
         dom.shortLiquidityLoader.classList.add("hidden");
         dom.totalMarketValueLoader.classList.add("hidden");
+        isRefreshingMarketState = false;
     }
 }
 

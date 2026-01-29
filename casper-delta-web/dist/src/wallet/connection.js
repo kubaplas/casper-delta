@@ -1,7 +1,10 @@
 import * as dom from "../dom.js";
-import { setConnected, setAddress, setBalances, setConsolidatedData, client, account } from "../data/state.js";
+import { setConnected, setAddress, setBalances, setConsolidatedData, client, account, connected } from "../data/state.js";
 import { refreshAllData, refreshMarketStateOnly, setFallbackValues } from "../data/fetch.js";
 import { hideTransaction } from "../ui/modals.js";
+// ---------- Wallet Connection State ----------
+// Guard to prevent re-entrant disconnect calls (e.g., from CSPR.click callback loop)
+let isDisconnecting = false;
 // ---------- Wallet Connection Functions ----------
 /**
  * Connect wallet (trigger CSPR.click sign in)
@@ -13,6 +16,8 @@ export async function connect() {
  * Handle successful connection
  */
 export async function onConnect() {
+    // Reset disconnect guard when connecting
+    isDisconnecting = false;
     setConnected(true);
     const addr = account.publicKey;
     setAddress(addr);
@@ -36,7 +41,18 @@ export async function onConnect() {
  * Disconnect wallet
  */
 export async function disconnect() {
-    await client.signOut();
+    // Prevent re-entrant calls (CSPR.click callback can trigger this again)
+    if (isDisconnecting || !connected) {
+        console.log("Disconnect already in progress or not connected, skipping");
+        return;
+    }
+    isDisconnecting = true;
+    try {
+        await client.signOut();
+    }
+    catch (e) {
+        console.warn("Error during signOut:", e);
+    }
     setConnected(false);
     setAddress(null);
     setBalances(null);
@@ -56,6 +72,10 @@ export async function disconnect() {
     catch (error) {
         console.error("Failed to load market data after disconnect:", error);
         // Market data will show "—" from the error handling in refreshMarketStateOnly
+    }
+    finally {
+        // Reset the guard after everything is done
+        isDisconnecting = false;
     }
 }
 // ---------- Mode Management Functions ----------
