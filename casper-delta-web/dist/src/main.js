@@ -182,12 +182,28 @@ function setupEventListeners() {
     });
 }
 // ---------- Application Entry Point ----------
+/**
+ * Wait for CSPR.click SDK to be available on window.csprclick
+ * This is necessary because the SDK loads with 'defer' and may not be ready immediately
+ */
+async function waitForCsprClick(maxWaitMs = 10000) {
+    const startTime = Date.now();
+    while (!window.csprclick) {
+        if (Date.now() - startTime > maxWaitMs) {
+            throw new Error("CSPR.click SDK failed to load - please refresh the page");
+        }
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    console.log("CSPR.click SDK loaded successfully");
+}
 async function run() {
     try {
         // Initialize theme
         initTheme();
         // Ensure buttons are disabled by default (in case HTML disabled attributes aren't enough)
         enableDisconnectedMode();
+        // Wait for CSPR.click SDK to be available (required for wallet integration)
+        await waitForCsprClick();
         // Initialize with CSPR.click integration
         await initializeClients();
         // Initialize trading info visibility
