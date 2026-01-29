@@ -183,21 +183,26 @@ function setupEventListeners() {
 }
 // ---------- Application Entry Point ----------
 /**
- * Wait for CSPR.click SDK to be available on window.csprclick
- * This is necessary because the SDK loads with 'defer' and may not be ready immediately
+ * Wait for CSPR.click SDK to be fully available and initialized
+ * Since the SDK script loads synchronously before this module, it should already be available.
+ * This function adds a small safety check in case of any timing issues.
  */
-async function waitForCsprClick(maxWaitMs = 10000) {
+async function waitForCsprClick(maxWaitMs = 5000) {
     const startTime = Date.now();
+    // The SDK should already be loaded since it's a synchronous script in <head>
+    // But we'll still check just in case
+    if (window.csprclick) {
+        console.log("CSPR.click SDK already available (loaded synchronously)");
+        return;
+    }
+    console.log("Waiting for CSPR.click SDK...");
     while (!window.csprclick) {
         if (Date.now() - startTime > maxWaitMs) {
             throw new Error("CSPR.click SDK failed to load - please refresh the page");
         }
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 50));
     }
-    // Additional wait to ensure CSPR.click SDK is fully initialized
-    // This is especially important for production environments with network latency
-    await new Promise(resolve => setTimeout(resolve, 500));
-    console.log("CSPR.click SDK loaded and initialized successfully");
+    console.log("CSPR.click SDK loaded");
 }
 async function run() {
     try {
@@ -213,6 +218,9 @@ async function run() {
         initializeTradingInfo();
         // Set up all event listeners
         setupEventListeners();
+        // Enable the connect button now that everything is loaded
+        dom.connectBtn.disabled = false;
+        dom.connectBtn.textContent = "Connect Wallet";
         if (dom.marketStatusSpan)
             dom.marketStatusSpan.textContent = "Ready";
         // Check if user is already connected (restored session)

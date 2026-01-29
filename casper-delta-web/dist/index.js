@@ -105,7 +105,26 @@ app.get('/', (req, res) => {
     });
 });
 // Serve static files (after the custom / handler)
-app.use(express.static(baseDir, { index: false }));
+// Add caching headers for better performance
+app.use(express.static(baseDir, {
+    index: false,
+    maxAge: '5m', // 5 minutes (300 seconds)
+    immutable: true,
+    setHeaders: (res, filePath) => {
+        // Longer cache for WASM files (they're large and versioned)
+        if (filePath.endsWith('.wasm')) {
+            res.setHeader('Cache-Control', 'public, max-age=86400, immutable'); // 1 day
+        }
+        // Longer cache for fonts and images
+        else if (filePath.match(/\.(woff2?|ttf|eot|png|jpg|jpeg|gif|svg|ico)$/)) {
+            res.setHeader('Cache-Control', 'public, max-age=86400, immutable'); // 1 day
+        }
+        // Standard cache for JS/CSS
+        else if (filePath.match(/\.(js|css)$/)) {
+            res.setHeader('Cache-Control', 'public, max-age=300, immutable'); // 5 minutes
+        }
+    }
+}));
 app.listen(port, () => {
     console.log(`🚀 Casper Delta Client is running at http://localhost:${port}`);
 });
