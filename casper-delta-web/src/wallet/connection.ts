@@ -58,22 +58,13 @@ export async function connect(): Promise<void> {
 
 /**
  * Handle successful connection
- * @param publicKeyOverride - Optional public key from native cspr.click event (used when WASM callback doesn't fire)
  */
-export async function onConnect(publicKeyOverride?: string): Promise<void> {
+export async function onConnect(): Promise<void> {
     // Reset disconnect guard when connecting
     isDisconnecting = false;
     
-    // Get public key from override or from account state
-    const addr = publicKeyOverride || account?.publicKey;
-    
-    // Guard: ensure we have a public key
-    if (!addr) {
-        console.warn("onConnect called but no public key available, skipping...");
-        return;
-    }
-    
     setConnected(true);
+    const addr = account.publicKey;
     setAddress(addr);
     dom.addressSpan.textContent = `${addr.slice(0, 5)}...${addr.slice(-5)}`;
     dom.connectBtn.classList.add("hidden");

@@ -15,81 +15,43 @@ export function setOnDisconnectCallback(fn) {
 // ---------- CSPR.click Integration ----------
 /**
  * Set up CSPR.click callbacks
- * According to cspr.click docs, event handlers should be registered after 'csprclick:loaded' event.
- * The caller (main.ts) ensures this function is only called after the SDK is fully loaded.
- * @see https://docs.cspr.click/cspr.click-sdk/javascript/handling-events
  */
 export function setupCsprClickCallbacks() {
-    // Set up the native window.csprclick.on() event handlers (as per cspr.click docs)
-    // These are the primary handlers for cspr.click events, especially for session restoration
-    const csprclick = window.csprclick;
-    if (csprclick && typeof csprclick.on === 'function') {
-        console.log("Setting up CSPR.click event handlers via window.csprclick.on()...");
-        csprclick.on('csprclick:signed_in', async (evt) => {
-            console.log("csprclick:signed_in event received", evt);
-            // Extract public key from native event (uses snake_case: public_key)
-            const publicKey = evt?.account?.public_key || evt?.activeKey || evt?.publicKey;
-            if (publicKey && onConnectFn) {
-                console.log("Calling onConnect with publicKey from native event:", publicKey);
-                await onConnectFn(publicKey);
-            }
-        });
-        csprclick.on('csprclick:switched_account', async (evt) => {
-            console.log("csprclick:switched_account event received", evt);
-            const publicKey = evt?.account?.public_key || evt?.activeKey || evt?.publicKey;
-            if (publicKey && onConnectFn) {
-                console.log("Calling onConnect with publicKey from native event:", publicKey);
-                await onConnectFn(publicKey);
-            }
-        });
-        csprclick.on('csprclick:signed_out', async (evt) => {
-            console.log("csprclick:signed_out event received", evt);
-            if (onDisconnectFn) {
-                onDisconnectFn();
-            }
-        });
-        csprclick.on('csprclick:disconnected', async (evt) => {
-            console.log("csprclick:disconnected event received", evt);
-            if (onDisconnectFn) {
-                onDisconnectFn();
-            }
-        });
-        console.log("CSPR.click event handlers registered via window.csprclick.on()");
+    // Verify CsprClickCallbacks is available
+    if (!CsprClickCallbacks || typeof CsprClickCallbacks.onSignedIn !== 'function') {
+        console.error("CsprClickCallbacks not available - wallet integration may fail");
+        // Retry after a delay
+        setTimeout(() => {
+            console.log("Retrying CSPR.click callback setup...");
+            setupCsprClickCallbacks();
+        }, 1000);
+        return;
     }
-    else {
-        console.warn("window.csprclick.on() not available - using fallback WASM callbacks");
-    }
-    // Also set up the WASM CsprClickCallbacks as a fallback/supplement
-    if (CsprClickCallbacks && typeof CsprClickCallbacks.onSignedIn === 'function') {
-        console.log("Setting up CSPR.click WASM callbacks...");
-        CsprClickCallbacks.onSignedIn(async (accountInfo) => {
-            console.log("CSPR.click WASM onSignedIn callback fired", accountInfo);
-            setAccount(accountInfo);
-            if (onConnectFn) {
-                await onConnectFn();
-            }
-        });
-        CsprClickCallbacks.onSwitchedAccount(async (accountInfo) => {
-            console.log("CSPR.click WASM onSwitchedAccount callback fired", accountInfo);
-            setAccount(accountInfo);
-            if (onConnectFn) {
-                await onConnectFn();
-            }
-        });
-        CsprClickCallbacks.onSignedOut(() => {
-            console.log("CSPR.click WASM onSignedOut callback fired");
-            if (onDisconnectFn) {
-                onDisconnectFn();
-            }
-        });
-        CsprClickCallbacks.onTransactionStatusUpdate((status, result) => {
-            handleCsprClickStatusUpdate(status, result);
-        });
-        console.log("CSPR.click WASM callbacks setup complete");
-    }
-    else {
-        console.warn("CsprClickCallbacks WASM module not available");
-    }
+    console.log("Setting up CSPR.click callbacks...");
+    // Set up the callback handlers
+    CsprClickCallbacks.onSignedIn(async (accountInfo) => {
+        console.log("CSPR.click onSignedIn callback fired", accountInfo);
+        setAccount(accountInfo);
+        if (onConnectFn) {
+            await onConnectFn();
+        }
+    });
+    CsprClickCallbacks.onSwitchedAccount(async (accountInfo) => {
+        console.log("CSPR.click onSwitchedAccount callback fired", accountInfo);
+        setAccount(accountInfo);
+        if (onConnectFn) {
+            await onConnectFn();
+        }
+    });
+    CsprClickCallbacks.onSignedOut(() => {
+        console.log("CSPR.click onSignedOut callback fired");
+        if (onDisconnectFn) {
+            onDisconnectFn();
+        }
+    });
+    CsprClickCallbacks.onTransactionStatusUpdate((status, result) => {
+        handleCsprClickStatusUpdate(status, result);
+    });
     console.log("CSPR.click callbacks setup complete");
 }
 /**

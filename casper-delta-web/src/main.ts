@@ -253,46 +253,30 @@ function setupEventListeners(): void {
 
 // ---------- Application Entry Point ----------
 
-// Track whether CSPR.click has fired its loaded event
-let csprClickLoaded = false;
-
-// Set up the loaded listener immediately
-window.addEventListener('csprclick:loaded', () => {
-    console.log("csprclick:loaded event received");
-    csprClickLoaded = true;
-});
-
 /**
- * Wait for CSPR.click SDK to be fully available and initialized.
- * According to cspr.click docs, we must wait for the 'csprclick:loaded' event
- * before registering event handlers.
- * @see https://docs.cspr.click/cspr.click-sdk/javascript/handling-events
+ * Wait for CSPR.click SDK to be fully available and initialized
+ * Since the SDK script loads synchronously before this module, it should already be available.
+ * This function adds a small safety check in case of any timing issues.
  */
-async function waitForCsprClick(maxWaitMs: number = 10000): Promise<void> {
+async function waitForCsprClick(maxWaitMs: number = 5000): Promise<void> {
     const startTime = Date.now();
     
-    // If the loaded event already fired, we're good
-    if (csprClickLoaded && (window as any).csprclick) {
-        console.log("CSPR.click SDK already loaded");
+    // The SDK should already be loaded since it's a synchronous script in <head>
+    // But we'll still check just in case
+    if ((window as any).csprclick) {
+        console.log("CSPR.click SDK already available (loaded synchronously)");
         return;
     }
     
-    console.log("Waiting for CSPR.click SDK to load...");
-    
-    // Wait for both: window.csprclick to be available AND the loaded event to fire
-    while (!csprClickLoaded || !(window as any).csprclick) {
+    console.log("Waiting for CSPR.click SDK...");
+    while (!(window as any).csprclick) {
         if (Date.now() - startTime > maxWaitMs) {
-            // Check if SDK object exists but event didn't fire (edge case)
-            if ((window as any).csprclick && !csprClickLoaded) {
-                console.warn("CSPR.click SDK object available but loaded event not received - proceeding anyway");
-                break;
-            }
             throw new Error("CSPR.click SDK failed to load - please refresh the page");
         }
         await new Promise(resolve => setTimeout(resolve, 50));
     }
     
-    console.log("CSPR.click SDK fully loaded and ready");
+    console.log("CSPR.click SDK loaded");
 }
 
 async function run(): Promise<void> {
@@ -303,11 +287,10 @@ async function run(): Promise<void> {
         // Ensure buttons are disabled by default (in case HTML disabled attributes aren't enough)
         enableDisconnectedMode();
 
-        // Wait for CSPR.click SDK to be fully loaded (required for wallet integration)
-        // This waits for both the SDK object and the 'csprclick:loaded' event
+        // Wait for CSPR.click SDK to be available (required for wallet integration)
         await waitForCsprClick();
 
-        // Initialize with CSPR.click integration (callbacks are set up here after SDK is loaded)
+        // Initialize with CSPR.click integration
         await initializeClients();
 
         // Initialize trading info visibility
@@ -321,13 +304,6 @@ async function run(): Promise<void> {
         dom.connectBtn.textContent = "Connect Wallet";
 
         if (dom.marketStatusSpan) dom.marketStatusSpan.textContent = "Ready";
-
-        // Refresh market data on startup (shows prices even without wallet connection)
-        try {
-            await refreshAllData();
-        } catch (refreshError) {
-            console.warn("Failed to refresh initial data:", refreshError);
-        }
 
         // Check if user is already connected (restored session)
         // This is important especially after page reload or redirect from wallet
