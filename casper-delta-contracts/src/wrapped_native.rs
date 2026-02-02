@@ -179,8 +179,6 @@ pub mod events {
 
 #[cfg(test)]
 mod tests {
-    use crate::cep18::errors::Error::InsufficientBalance;
-    use crate::cep18::events::{Burn, Mint};
     use crate::wrapped_native::events::{Deposit, Withdrawal};
     use crate::wrapped_native::WrappedNativeTokenHostRef;
     use odra::casper_event_standard::EventInstance;
@@ -189,7 +187,8 @@ mod tests {
     use odra::prelude::*;
     use odra::uints::{ToU256, ToU512};
     use odra::VmError::BalanceExceeded;
-
+    use odra_modules::cep18::errors::Error::InsufficientBalance;
+    use odra_modules::cep18::events::{Burn, Mint};
     use super::WrappedNativeToken;
 
     fn setup() -> (

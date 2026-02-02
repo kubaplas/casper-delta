@@ -1,7 +1,7 @@
 //!
 use std::str::FromStr;
 
-use casper_delta_cli::scenarios::{SetMarketConfig, UpdatePrice};
+use casper_delta_cli::scenarios::{SetMarketConfig, UpdatePrice, UpgradePositionTokens};
 use casper_delta_contracts::config::Config;
 use casper_delta_contracts::faucetable_wcspr::{FaucetableWcspr, FaucetableWcsprInitArgs};
 use casper_delta_contracts::wrapped_native::WrappedNativeToken;
@@ -11,6 +11,7 @@ use odra::host::{HostEnv, InstallConfig};
 use odra::prelude::{Address, Addressable};
 use odra_cli::{cspr, deploy::DeployScript, DeployedContractsContainer, DeployerExt, OdraCli};
 use styks_contracts::styks_price_feed::StyksPriceFeed;
+use casper_delta_cli::{CD_LONG_ID, CD_SHORT_ID};
 // mod scenarios;
 
 const PRICE_FEED_ID: &str = "CSPRUSD";
@@ -53,7 +54,7 @@ impl DeployScript for ContractsDeployScript {
             cspr!(400),
         )?;
 
-        let wcspr_token = FaucetableWcspr::load_or_deploy_with_cfg(
+        let _wcspr_token = FaucetableWcspr::load_or_deploy_with_cfg(
             env,
             None,
             FaucetableWcsprInitArgs {
@@ -66,10 +67,10 @@ impl DeployScript for ContractsDeployScript {
 
         let short_token = PositionToken::load_or_deploy_with_cfg(
             env,
-            Some("CD_SHORT".to_string()),
+            Some(CD_SHORT_ID.to_string()),
             PositionTokenInitArgs {
                 name: "Casper Delta Short Token".to_string(),
-                symbol: "CD_SHORT".to_string(),
+                symbol: CD_SHORT_ID.to_string(),
                 contract_name: "Casper Delta Short Token".to_string(),
                 contract_description: "Short position token used by Casper Delta.".to_string(),
                 decimals: 9,
@@ -89,10 +90,10 @@ impl DeployScript for ContractsDeployScript {
 
         let long_token = PositionToken::load_or_deploy_with_cfg(
             env,
-            Some("CD_LONG".to_string()),
+            Some(CD_LONG_ID.to_string()),
             PositionTokenInitArgs {
                 name: "Casper Delta Long Token".to_string(),
-                symbol: "CD_LONG".to_string(),
+                symbol: CD_LONG_ID.to_string(),
                 contract_name: "Casper Delta Long Token".to_string(),
                 contract_description: "Long position Token used by Casper Delta".to_string(),
                 decimals: 9,
@@ -130,12 +131,13 @@ pub fn main() {
         .deploy(ContractsDeployScript)
         .contract::<StyksPriceFeed>()
         .contract::<Market>()
-        .named_contract::<PositionToken>("CD_LONG".to_string())
-        .named_contract::<PositionToken>("CD_SHORT".to_string())
+        .named_contract::<PositionToken>(CD_LONG_ID.to_string())
+        .named_contract::<PositionToken>(CD_SHORT_ID.to_string())
         .contract::<FaucetableWcspr>()
         .contract::<WrappedNativeToken>()
         .scenario(UpdatePrice)
         .scenario(SetMarketConfig)
+        .scenario(UpgradePositionTokens)
         .build()
         .run();
 }
