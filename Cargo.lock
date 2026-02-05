@@ -367,6 +367,7 @@ name = "casper-delta-cli"
 version = "0.1.0"
 dependencies = [
  "casper-delta-contracts",
+ "casper_trade_contracts",
  "dotenv",
  "odra",
  "odra-cli",
@@ -630,6 +631,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "688a46c29a4e861e42a3e849c1df494b7e83255537b891739181753ee9786c97"
 dependencies = [
  "casper-wasm",
+]
+
+[[package]]
+name = "casper_trade_contracts"
+version = "0.1.0"
+dependencies = [
+ "odra",
+ "odra-build",
+ "odra-modules",
 ]
 
 [[package]]

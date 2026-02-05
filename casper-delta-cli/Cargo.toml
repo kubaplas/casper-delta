@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 casper-delta-contracts = { path = "../casper-delta-contracts" }
+casper_trade_contracts = { path = "../../casper-trade/casper_trade_contracts" }
 styks-contracts = { workspace = true }
 odra = { workspace = true }
 odra-cli = { workspace = true }
@@ -15,4 +16,3 @@ dotenv = "0.15"
 [[bin]]
 name = "casper-delta-cli"
 path = "src/cli.rs"
-

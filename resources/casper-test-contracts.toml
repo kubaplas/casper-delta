@@ -19,3 +19,38 @@ package_hash = "hash-48f1fe2756bd9d66b1102c58e87a9ca6b2e33990571d9904b71c39df724
 name = "PositionToken"
 package_name = "CD_LONG"
 package_hash = "hash-226ef7940f010c57dcc2dd1e7d8c06e126472e28a11319aec8cd8d56bad162cb"
+
+[[contracts]]
+name = "WrappedNativeToken"
+package_name = "WrappedNativeToken"
+package_hash = "hash-3d80df21ba4ee4d66a2a1f60c32570dd5685e4b279f6538162a5fd1314847c1e"
+
+[[contracts]]
+name = "Pair"
+package_name = "CD_LONG-WCSPR LP"
+package_hash = "hash-432ce4b353b70d60d615ca840119944134771e43c7617f35c50f6c5e1814d090"
+
+[[contracts]]
+name = "Pair"
+package_name = "WCSPR-CD_SHORT LP"
+package_hash = "hash-210643b7949976942134f6f011aebb3d613ec07e71e887669495a817783f9509"
+
+[[contracts]]
+name = "Factory"
+package_name = "Factory"
+package_hash = "hash-df1c2e0e3f85f957a39dbeae390cb46a520e41330c5ffdd847fe8ea51bfedcc4"
+
+[[contracts]]
+name = "PairFactory"
+package_name = "PairFactory"
+package_hash = "hash-3ad34714fca45780404b9eaa9c3d4a4cb0996cd3fb429aaf0a1c2153d87efe37"
+
+[[contracts]]
+name = "Router"
+package_name = "Router"
+package_hash = "hash-04a11a367e708c52557930c4e9c1301f4465100d1b1b6d0a62b48d3e32402867"
+
+[[contracts]]
+name = "StyksPriceFeed"
+package_name = "StyksPriceFeed"
+package_hash = "hash-2879d6e927289197aab0101cc033f532fe22e4ab4686e44b5743cb1333031acc"

@@ -1,29 +1,32 @@
 //!
 use std::str::FromStr;
 
-use casper_delta_cli::scenarios::{SetMarketConfig, UpdatePrice, UpgradePositionTokens};
+use casper_delta_cli::scenarios::{Bot, SetMarketConfig, UpdatePrice, UpgradePositionTokens};
+use casper_delta_cli::{CD_LONG_ID, CD_SHORT_ID};
 use casper_delta_contracts::config::Config;
 use casper_delta_contracts::faucetable_wcspr::{FaucetableWcspr, FaucetableWcsprInitArgs};
-use casper_delta_contracts::wrapped_native::WrappedNativeToken;
 use casper_delta_contracts::market::{Market, MarketInitArgs};
 use casper_delta_contracts::position_token::{LongOrShort, PositionToken, PositionTokenInitArgs};
+use casper_delta_contracts::wrapped_native::WrappedNativeToken;
+use casper_trade_contracts::factory::Factory;
+use casper_trade_contracts::pair::{Pair, PairFactory};
+use casper_trade_contracts::router::Router;
 use odra::host::{HostEnv, InstallConfig};
 use odra::prelude::{Address, Addressable};
 use odra_cli::{cspr, deploy::DeployScript, DeployedContractsContainer, DeployerExt, OdraCli};
 use styks_contracts::styks_price_feed::StyksPriceFeed;
-use casper_delta_cli::{CD_LONG_ID, CD_SHORT_ID};
 // mod scenarios;
 
 const PRICE_FEED_ID: &str = "CSPRUSD";
 
 fn load_env_vars() -> (String, String) {
     dotenv::dotenv().ok();
-    
-    let wcspr_token = std::env::var("WCSPR_TOKEN_ADDRESS")
-        .expect("WCSPR_TOKEN_ADDRESS not found in .env file");
-    let price_feed = std::env::var("PRICE_FEED_ADDRESS")
-        .expect("PRICE_FEED_ADDRESS not found in .env file");
-    
+
+    let wcspr_token =
+        std::env::var("WCSPR_TOKEN_ADDRESS").expect("WCSPR_TOKEN_ADDRESS not found in .env file");
+    let price_feed =
+        std::env::var("PRICE_FEED_ADDRESS").expect("PRICE_FEED_ADDRESS not found in .env file");
+
     (price_feed, wcspr_token)
 }
 pub struct ContractsDeployScript;
@@ -34,7 +37,7 @@ impl DeployScript for ContractsDeployScript {
         container: &mut DeployedContractsContainer,
     ) -> Result<(), odra_cli::deploy::Error> {
         let (price_feed_str, wcspr_token_str) = load_env_vars();
-        
+
         let price_feed_address = Address::from_str(&price_feed_str)
             .expect("Invalid PRICE_FEED_ADDRESS format in .env file");
 
@@ -135,9 +138,15 @@ pub fn main() {
         .named_contract::<PositionToken>(CD_SHORT_ID.to_string())
         .contract::<FaucetableWcspr>()
         .contract::<WrappedNativeToken>()
+        .contract::<Router>()
+        .contract::<Factory>()
+        .contract::<PairFactory>()
+        .named_contract::<Pair>("CD_LONG-WCSPR LP".to_string())
+        .named_contract::<Pair>("WCSPR-CD_SHORT LP".to_string())
         .scenario(UpdatePrice)
         .scenario(SetMarketConfig)
         .scenario(UpgradePositionTokens)
+        .scenario(Bot)
         .build()
         .run();
 }
