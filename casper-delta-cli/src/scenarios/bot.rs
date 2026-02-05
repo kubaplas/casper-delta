@@ -360,7 +360,7 @@ enum Path {
 
 impl Path {
     fn calc(data: &PriceData) -> Self {
-        let diff_threshold = 2.5f64;
+        let diff_threshold = 3.3f64;
         let long_diff = data.long_diff.abs();
         let short_diff = data.short_diff.abs();
         let long_price_diff = data.long_price - data.long_fair_price;
@@ -632,14 +632,5 @@ mod tests {
             short_fair_price,
         );
         assert_eq!(Path::calc(&data), Path::Empty);
-    }
-
-    #[test]
-    fn aa() {
-        let amounts = vec![1, 3];
-        if let [amount_in, .., amount_out] = amounts.as_slice() {
-            println!("{:?}", amount_in);
-            println!("{:?}", amount_out);
-        }
     }
 }
