@@ -1,7 +1,9 @@
 //!
 use std::str::FromStr;
 
-use casper_delta_cli::scenarios::{Bot, SetMarketConfig, UpdatePrice, UpgradePositionTokens};
+use casper_delta_cli::scenarios::{
+    Bot, BotSetup, SetMarketConfig, UpdatePrice, UpgradePositionTokens,
+};
 use casper_delta_cli::{CD_LONG_ID, CD_SHORT_ID};
 use casper_delta_contracts::config::Config;
 use casper_delta_contracts::faucetable_wcspr::{FaucetableWcspr, FaucetableWcsprInitArgs};
@@ -146,6 +148,7 @@ pub fn main() {
         .scenario(UpdatePrice)
         .scenario(SetMarketConfig)
         .scenario(UpgradePositionTokens)
+        .scenario(BotSetup)
         .scenario(Bot)
         .build()
         .run();

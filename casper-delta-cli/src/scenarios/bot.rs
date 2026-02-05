@@ -19,6 +19,37 @@ use odra_cli::{
     ContractProvider, DeployedContractsContainer,
 };
 
+pub struct BotSetup;
+
+impl ScenarioMetadata for BotSetup {
+    const NAME: &'static str = "BotSetup";
+    const DESCRIPTION: &'static str = "Sets up the environment for the bot.";
+}
+
+impl Scenario for BotSetup {
+    fn run(
+        &self,
+        env: &HostEnv,
+        container: &DeployedContractsContainer,
+        _args: Args,
+    ) -> Result<(), Error> {
+        let contracts = ContractRefs::new(env, container);
+        let cspr_trade_address = contracts.router()?.address();
+        let cspr_delta_address = contracts.market()?.address();
+        env.set_gas(cspr!(2.5));
+
+        // Casper trade must be able to spend wcspr, long and short tokens
+        contracts.wcspr()?.approve(&cspr_trade_address, &U256::MAX);
+        contracts.long()?.approve(&cspr_trade_address, &U256::MAX);
+        contracts.short()?.approve(&cspr_trade_address, &U256::MAX);
+
+        // Casper delta must be able to spend wcspr
+        contracts.wcspr()?.approve(&cspr_delta_address, &U256::MAX);
+
+        Ok(())
+    }
+}
+
 pub struct Bot;
 
 impl ScenarioMetadata for Bot {
