@@ -70,12 +70,13 @@ impl Scenario for Bot {
         loop {
             let price_data = self.get_price_data(&calc)?;
             let path = Path::calc(&price_data);
+            println!("{price_data}");
+
             if path == Path::Empty {
                 println!("No arbitrage path found");
                 sleep(Duration::from_secs(180));
                 continue;
             }
-            println!("{price_data}");
             println!("Path: {:?}", path);
 
             let amount_in = price_data.get_amount_in(path);
