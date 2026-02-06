@@ -10,9 +10,9 @@ use casper_trade_contracts::{
     pair::{Pair, PairHostRef},
     router::{Router, RouterHostRef},
 };
-use odra::casper_types::U256;
 use odra::host::HostEnv;
 use odra::prelude::*;
+use odra::{casper_types::U256, schema::casper_contract_schema::NamedCLType};
 use odra_cli::{
     cspr,
     scenario::{Args, Error, Scenario, ScenarioMetadata},
@@ -58,14 +58,27 @@ impl ScenarioMetadata for Bot {
 }
 
 impl Scenario for Bot {
+    fn args(&self) -> Vec<odra_cli::CommandArg> {
+        vec![odra_cli::CommandArg::new(
+            "dry-run",
+            "Dry run the bot",
+            NamedCLType::Bool,
+        )]
+    }
+
     fn run(
         &self,
         env: &HostEnv,
         container: &DeployedContractsContainer,
-        _args: Args,
+        args: Args,
     ) -> Result<(), Error> {
         let contracts = ContractRefs::new(env, container);
         let calc = PriceCalculator::new(&contracts);
+
+        let dry_run = args.get_single("dry-run").unwrap_or(false);
+        if dry_run {
+            println!("Dry run mode enabled");
+        }
 
         loop {
             let price_data = self.get_price_data(&calc)?;
@@ -84,14 +97,17 @@ impl Scenario for Bot {
                 .get_swap_amounts(&contracts, path, amount_in)
                 .as_deref()
             {
-                env.set_gas(cspr!(13));
-                contracts.router()?.swap_tokens_for_exact_tokens(
-                    *amount_out,
-                    *amount_in,
-                    path.build(&contracts)?,
-                    env.caller(),
-                    u64::MAX,
-                );
+                if !dry_run {
+                    env.set_gas(cspr!(13));
+                    contracts.router()?.swap_tokens_for_exact_tokens(
+                        *amount_out,
+                        *amount_in,
+                        path.build(&contracts)?,
+                        env.caller(),
+                        u64::MAX,
+                    );
+                }
+
                 Self::print_gains_in_cspr(*amount_in, *amount_out, price_data, path);
                 println!("Arbitrage swap completed");
                 println!("Sleeping...");
@@ -241,19 +257,19 @@ impl Bot {
         let average_transaction_cost = 12.5f64;
         let (amount_in_cspr, amount_out_cspr) = match path {
             Path::LongWcsprShort => (
-                amount_in.as_u64() as f64 * price_data.long_price,
+                amount_in.as_u64() as f64 * price_data.long_fair_price,
                 amount_out.as_u64() as f64 * price_data.short_fair_price,
             ),
             Path::ShortWcsprLong => (
-                amount_in.as_u64() as f64 * price_data.short_price,
+                amount_in.as_u64() as f64 * price_data.short_fair_price,
                 amount_out.as_u64() as f64 * price_data.long_fair_price,
             ),
             Path::LongWcspr => (
-                amount_in.as_u64() as f64 * price_data.long_price,
+                amount_in.as_u64() as f64 * price_data.long_fair_price,
                 amount_out.as_u64() as f64,
             ),
             Path::ShortWcspr => (
-                amount_in.as_u64() as f64 * price_data.short_price,
+                amount_in.as_u64() as f64 * price_data.short_fair_price,
                 amount_out.as_u64() as f64,
             ),
             Path::WcsprLong => (
@@ -266,9 +282,8 @@ impl Bot {
             ),
             Path::Empty => return,
         };
-
         let gain_cspr =
-            (amount_out_cspr - amount_in_cspr) / 1_000_000_000_000.0f64 - average_transaction_cost;
+            (amount_out_cspr - amount_in_cspr) / 1_000_000_000.0f64 - average_transaction_cost;
         let gain_percent = (gain_cspr / amount_in_cspr) * 100.0f64;
         println!("Gain: {gain_cspr:.2} CSPR");
         println!("Gain percent: {gain_percent:.2}%");
