@@ -99,11 +99,21 @@ impl Scenario for Bot {
             {
                 if !dry_run {
                     self.set_gas(env, path);
-                    self.swap(&contracts, path, *amount_in, *amount_out, env.caller())?;
+                    let caller = env.caller();
+                    let (actual_amount_in, actual_amount_out) =
+                        self.swap(&contracts, path, *amount_in, *amount_out, caller)?;
                     println!("Arbitrage swap completed");
+                    Self::print_gains_in_cspr(
+                        actual_amount_in,
+                        actual_amount_out,
+                        price_data,
+                        path,
+                    );
+                } else {
+                    println!("Dry run mode - no swap completed");
+                    Self::print_gains_in_cspr(*amount_in, *amount_out, price_data, path);
                 }
 
-                Self::print_gains_in_cspr(*amount_in, *amount_out, price_data, path);
                 println!("Sleeping for 3 minutes...\n");
                 sleep(Duration::from_secs(180));
             } else {
@@ -225,15 +235,21 @@ impl Bot {
         amount_in: U256,
         amount_out: U256,
         recipient: Address,
-    ) -> Result<(), Error> {
-        refs.router()?.swap_tokens_for_exact_tokens(
+    ) -> Result<(U256, U256), Error> {
+        let result = refs.router()?.swap_tokens_for_exact_tokens(
             amount_out,
             amount_in,
             path.build(refs)?,
             recipient,
             u64::MAX,
         );
-        Ok(())
+        if let [amount_in, .., amount_out] = result.as_slice() {
+            Ok((*amount_in, *amount_out))
+        } else {
+            Err(Error::OdraError {
+                message: "Invalid swap result".to_string(),
+            })
+        }
     }
 
     fn set_gas(&self, env: &HostEnv, path: Path) {
