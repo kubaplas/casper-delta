@@ -86,11 +86,11 @@ impl Scenario for Bot {
             println!("{price_data}");
 
             if path == Path::Empty {
-                println!("No arbitrage path found");
+                println!("No arbitrage path found\n");
                 sleep(Duration::from_secs(180));
                 continue;
             }
-            println!("Path: {:?}", path);
+            println!("Swap path: {:?}", path);
 
             let amount_in = price_data.get_amount_in(path);
             if let Ok([amount_in, .., amount_out]) = self
@@ -98,22 +98,16 @@ impl Scenario for Bot {
                 .as_deref()
             {
                 if !dry_run {
-                    env.set_gas(cspr!(13));
-                    contracts.router()?.swap_tokens_for_exact_tokens(
-                        *amount_out,
-                        *amount_in,
-                        path.build(&contracts)?,
-                        env.caller(),
-                        u64::MAX,
-                    );
+                    self.set_gas(env, path);
+                    self.swap(&contracts, path, *amount_in, *amount_out, env.caller())?;
+                    println!("Arbitrage swap completed");
                 }
 
                 Self::print_gains_in_cspr(*amount_in, *amount_out, price_data, path);
-                println!("Arbitrage swap completed");
-                println!("Sleeping...");
+                println!("Sleeping for 3 minutes...\n");
                 sleep(Duration::from_secs(180));
             } else {
-                println!("No valid swap amounts found");
+                println!("No valid swap amounts found\n");
                 sleep(Duration::from_secs(180));
                 continue;
             }
@@ -224,6 +218,32 @@ impl<'a> PriceCalculator<'a> {
 }
 
 impl Bot {
+    fn swap(
+        &self,
+        refs: &ContractRefs,
+        path: Path,
+        amount_in: U256,
+        amount_out: U256,
+        recipient: Address,
+    ) -> Result<(), Error> {
+        refs.router()?.swap_tokens_for_exact_tokens(
+            amount_out,
+            amount_in,
+            path.build(refs)?,
+            recipient,
+            u64::MAX,
+        );
+        Ok(())
+    }
+
+    fn set_gas(&self, env: &HostEnv, path: Path) {
+        if path.is_multi_hop() {
+            env.set_gas(cspr!(13));
+        } else {
+            env.set_gas(cspr!(8));
+        }
+    }
+
     fn get_price_data(&self, calc: &PriceCalculator) -> Result<PriceData, Error> {
         let (long_price, short_price) = calc.casper_trade_prices()?;
         let (long_fair_price, short_fair_price, wcspr_price) = calc.fair_prices()?;
@@ -468,6 +488,10 @@ impl Path {
             ]),
             Path::Empty => Ok(vec![]),
         }
+    }
+
+    fn is_multi_hop(&self) -> bool {
+        matches!(self, Path::LongWcsprShort | Path::ShortWcsprLong)
     }
 }
 
