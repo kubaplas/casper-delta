@@ -114,7 +114,6 @@ impl Scenario for Bot {
                     continue;
                 }
 
-                self.set_gas(env, path);
                 let (actual_amount_in, actual_amount_out) =
                     self.swap(env, &contracts, path, *amount_in, *amount_out, caller)?;
                 Self::print_gains_in_cspr(actual_amount_in, actual_amount_out, &price_data, path);
@@ -138,7 +137,11 @@ impl Bot {
     ) -> Result<(U256, U256), Error> {
         let asset_manager = AssetManager::new(env, refs);
         asset_manager.ensure_funds(path, amount_in)?;
-
+        if path.is_multi_hop() {
+            env.set_gas(cspr!(13));
+        } else {
+            env.set_gas(cspr!(8));
+        }
         let result = refs.router()?.swap_tokens_for_exact_tokens(
             amount_out,
             amount_in,
@@ -155,14 +158,6 @@ impl Bot {
             Err(Error::OdraError {
                 message: "Invalid swap result".to_string(),
             })
-        }
-    }
-
-    fn set_gas(&self, env: &HostEnv, path: Path) {
-        if path.is_multi_hop() {
-            env.set_gas(cspr!(13));
-        } else {
-            env.set_gas(cspr!(8));
         }
     }
 

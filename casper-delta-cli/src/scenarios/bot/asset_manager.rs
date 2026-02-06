@@ -7,7 +7,7 @@ use odra_cli::{cspr, scenario::Error};
 
 use crate::scenarios::bot::{path::Path, ContractRefs};
 
-const TOP_UP_AMOUNT: u64 = 2_000_000_000;
+const TOP_UP_AMOUNT: u64 = 2_000_000_000_000; // 2_000 cspr
 
 pub struct AssetManager<'a> {
     env: &'a HostEnv,
@@ -51,42 +51,36 @@ impl<'a> AssetManager<'a> {
         Ok(())
     }
 
-    fn top_up_longs_if_required(&self, amount_in: U256) -> Result<(), Error> {
+    fn top_up_longs_if_required(&self, required_balance: U256) -> Result<(), Error> {
         let me = self.env.caller();
         let long_token = self.refs.long()?;
         let wcspr_token = self.refs.wcspr()?;
         let long_balance = long_token.balance_of(&me);
-        let required_balance = amount_in;
         if long_balance < required_balance {
-            odra_cli::log("Toping up longs");
+            odra_cli::log("Not enough longs, topping up");
             if wcspr_token.balance_of(&me) < TOP_UP_AMOUNT.into() {
-                odra_cli::log("Not enough wcspr to top up longs");
-                return Err(Error::OdraError {
-                    message: "Not enough wcspr to top up longs".to_string(),
-                });
+                odra_cli::log("Not enough wcspr to top up longs, wrapping cspr");
+                self.wrap_cspr_if_required()?;
             }
-            self.env.set_gas(cspr!(2.5));
+            self.env.set_gas(cspr!(4));
             self.refs.market()?.try_deposit_long(TOP_UP_AMOUNT.into())?;
         }
 
         Ok(())
     }
 
-    fn top_up_shorts_if_required(&self, amount_in: U256) -> Result<(), Error> {
+    fn top_up_shorts_if_required(&self, required_balance: U256) -> Result<(), Error> {
         let me = self.env.caller();
         let short_token = self.refs.short()?;
         let wcspr_token = self.refs.wcspr()?;
         let short_balance = short_token.balance_of(&me);
-        let required_balance = amount_in;
         if short_balance < required_balance {
             odra_cli::log("Toping up shorts");
             if wcspr_token.balance_of(&me) < TOP_UP_AMOUNT.into() {
-                odra_cli::log("Not enough wcspr to top up shorts");
-                return Err(Error::OdraError {
-                    message: "Not enough wcspr to top up shorts".to_string(),
-                });
+                odra_cli::log("Not enough wcspr to top up shorts, wrapping cspr");
+                self.wrap_cspr_if_required()?;
             }
-            self.env.set_gas(cspr!(2.5));
+            self.env.set_gas(cspr!(4));
             self.refs
                 .market()?
                 .try_deposit_short(TOP_UP_AMOUNT.into())?;
@@ -106,7 +100,7 @@ impl<'a> AssetManager<'a> {
         self.refs
             .wcspr()?
             .with_tokens(TOP_UP_AMOUNT.into())
-            .deposit();
+            .try_deposit()?;
 
         Ok(())
     }
