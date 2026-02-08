@@ -1,7 +1,7 @@
 use odra::{casper_types::U256, prelude::Addressable};
 use odra_cli::scenario::Error;
 
-use crate::scenarios::bot::ContractRefs;
+use crate::scenarios::bot::{contracts::ContractRefs, data::PriceData, path::Path};
 
 pub(super) struct PriceCalculator<'a> {
     contracts: &'a ContractRefs<'a>,
@@ -39,5 +39,42 @@ impl<'a> PriceCalculator<'a> {
 
     fn calculate_price(amount0: U256, amount1: U256) -> f64 {
         (amount0 * U256::from(1_000_000) / amount1).as_u64() as f64 / 1000_000.0f64
+    }
+
+    pub(super) fn calc_gains_in_cspr(
+        amount_in: U256,
+        amount_out: U256,
+        price_data: &PriceData,
+        path: Path,
+    ) -> f64 {
+        let average_transaction_cost = if path.is_multi_hop() { 12.5f64 } else { 7.0f64 };
+        let (amount_in_cspr, amount_out_cspr) = match path {
+            Path::LongWcsprShort => (
+                amount_in.as_u64() as f64 * price_data.long_fair_price,
+                amount_out.as_u64() as f64 * price_data.short_fair_price,
+            ),
+            Path::ShortWcsprLong => (
+                amount_in.as_u64() as f64 * price_data.short_fair_price,
+                amount_out.as_u64() as f64 * price_data.long_fair_price,
+            ),
+            Path::LongWcspr => (
+                amount_in.as_u64() as f64 * price_data.long_fair_price,
+                amount_out.as_u64() as f64,
+            ),
+            Path::ShortWcspr => (
+                amount_in.as_u64() as f64 * price_data.short_fair_price,
+                amount_out.as_u64() as f64,
+            ),
+            Path::WcsprLong => (
+                amount_in.as_u64() as f64,
+                amount_out.as_u64() as f64 * price_data.long_fair_price,
+            ),
+            Path::WcsprShort => (
+                amount_in.as_u64() as f64,
+                amount_out.as_u64() as f64 * price_data.short_fair_price,
+            ),
+            Path::Empty => return 0.0f64,
+        };
+        (amount_out_cspr - amount_in_cspr) / 1_000_000_000.0f64 - average_transaction_cost
     }
 }

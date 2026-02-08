@@ -14,6 +14,10 @@ serde_json = "1.0.140"
 dotenv = "0.15"
 chrono = "0.4"
 
+[dev-dependencies]
+odra-test = { workspace = true }
+mockall = "0.14.0"
+
 [[bin]]
 name = "casper-delta-cli"
 path = "src/cli.rs"

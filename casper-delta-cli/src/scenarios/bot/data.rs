@@ -4,6 +4,8 @@ use odra::casper_types::U256;
 
 use crate::scenarios::bot::path::Path;
 
+const DECIMAL_PLACES: u32 = 9;
+
 #[derive(Debug)]
 pub struct PriceData {
     pub long_price: f64,
@@ -47,18 +49,18 @@ impl PriceData {
     }
 
     fn shorts_amount_per_usd(&self) -> U256 {
-        U256::from(self.shorts_for_one_usd * 1_000_000_000)
+        U256::from(self.shorts_for_one_usd * 10u64.pow(DECIMAL_PLACES))
     }
 
     fn longs_amount_per_usd(&self) -> U256 {
-        U256::from(self.longs_for_one_usd * 1_000_000_000)
+        U256::from(self.longs_for_one_usd * 10u64.pow(DECIMAL_PLACES))
     }
 
     fn wcspr_amount_per_usd(&self) -> U256 {
-        U256::from(self.wcspr_for_one_usd * 1_000_000_000_000)
+        U256::from(self.wcspr_for_one_usd * 10u64.pow(DECIMAL_PLACES))
     }
 
-    pub fn get_amount_in(&self, path: Path) -> U256 {
+    pub fn amount_per_one_usd(&self, path: Path) -> U256 {
         match path {
             Path::LongWcsprShort => self.longs_amount_per_usd(),
             Path::ShortWcsprLong => self.shorts_amount_per_usd(),

@@ -1,9 +1,9 @@
 use odra::prelude::{Address, Addressable};
 use odra_cli::scenario::Error;
 
-use crate::scenarios::bot::{data::PriceData, ContractRefs};
+use crate::scenarios::bot::{contracts::ContractRefs, data::PriceData};
 
-const DIFF_THRESHOLD: f64 = 3.3f64;
+const DIFF_THRESHOLD: f64 = 2.5f64;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Path {
