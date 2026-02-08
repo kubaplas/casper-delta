@@ -91,6 +91,11 @@ impl Scenario for Bot {
         asset_manager.print_balances()?;
 
         loop {
+            odra_cli::log(&format!(
+                "Current time: {}",
+                chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
+            ));
+
             let price_data = self.get_price_data(&calc)?;
             odra_cli::log(&price_data);
 

@@ -26,8 +26,8 @@ impl PriceData {
         long_fair_price: f64,
         short_fair_price: f64,
     ) -> Self {
-        let long_diff = ((long_price / long_fair_price) * 100.0f64).floor() - 100.0f64;
-        let short_diff = ((short_price / short_fair_price) * 100.0f64).floor() - 100.0f64;
+        let long_diff = (long_price / long_fair_price) * 100.0f64 - 100.0f64;
+        let short_diff = (short_price / short_fair_price) * 100.0f64 - 100.0f64;
         let longs_for_one_usd = (1.0f64 / wcspr_price / long_fair_price) as u64;
         let shorts_for_one_usd = (1.0f64 / wcspr_price / short_fair_price) as u64;
         let wcspr_for_one_usd = (1.0f64 / wcspr_price) as u64;
@@ -84,14 +84,18 @@ impl Display for PriceData {
             self.short_fair_price
         )?;
         if self.long_diff > 0.0f64 {
-            write!(f, "Long diff overvalued by {}%\n", self.long_diff)?;
+            write!(f, "Long diff overvalued by {:.2}%\n", self.long_diff)?;
         } else {
-            write!(f, "Long diff undervalued by {}%\n", self.long_diff)?;
+            write!(f, "Long diff undervalued by {:.2}%\n", self.long_diff.abs())?;
         }
         if self.short_diff > 0.0f64 {
-            write!(f, "Short diff overvalued by {}%\n", self.short_diff)?;
+            write!(f, "Short diff overvalued by {:.2}%\n", self.short_diff)?;
         } else {
-            write!(f, "Short diff undervalued by {}%\n", self.short_diff)?;
+            write!(
+                f,
+                "Short diff undervalued by {:.2}%\n",
+                self.short_diff.abs()
+            )?;
         }
         write!(
             f,

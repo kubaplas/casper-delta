@@ -368,6 +368,7 @@ version = "0.1.0"
 dependencies = [
  "casper-delta-contracts",
  "casper_trade_contracts",
+ "chrono",
  "dotenv",
  "odra",
  "odra-cli",

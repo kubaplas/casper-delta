@@ -3,6 +3,8 @@ use odra_cli::scenario::Error;
 
 use crate::scenarios::bot::{data::PriceData, ContractRefs};
 
+const DIFF_THRESHOLD: f64 = 3.3f64;
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Path {
     LongWcsprShort,
@@ -22,7 +24,6 @@ impl From<&PriceData> for Path {
 
 impl Path {
     fn calc(data: &PriceData) -> Self {
-        let diff_threshold = 3.3f64;
         let long_diff = data.long_diff.abs();
         let short_diff = data.short_diff.abs();
         let long_price_diff = data.long_price - data.long_fair_price;
@@ -30,23 +31,23 @@ impl Path {
 
         if long_price_diff > 0.0f64
             && short_price_diff < 0.0f64
-            && long_diff > diff_threshold
-            && short_diff > diff_threshold
+            && long_diff > DIFF_THRESHOLD
+            && short_diff > DIFF_THRESHOLD
         {
             Path::LongWcsprShort
         } else if short_price_diff > 0.0f64
             && long_price_diff < 0.0f64
-            && long_diff > diff_threshold
-            && short_diff > diff_threshold
+            && long_diff > DIFF_THRESHOLD
+            && short_diff > DIFF_THRESHOLD
         {
             Path::ShortWcsprLong
-        } else if long_price_diff > 0.0f64 && long_diff > diff_threshold {
+        } else if long_price_diff > 0.0f64 && long_diff > DIFF_THRESHOLD {
             Path::LongWcspr
-        } else if short_price_diff > 0.0f64 && short_diff > diff_threshold {
+        } else if short_price_diff > 0.0f64 && short_diff > DIFF_THRESHOLD {
             Path::ShortWcspr
-        } else if long_price_diff < 0.0f64 && long_diff > diff_threshold {
+        } else if long_price_diff < 0.0f64 && long_diff > DIFF_THRESHOLD {
             Path::WcsprLong
-        } else if short_price_diff < 0.0f64 && short_diff > diff_threshold {
+        } else if short_price_diff < 0.0f64 && short_diff > DIFF_THRESHOLD {
             Path::WcsprShort
         } else {
             Path::Empty
