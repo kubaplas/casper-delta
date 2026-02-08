@@ -45,6 +45,21 @@ impl<'a> RealTokenManager<'a> {
     pub fn new(env: &'a HostEnv, refs: &'a ContractRefs<'a>) -> Self {
         Self { env, refs }
     }
+
+    pub fn wcspr_allowance(&self, spender: &Address) -> Result<U256, Error> {
+        let me = self.env.caller();
+        Ok(self.refs.wcspr()?.allowance(&me, spender))
+    }
+
+    pub fn long_allowance(&self, spender: &Address) -> Result<U256, Error> {
+        let me = self.env.caller();
+        Ok(self.refs.long()?.allowance(&me, spender))
+    }
+
+    pub fn short_allowance(&self, spender: &Address) -> Result<U256, Error> {
+        let me = self.env.caller();
+        Ok(self.refs.short()?.allowance(&me, spender))
+    }
 }
 
 impl TokenManager for RealTokenManager<'_> {
@@ -52,14 +67,21 @@ impl TokenManager for RealTokenManager<'_> {
         self.env.set_gas(cspr!(4));
         let cspr_trade_address = self.refs.router()?.address();
         let cspr_delta_address = self.refs.market()?.address();
-
         // Casper trade must be able to spend wcspr, long and short tokens
-        self.refs.wcspr()?.approve(&cspr_trade_address, &U256::MAX);
-        self.refs.long()?.approve(&cspr_trade_address, &U256::MAX);
-        self.refs.short()?.approve(&cspr_trade_address, &U256::MAX);
+        if self.wcspr_allowance(&cspr_trade_address)?.is_zero() {
+            self.refs.wcspr()?.approve(&cspr_trade_address, &U256::MAX);
+        }
+        if self.long_allowance(&cspr_trade_address)?.is_zero() {
+            self.refs.long()?.approve(&cspr_trade_address, &U256::MAX);
+        }
+        if self.short_allowance(&cspr_trade_address)?.is_zero() {
+            self.refs.short()?.approve(&cspr_trade_address, &U256::MAX);
+        }
 
         // Casper delta must be able to spend wcspr
-        self.refs.wcspr()?.approve(&cspr_delta_address, &U256::MAX);
+        if self.wcspr_allowance(&cspr_delta_address)?.is_zero() {
+            self.refs.wcspr()?.approve(&cspr_delta_address, &U256::MAX);
+        }
         Ok(())
     }
 
