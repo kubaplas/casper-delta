@@ -136,17 +136,10 @@ impl Bot {
         recipient: Address,
     ) -> Result<(U256, U256), Error> {
         println!("Preparing swap...");
-        let result = asset_manager.swap(path, amount_in, amount_out, recipient)?;
+        asset_manager.swap(path, amount_in, amount_out, recipient)?;
         odra_cli::log("Arbitrage swap completed");
         asset_manager.print_balances()?;
-
-        if let [amount_in, .., amount_out] = result.as_slice() {
-            Ok((*amount_in, *amount_out))
-        } else {
-            Err(Error::OdraError {
-                message: "Invalid swap result".to_string(),
-            })
-        }
+        Ok((amount_in, amount_out))
     }
 
     fn get_price_data(&self, calc: &PriceCalculator) -> Result<PriceData, Error> {

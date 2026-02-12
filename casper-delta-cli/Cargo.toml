@@ -18,15 +18,6 @@ chrono = "0.4"
 odra-test = { workspace = true }
 mockall = "0.14.0"
 
-[patch.crates-io]
-odra = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-return" }
-odra-cli = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-return" }
-odra-core = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-return" }
-odra-modules = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-return" }
-odra-test = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-return" }
-odra-wasm-client = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-return" }
-odra-wasm-client-builder = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-return" }
-
 [[bin]]
 name = "casper-delta-cli"
 path = "src/cli.rs"

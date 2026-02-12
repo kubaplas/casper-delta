@@ -73,3 +73,12 @@ strip = true
 
 [profile.dev.package."*"]
 opt-level = 3
+
+[patch.crates-io]
+odra = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-ret" }
+odra-cli = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-ret" }
+odra-core = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-ret" }
+odra-modules = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-ret" }
+odra-test = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-ret" }
+odra-wasm-client = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-ret" }
+odra-wasm-client-builder = { git = "https://github.com/odradev/odra.git", branch = "feature/mut-no-ret" }

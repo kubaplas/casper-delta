@@ -74,6 +74,8 @@ cli-on-nctl *args="":
 
     rm -rf examples/.node-keys
 
+build-bot:
+    cargo build --bin casper-delta-cli --release
 #plots:
 #    cargo run -p casper-delta-charts
 #

@@ -33,7 +33,7 @@ pub trait TokenManager {
         amount_in: U256,
         amount_out: U256,
         recipient: Address,
-    ) -> Result<Vec<U256>, Error>;
+    ) -> Result<(), Error>;
 }
 
 pub struct RealTokenManager<'a> {
@@ -114,20 +114,21 @@ impl TokenManager for RealTokenManager<'_> {
         amount_in: U256,
         amount_out: U256,
         recipient: Address,
-    ) -> Result<Vec<U256>, Error> {
+    ) -> Result<(), Error> {
         if path.is_multi_hop() {
             self.env.set_gas(cspr!(13));
         } else {
             self.env.set_gas(cspr!(8));
         }
-        let result = self.refs.router()?.swap_tokens_for_exact_tokens(
+        self.refs.router()?.
+            swap_tokens_for_exact_tokens_no_ret(
             amount_out,
             amount_in,
             path.build(self.refs)?,
             recipient,
             u64::MAX,
         );
-        Ok(result)
+        Ok(())
     }
 }
 
@@ -189,12 +190,11 @@ impl<'a> AssetManager<'a> {
         amount_in: U256,
         amount_out: U256,
         recipient: Address,
-    ) -> Result<Vec<U256>, Error> {
+    ) -> Result<(), Error> {
         self.ensure_funds(path, amount_in)?;
-        let result = self
-            .token_manager
+        self.token_manager
             .swap(path, amount_in, amount_out, recipient)?;
-        Ok(result)
+        Ok(())
     }
 
     pub fn print_balances(&self) -> Result<(), Error> {
@@ -321,7 +321,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(100), U256::from(50)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -332,7 +332,6 @@ mod tests {
         );
 
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), vec![U256::from(100), U256::from(50)]);
     }
 
     #[test]
@@ -345,7 +344,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(100), U256::from(75)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -356,7 +355,6 @@ mod tests {
         );
 
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), vec![U256::from(100), U256::from(75)]);
     }
 
     // ========== Single-Hop Path Tests: Long -> WCSPR ==========
@@ -371,7 +369,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(200)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -394,7 +392,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::zero()]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(Path::LongWcspr, U256::zero(), U256::zero(), env.caller());
@@ -414,7 +412,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(300)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -439,7 +437,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(1000)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -464,7 +462,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(150)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -489,7 +487,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(250)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -540,7 +538,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(100)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -565,7 +563,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(1_000_000_000_000u64)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -607,7 +605,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(100)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -647,7 +645,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(100)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -687,7 +685,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(150)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
@@ -738,7 +736,7 @@ mod tests {
         token_manager
             .expect_swap()
             .times(1)
-            .return_once(|_, _, _, _| Ok(vec![U256::from(100)]));
+            .return_once(|_, _, _, _| Ok(()));
 
         let asset_manager = AssetManager::new(&refs, &token_manager);
         let result = asset_manager.swap(
