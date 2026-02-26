@@ -19,7 +19,7 @@ import * as dom from "./dom.js";
 
 // UI utilities and modals
 import { sanitizeNumericInput } from "./ui/utils.js";
-import { initializeTradingInfo, showTradingInfo, closeTradingInfo, clearError } from "./ui/modals.js";
+import { initializeTradingInfo, showTradingInfo, closeTradingInfo, clearError, showError } from "./ui/modals.js";
 import { initTheme, toggleTheme } from "./ui/theme.js";
 import { MarketChart } from "./ui/Chart.js";
 
@@ -30,6 +30,10 @@ import {
     setWcspr,
     setLongToken,
     setShortToken,
+    setConnected,
+    setAddress,
+    client as stateClient,
+    address as stateAddress,
 } from "./data/state.js";
 
 // Data fetching
@@ -45,10 +49,10 @@ import {
     withdrawLong,
     depositShort,
     withdrawShort,
-    updatePrice,
     requestFaucet,
     wrapCspr,
     unwrapCspr,
+    setUnwrapMax,
 } from "./trading/operations.js";
 
 import { approveMarket } from "./trading/approval.js";
@@ -62,15 +66,7 @@ import {
 
 // Wallet connection
 import { connect, disconnect, onConnect, enableDisconnectedMode } from "./wallet/connection.js";
-
-// ---------- Position Closing State Initialization ----------
-function initializePositionClosingState(): void {
-    // Initialize position closing amounts after WASM is loaded
-    import("./data/state.js").then(({ setCurrentLongCloseAmount, setCurrentShortCloseAmount }) => {
-        setCurrentLongCloseAmount(U256.fromNumber(0));
-        setCurrentShortCloseAmount(U256.fromNumber(0));
-    });
-}
+import { setCurrentLongCloseAmount, setCurrentShortCloseAmount } from "./data/state.js";
 
 // ---------- Client Initialization ----------
 async function initializeClients(): Promise<void> {
@@ -85,14 +81,11 @@ async function initializeClients(): Promise<void> {
 
     // Set onConnect and disconnect callbacks
     setOnConnectCallback(onConnect);
-    setOnDisconnectCallback(() => {
-        import("./wallet/connection.js").then(({ disconnect }) => {
-            disconnect();
-        });
-    });
+    setOnDisconnectCallback(disconnect);
 
-    // Initialize position closing state after WASM is loaded
-    initializePositionClosingState();
+    // Initialize position closing amounts
+    setCurrentLongCloseAmount(U256.fromNumber(0));
+    setCurrentShortCloseAmount(U256.fromNumber(0));
 
     // Initialize the base client
     const client = new OdraWasmClient(
@@ -140,22 +133,14 @@ function setupEventListeners(): void {
     dom.switchAccountBtn.addEventListener("click", async () => {
         dom.addressDropdownMenu.classList.add("hidden");
         try {
-            // Show a brief loading state
             dom.addressSpan.textContent = "Switching...";
-            import("./data/state.js").then(({ client }) => {
-                client.switchAccount();
-            });
+            stateClient.switchAccount();
         } catch (error) {
             console.error("Failed to switch account:", error);
-            import("./ui/modals.js").then(({ showError }) => {
-                showError("Failed to switch account.");
-            });
-            // Restore the original address if switching failed
-            import("./data/state.js").then(({ address }) => {
-                if (address) {
-                    dom.addressSpan.textContent = `${address.slice(0, 5)}...${address.slice(-5)}`;
-                }
-            });
+            showError("Failed to switch account.");
+            if (stateAddress) {
+                dom.addressSpan.textContent = `${stateAddress.slice(0, 5)}...${stateAddress.slice(-5)}`;
+            }
         }
     });
 
@@ -182,10 +167,10 @@ function setupEventListeners(): void {
     dom.shortClose100Btn.addEventListener("click", () => updateShortCloseAmount(100));
 
     // Action buttons
-    dom.updatePriceBtn.addEventListener("click", updatePrice);
     dom.faucetBtn.addEventListener("click", requestFaucet);
     dom.wrapCsprBtn.addEventListener("click", wrapCspr);
     dom.unwrapCsprBtn.addEventListener("click", unwrapCspr);
+    dom.unwrapMaxBtn.addEventListener("click", setUnwrapMax);
     dom.approveMarketBtn.addEventListener("click", approveMarket);
 
     // Sanitize numeric inputs on the fly
@@ -254,29 +239,19 @@ function setupEventListeners(): void {
 // ---------- Application Entry Point ----------
 
 /**
- * Wait for CSPR.click SDK to be fully available and initialized
- * Since the SDK script loads synchronously before this module, it should already be available.
- * This function adds a small safety check in case of any timing issues.
+ * Wait for CSPR.click SDK to be fully available.
+ * The SDK loads synchronously before this module, but we add a safety check.
  */
 async function waitForCsprClick(maxWaitMs: number = 5000): Promise<void> {
+    if ((window as any).csprclick) return;
+    
     const startTime = Date.now();
-    
-    // The SDK should already be loaded since it's a synchronous script in <head>
-    // But we'll still check just in case
-    if ((window as any).csprclick) {
-        console.log("CSPR.click SDK already available (loaded synchronously)");
-        return;
-    }
-    
-    console.log("Waiting for CSPR.click SDK...");
     while (!(window as any).csprclick) {
         if (Date.now() - startTime > maxWaitMs) {
             throw new Error("CSPR.click SDK failed to load - please refresh the page");
         }
         await new Promise(resolve => setTimeout(resolve, 50));
     }
-    
-    console.log("CSPR.click SDK loaded");
 }
 
 async function run(): Promise<void> {
@@ -284,10 +259,10 @@ async function run(): Promise<void> {
         // Initialize theme
         initTheme();
 
-        // Ensure buttons are disabled by default (in case HTML disabled attributes aren't enough)
+        // Ensure buttons are disabled by default
         enableDisconnectedMode();
 
-        // Wait for CSPR.click SDK to be available (required for wallet integration)
+        // Wait for CSPR.click SDK to be available
         await waitForCsprClick();
 
         // Initialize with CSPR.click integration
@@ -305,27 +280,11 @@ async function run(): Promise<void> {
 
         if (dom.marketStatusSpan) dom.marketStatusSpan.textContent = "Ready";
 
-        // Check if user is already connected (restored session)
-        // This is important especially after page reload or redirect from wallet
-        setTimeout(async () => {
-            try {
-                // Check if there's an active session by checking the account
-                const { account: currentAccount, connected: isConnected } = await import("./data/state.js");
-                if (currentAccount && currentAccount.publicKey && !isConnected) {
-                    console.log("Detected existing active session, auto-connecting...");
-                    await onConnect();
-                }
-            } catch (err) {
-                console.log("No active session detected or failed to auto-connect:", err);
-            }
-        }, 1000);
-
         // Initialize and refresh chart
         if (isMarketGraphVisible()) {
             try {
                 const chart = new MarketChart('market-chart');
                 await chart.refresh();
-                // Refresh chart whenever data is refreshed
                 const originalRefreshAllData = refreshAllData;
                 (window as any).refreshAllData = async () => {
                     await originalRefreshAllData();
@@ -335,7 +294,6 @@ async function run(): Promise<void> {
                 console.warn("Failed to initialize chart:", chartError);
             }
         } else {
-            // Hide chart section if not enabled
             const chartSection = document.querySelector('#market-chart')?.closest('section');
             if (chartSection) {
                 (chartSection as HTMLElement).style.display = 'none';
@@ -343,17 +301,12 @@ async function run(): Promise<void> {
         }
     } catch (err: any) {
         console.error("Failed to initialize:", err);
-
-        // Parse the error to determine if it's wallet-related
         const errorMessage = err.message || err.toString();
 
         if (errorMessage.toLowerCase().includes('wallet is locked') ||
             errorMessage.toLowerCase().includes('code":1')) {
-            // Instead of showing wallet locked popup, switch to disconnected mode
-            import("./data/state.js").then(({ setConnected, setAddress }) => {
-                setConnected(false);
-                setAddress(null);
-            });
+            setConnected(false);
+            setAddress(null);
             enableDisconnectedMode();
             try {
                 await refreshMarketStateOnly();
@@ -361,10 +314,7 @@ async function run(): Promise<void> {
                 console.warn("Failed to refresh market state:", refreshError);
             }
         } else {
-            // For non-wallet errors, show the error display
-            import("./ui/modals.js").then(({ showError }) => {
-                showError(`Initialization failed: ${errorMessage}`);
-            });
+            showError(`Initialization failed: ${errorMessage}`);
         }
 
         if (dom.marketStatusSpan) dom.marketStatusSpan.textContent = "Error";
@@ -372,4 +322,4 @@ async function run(): Promise<void> {
 }
 
 // Start the application
-setTimeout(() => run(), 100);
+setTimeout(run, 100);

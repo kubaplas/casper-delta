@@ -1,10 +1,10 @@
-import { setGas, Address } from "casper-delta-wasm-client";
+import { setGas, Address, U256 } from "casper-delta-wasm-client";
 import { HIGH_GAS_AMOUNT } from "../config.js";
 import * as dom from "../dom.js";
 import { showError } from "../ui/modals.js";
 import { formatNumber, formatDollarPrice, formatAllowance } from "../ui/formatters.js";
 import { showAllLoaders, hideAllLoaders } from "../ui/loaders.js";
-import { connected, address, market, setBalances, setMarketState, setConsolidatedData, setMarketAllowanceValue, } from "./state.js";
+import { connected, address, market, client, consolidatedData, setBalances, setMarketState, setConsolidatedData, setMarketAllowanceValue, setCsprBalance, } from "./state.js";
 import { resetLongCloseAmount, resetShortCloseAmount, updateCloseButtonsAvailability } from "../trading/positions.js";
 // ---------- Request Helper Functions ----------
 /**
@@ -128,6 +128,8 @@ export async function refreshAllDataConsolidated() {
         });
         // Update all UI elements from the consolidated data
         updateUIFromConsolidatedData();
+        // Fetch native CSPR balance (separate RPC call)
+        await refreshCsprBalance();
     }
     catch (e) {
         console.error("Failed to fetch consolidated data:", e);
@@ -207,70 +209,96 @@ export async function refreshMarketStateOnly() {
     }
 }
 /**
+ * Fetch native CSPR balance for the connected account
+ */
+export async function refreshCsprBalance() {
+    if (!connected || !address) {
+        setCsprBalance(null);
+        dom.csprBalanceSpan.textContent = "—";
+        return;
+    }
+    try {
+        // Query account main purse balance using RPC
+        const addressObj = Address.fromPublicKey(address);
+        const balance = await executeWithRetry(() => client.getBalance(addressObj));
+        // Balance is returned as U512 in motes (smallest unit)
+        const balanceInMotes = balance.toString();
+        const csprBalanceU256 = new U256(balanceInMotes);
+        setCsprBalance(csprBalanceU256);
+        dom.csprBalanceSpan.textContent = formatNumber(csprBalanceU256);
+    }
+    catch (e) {
+        console.error("Failed to fetch CSPR balance:", e);
+        setCsprBalance(null);
+        dom.csprBalanceSpan.textContent = "—";
+    }
+}
+/**
  * Update UI from consolidated data
  */
 function updateUIFromConsolidatedData() {
-    // Import from state to get consolidatedData
-    import("./state.js").then(({ consolidatedData }) => {
-        if (!consolidatedData)
-            return;
-        const data = consolidatedData.addressMarketState;
-        if (!data) {
-            console.error("addressMarketState is undefined in consolidatedData");
-            return;
-        }
-        // Update market state from consolidated data
-        setMarketState(data.marketState);
-        dom.currentPriceSpan.textContent = formatDollarPrice(data.marketState.price);
-        dom.longLiquiditySpan.textContent = formatNumber(data.marketState.long_liquidity) + " WCSPR";
-        dom.shortLiquiditySpan.textContent = formatNumber(data.marketState.short_liquidity) + " WCSPR";
-        // Compute total market value
-        const totalMarketValue = data.marketState.long_liquidity.add(data.marketState.short_liquidity);
-        dom.totalMarketValueSpan.textContent = formatNumber(totalMarketValue) + " WCSPR";
-        // Update balances from consolidated data
-        setBalances({
-            wcspr: data.wcspr_balance,
-            longToken: data.long_token_balance,
-            shortToken: data.short_token_balance
-        });
-        dom.wcsprBalanceSpan.textContent = formatNumber(data.wcspr_balance) + " WCSPR";
-        // Calculate available WCSPR (minimum of balance and allowance)
-        const availableWcspr = data.wcspr_balance.lt(data.market_allowance) ? data.wcspr_balance : data.market_allowance;
-        // Update position-specific WCSPR balances with available amount
-        dom.wcsprBalanceLong.textContent = formatNumber(availableWcspr) + " WCSPR";
-        dom.wcsprBalanceShort.textContent = formatNumber(availableWcspr) + " WCSPR";
-        // Set click-to-fill for open positions (available WCSPR amount)
-        dom.wcsprBalanceLong.onclick = () => {
-            try {
-                dom.longOpenAmountInput.value = formatNumber(availableWcspr);
-            }
-            catch { }
-        };
-        dom.wcsprBalanceShort.onclick = () => {
-            try {
-                dom.shortOpenAmountInput.value = formatNumber(availableWcspr);
-            }
-            catch { }
-        };
-        // Update portfolio position values in WCSPR
-        dom.longTokenBalancePortfolio.textContent = `${formatNumber(data.long_position_value)} WCSPR`;
-        dom.shortTokenBalancePortfolio.textContent = `${formatNumber(data.short_position_value)} WCSPR`;
-        // Update position value displays in closing sections
-        dom.longPositionValueDisplay.textContent = `${formatNumber(data.long_position_value)} WCSPR`;
-        dom.shortPositionValueDisplay.textContent = `${formatNumber(data.short_position_value)} WCSPR`;
-        // Reset closing amounts when position values change
-        resetLongCloseAmount();
-        resetShortCloseAmount();
-        // Update close buttons availability based on token balances
-        updateCloseButtonsAvailability();
-        // Update market allowance
-        dom.marketAllowanceSpan.textContent = formatAllowance(data.market_allowance);
-        setMarketAllowanceValue(data.market_allowance);
-        // Update position values
-        // Total is WCSPR balance + long/short values
-        const totalValueWithWcspr = data.total_position_value.add(data.wcspr_balance);
-        dom.totalPositionValueSpan.textContent = formatNumber(totalValueWithWcspr) + " WCSPR";
+    if (!consolidatedData)
+        return;
+    const data = consolidatedData.addressMarketState;
+    if (!data) {
+        console.error("addressMarketState is undefined in consolidatedData");
+        return;
+    }
+    // Update market state from consolidated data
+    setMarketState(data.marketState);
+    dom.currentPriceSpan.textContent = formatDollarPrice(data.marketState.price);
+    dom.longLiquiditySpan.textContent = formatNumber(data.marketState.long_liquidity) + " WCSPR";
+    dom.shortLiquiditySpan.textContent = formatNumber(data.marketState.short_liquidity) + " WCSPR";
+    const totalMarketValue = data.marketState.long_liquidity.add(data.marketState.short_liquidity);
+    dom.totalMarketValueSpan.textContent = formatNumber(totalMarketValue) + " WCSPR";
+    // Update balances from consolidated data
+    setBalances({
+        wcspr: data.wcspr_balance,
+        longToken: data.long_token_balance,
+        shortToken: data.short_token_balance
     });
+    dom.wcsprBalanceSpan.textContent = formatNumber(data.wcspr_balance) + " WCSPR";
+    dom.wcsprBalanceUnwrap.textContent = formatNumber(data.wcspr_balance);
+    // Calculate available WCSPR (minimum of balance and allowance)
+    const availableWcspr = data.wcspr_balance.lt(data.market_allowance) ? data.wcspr_balance : data.market_allowance;
+    // Update position-specific WCSPR balances with available amount
+    dom.wcsprBalanceLong.textContent = formatNumber(availableWcspr) + " WCSPR";
+    dom.wcsprBalanceShort.textContent = formatNumber(availableWcspr) + " WCSPR";
+    // Set click-to-fill for open positions (available WCSPR amount)
+    dom.wcsprBalanceLong.onclick = () => {
+        try {
+            dom.longOpenAmountInput.value = formatNumber(availableWcspr);
+        }
+        catch { }
+    };
+    dom.wcsprBalanceShort.onclick = () => {
+        try {
+            dom.shortOpenAmountInput.value = formatNumber(availableWcspr);
+        }
+        catch { }
+    };
+    // Update portfolio position values in WCSPR
+    dom.longTokenBalancePortfolio.textContent = `${formatNumber(data.long_position_value)} WCSPR`;
+    dom.shortTokenBalancePortfolio.textContent = `${formatNumber(data.short_position_value)} WCSPR`;
+    // Update position value displays in closing sections
+    dom.longPositionValueDisplay.textContent = `${formatNumber(data.long_position_value)} WCSPR`;
+    dom.shortPositionValueDisplay.textContent = `${formatNumber(data.short_position_value)} WCSPR`;
+    // Reset closing amounts when position values change
+    resetLongCloseAmount();
+    resetShortCloseAmount();
+    // Update close buttons availability based on token balances
+    updateCloseButtonsAvailability();
+    // Update market allowance
+    dom.marketAllowanceSpan.textContent = formatAllowance(data.market_allowance);
+    // For overview: show balance if allowed >= balance, otherwise show allowed amount
+    const allowedDisplay = !data.market_allowance.lt(data.wcspr_balance)
+        ? formatNumber(data.wcspr_balance)
+        : formatAllowance(data.market_allowance);
+    dom.marketAllowanceOverview.textContent = allowedDisplay + " WCSPR";
+    setMarketAllowanceValue(data.market_allowance);
+    // Update position values (WCSPR balance + long/short values)
+    const totalValueWithWcspr = data.total_position_value.add(data.wcspr_balance);
+    dom.totalPositionValueSpan.textContent = formatNumber(totalValueWithWcspr) + " WCSPR";
 }
 /**
  * Set fallback values for all UI elements
@@ -282,7 +310,9 @@ export function setFallbackValues() {
     dom.shortLiquiditySpan.textContent = "—";
     // Balance fallbacks
     dom.wcsprBalanceSpan.textContent = "—";
+    dom.wcsprBalanceUnwrap.textContent = "—";
     dom.marketAllowanceSpan.textContent = "—";
+    dom.marketAllowanceOverview.textContent = "—";
     // Position-specific balance fallbacks
     dom.wcsprBalanceLong.textContent = "—";
     dom.wcsprBalanceShort.textContent = "—";
@@ -290,7 +320,7 @@ export function setFallbackValues() {
     dom.totalPositionValueSpan.textContent = "—";
 }
 /**
- * Legacy function for compatibility - delegates to consolidated refresh
+ * Refresh all application data.
  */
 export async function refreshAllData() {
     await refreshAllDataConsolidated();

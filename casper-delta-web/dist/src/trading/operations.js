@@ -6,7 +6,7 @@ import { parseAmount, formatNumber } from "../ui/formatters.js";
 import { showTransactionPopup, disableTransactionButtons } from "../transactions/monitor.js";
 import { onTransactionSentFailure } from "../transactions/handlers.js";
 import { resetLongCloseAmount, resetShortCloseAmount } from "./positions.js";
-import { connected, address, market, wcspr, balances, marketAllowanceValue, currentLongClosePercentage, currentShortClosePercentage, currentLongCloseAmount, currentShortCloseAmount, } from "../data/state.js";
+import { connected, address, market, wcspr, balances, marketAllowanceValue, currentLongCloseAmount, currentShortCloseAmount, } from "../data/state.js";
 import { currentTransaction } from "../transactions/monitor.js";
 // ---------- Transaction Pre-check ----------
 /**
@@ -70,12 +70,8 @@ export async function withdrawLong() {
     if (!transactionPreCheck("Please connect your wallet to trade")) {
         return;
     }
-    if (currentLongClosePercentage === 0) {
-        showError("Please select a percentage to close");
-        return;
-    }
     if (!currentLongCloseAmount) {
-        showError("Please select a percentage to close");
+        showError("Please enter an amount to close");
         return;
     }
     if (currentLongCloseAmount.toBigInt() === 0n) {
@@ -139,12 +135,8 @@ export async function withdrawShort() {
     if (!transactionPreCheck("Please connect your wallet to trade")) {
         return;
     }
-    if (currentShortClosePercentage === 0) {
-        showError("Please select a percentage to close");
-        return;
-    }
     if (!currentShortCloseAmount) {
-        showError("Please select a percentage to close");
+        showError("Please enter an amount to close");
         return;
     }
     if (currentShortCloseAmount.toBigInt() === 0n) {
@@ -162,25 +154,6 @@ export async function withdrawShort() {
     }
     catch (e) {
         onTransactionSentFailure(e, "Failed to close short position");
-    }
-}
-/**
- * Update market price
- */
-export async function updatePrice() {
-    if (!transactionPreCheck("Please connect your wallet to update price")) {
-        return;
-    }
-    // Show popup immediately when user clicks the button
-    showTransactionPopup("Price update");
-    // Disable all buttons immediately before wallet interaction
-    disableTransactionButtons();
-    try {
-        setGas(DEFAULT_GAS_AMOUNT);
-        await market.updatePrice();
-    }
-    catch (e) {
-        onTransactionSentFailure(e, "Failed to update price");
     }
 }
 /**
@@ -280,4 +253,15 @@ export async function unwrapCspr() {
     catch (e) {
         onTransactionSentFailure(e, "Failed to unwrap CSPR");
     }
+}
+/**
+ * Set unwrap amount to maximum WCSPR balance
+ */
+export function setUnwrapMax() {
+    if (!balances) {
+        showError("Balances not loaded yet. Please refresh.");
+        return;
+    }
+    // Set the unwrap amount input to the maximum WCSPR balance
+    dom.unwrapAmountInput.value = formatNumber(balances.wcspr);
 }

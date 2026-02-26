@@ -54,8 +54,8 @@ export const longCloseAmountInput = document.getElementById("long-close-amount-i
 export const shortCloseAmountInput = document.getElementById("short-close-amount-input") as HTMLInputElement;
 export const longCloseAmountDisplay = document.getElementById("long-close-amount-display") as HTMLSpanElement;
 export const shortCloseAmountDisplay = document.getElementById("short-close-amount-display") as HTMLSpanElement;
-export const longClosePercentage = document.getElementById("long-close-percentage") as HTMLSpanElement;
-export const shortClosePercentage = document.getElementById("short-close-percentage") as HTMLSpanElement;
+export const longCloseTokensDisplay = document.getElementById("long-close-tokens-display") as HTMLDivElement;
+export const shortCloseTokensDisplay = document.getElementById("short-close-tokens-display") as HTMLDivElement;
 
 // Percentage buttons
 export const longClose25Btn = document.getElementById("long-close-25") as HTMLButtonElement;
@@ -72,7 +72,6 @@ export const depositShortBtn = document.getElementById("deposit-short-btn") as H
 export const withdrawShortBtn = document.getElementById("withdraw-short-btn") as HTMLButtonElement;
 
 // Action buttons
-export const updatePriceBtn = document.getElementById("update-price-btn") as HTMLButtonElement;
 export const refreshBtn = document.getElementById("refresh-btn") as HTMLButtonElement;
 export const faucetBtn = document.getElementById("faucet-btn") as HTMLButtonElement;
 export const wrapCsprBtn = document.getElementById("wrap-cspr-btn") as HTMLButtonElement;
@@ -82,11 +81,16 @@ export const approveMarketBtn = document.getElementById("approve-market-btn") as
 // Wrap/Unwrap inputs
 export const wrapAmountInput = document.getElementById("wrap-amount") as HTMLInputElement;
 export const unwrapAmountInput = document.getElementById("unwrap-amount") as HTMLInputElement;
+export const unwrapMaxBtn = document.getElementById("unwrap-max-btn") as HTMLButtonElement;
+export const csprBalanceSpan = document.getElementById("cspr-balance") as HTMLSpanElement;
+export const wcsprBalanceUnwrap = document.getElementById("wcspr-balance-unwrap") as HTMLSpanElement;
 
 // Approve input and display
 export const approveAmountInput = document.getElementById("approve-amount") as HTMLInputElement;
 export const marketAllowanceSpan = document.getElementById("market-allowance") as HTMLSpanElement;
 export const marketAllowanceLoader = document.getElementById("market-allowance-loader") as HTMLSpanElement;
+export const marketAllowanceOverview = document.getElementById("market-allowance-overview") as HTMLSpanElement;
+export const marketAllowanceOverviewLoader = document.getElementById("market-allowance-overview-loader") as HTMLDivElement;
 
 // Notification elements
 export const txSection = document.getElementById("tx-section") as HTMLDivElement;

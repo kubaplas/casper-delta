@@ -35,30 +35,6 @@ export function formatNumber(value: U256 | U512, decimals: number = TOKEN_DECIMA
 }
 
 /**
- * Special formatter for price display that can handle very small values
- */
-export function formatPrice(value: U256, decimals: number = TOKEN_DECIMALS): string {
-    try {
-        const formatter = value.formatter(decimals);
-
-        // For prices, we want to show more precision to see small values
-        // Try different precisions until we get a non-zero display
-        for (let precision = 4; precision <= 9; precision++) {
-            const formatted = formatter.fmtWithPrecision(precision);
-            if (formatted !== "0." + "0".repeat(precision)) {
-                return formatted;
-            }
-        }
-
-        // If still zero, return 0.0
-        return "0.0";
-    } catch (e) {
-        console.error("Error formatting price:", e);
-        return "0.0";
-    }
-}
-
-/**
  * Formatter for allowance values that shows "MAX" for very large amounts
  */
 export function formatAllowance(value: U256, decimals: number = TOKEN_DECIMALS): string {

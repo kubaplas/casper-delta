@@ -45,8 +45,8 @@ export const longCloseAmountInput = document.getElementById("long-close-amount-i
 export const shortCloseAmountInput = document.getElementById("short-close-amount-input");
 export const longCloseAmountDisplay = document.getElementById("long-close-amount-display");
 export const shortCloseAmountDisplay = document.getElementById("short-close-amount-display");
-export const longClosePercentage = document.getElementById("long-close-percentage");
-export const shortClosePercentage = document.getElementById("short-close-percentage");
+export const longCloseTokensDisplay = document.getElementById("long-close-tokens-display");
+export const shortCloseTokensDisplay = document.getElementById("short-close-tokens-display");
 // Percentage buttons
 export const longClose25Btn = document.getElementById("long-close-25");
 export const longClose50Btn = document.getElementById("long-close-50");
@@ -61,7 +61,6 @@ export const withdrawLongBtn = document.getElementById("withdraw-long-btn");
 export const depositShortBtn = document.getElementById("deposit-short-btn");
 export const withdrawShortBtn = document.getElementById("withdraw-short-btn");
 // Action buttons
-export const updatePriceBtn = document.getElementById("update-price-btn");
 export const refreshBtn = document.getElementById("refresh-btn");
 export const faucetBtn = document.getElementById("faucet-btn");
 export const wrapCsprBtn = document.getElementById("wrap-cspr-btn");
@@ -70,10 +69,15 @@ export const approveMarketBtn = document.getElementById("approve-market-btn");
 // Wrap/Unwrap inputs
 export const wrapAmountInput = document.getElementById("wrap-amount");
 export const unwrapAmountInput = document.getElementById("unwrap-amount");
+export const unwrapMaxBtn = document.getElementById("unwrap-max-btn");
+export const csprBalanceSpan = document.getElementById("cspr-balance");
+export const wcsprBalanceUnwrap = document.getElementById("wcspr-balance-unwrap");
 // Approve input and display
 export const approveAmountInput = document.getElementById("approve-amount");
 export const marketAllowanceSpan = document.getElementById("market-allowance");
 export const marketAllowanceLoader = document.getElementById("market-allowance-loader");
+export const marketAllowanceOverview = document.getElementById("market-allowance-overview");
+export const marketAllowanceOverviewLoader = document.getElementById("market-allowance-overview-loader");
 // Notification elements
 export const txSection = document.getElementById("tx-section");
 export const txLinkAnchor = document.getElementById("tx-link");

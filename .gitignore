@@ -4,7 +4,8 @@ target
 .backend*
 .builder*
 .node-keys
-.env
+.env*
 .DS_Store
 casper-delta-example/node_modules
 market_data.db
+resources/

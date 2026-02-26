@@ -92,13 +92,8 @@ export async function withdrawLong(): Promise<void> {
         return;
     }
 
-    if (currentLongClosePercentage === 0) {
-        showError("Please select a percentage to close");
-        return;
-    }
-
     if (!currentLongCloseAmount) {
-        showError("Please select a percentage to close");
+        showError("Please enter an amount to close");
         return;
     }
 
@@ -171,13 +166,8 @@ export async function withdrawShort(): Promise<void> {
         return;
     }
 
-    if (currentShortClosePercentage === 0) {
-        showError("Please select a percentage to close");
-        return;
-    }
-
     if (!currentShortCloseAmount) {
-        showError("Please select a percentage to close");
+        showError("Please enter an amount to close");
         return;
     }
 
@@ -198,28 +188,6 @@ export async function withdrawShort(): Promise<void> {
         resetShortCloseAmount();
     } catch (e: any) {
         onTransactionSentFailure(e, "Failed to close short position");
-    }
-}
-
-/**
- * Update market price
- */
-export async function updatePrice(): Promise<void> {
-    if (!transactionPreCheck("Please connect your wallet to update price")) {
-        return;
-    }
-
-    // Show popup immediately when user clicks the button
-    showTransactionPopup("Price update");
-
-    // Disable all buttons immediately before wallet interaction
-    disableTransactionButtons();
-
-    try {
-        setGas(DEFAULT_GAS_AMOUNT);
-        await market.updatePrice();
-    } catch (e: any) {
-        onTransactionSentFailure(e, "Failed to update price");
     }
 }
 
@@ -331,4 +299,17 @@ export async function unwrapCspr(): Promise<void> {
     } catch (e: any) {
         onTransactionSentFailure(e, "Failed to unwrap CSPR");
     }
+}
+
+/**
+ * Set unwrap amount to maximum WCSPR balance
+ */
+export function setUnwrapMax(): void {
+    if (!balances) {
+        showError("Balances not loaded yet. Please refresh.");
+        return;
+    }
+
+    // Set the unwrap amount input to the maximum WCSPR balance
+    dom.unwrapAmountInput.value = formatNumber(balances.wcspr);
 }

@@ -27,6 +27,8 @@ export function showAllLoaders(): void {
     // Allowance loader
     dom.marketAllowanceSpan.classList.add("hidden");
     dom.marketAllowanceLoader.classList.remove("hidden");
+    dom.marketAllowanceOverview.classList.add("hidden");
+    dom.marketAllowanceOverviewLoader.classList.remove("hidden");
 
     // Position loaders
     dom.totalPositionValueSpan.classList.add("hidden");
@@ -60,6 +62,8 @@ export function hideAllLoaders(): void {
     // Allowance loader
     dom.marketAllowanceSpan.classList.remove("hidden");
     dom.marketAllowanceLoader.classList.add("hidden");
+    dom.marketAllowanceOverview.classList.remove("hidden");
+    dom.marketAllowanceOverviewLoader.classList.add("hidden");
 
     // Position loaders
     dom.totalPositionValueSpan.classList.remove("hidden");

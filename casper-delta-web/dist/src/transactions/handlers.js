@@ -1,7 +1,7 @@
 import * as dom from "../dom.js";
 import { getErrorDescription } from "../config.js";
 import { showError, showErrorWithTransaction, showTransaction } from "../ui/modals.js";
-import { enableTransactionButtons, cleanup, setCurrentTransaction } from "./monitor.js";
+import { enableTransactionButtons, cleanup, hideTransactionPopup, setCurrentTransaction } from "./monitor.js";
 // Import data refresh function (will be defined in data/fetch.ts)
 // This creates a circular dependency which we'll resolve using dynamic import
 let refreshAllDataConsolidated;
@@ -53,22 +53,7 @@ export async function onTransactionSuccessFromCsprClick(data) {
  * Handle failed transaction from CSPR.click
  */
 export async function onTransactionFailureFromCsprClick(data) {
-    // Enhanced logging to debug WASM object
-    console.error("Transaction failed from CSPR.click:", data);
-    try {
-        console.error("Transaction result details:", {
-            error: data.error,
-            errorCode: data.errorCode,
-            isCancelled: data.isCancelled,
-            status: data.status,
-            txHash: data.txHash,
-            data: data.data,
-            dataErrorMessage: data.data?.errorMessage,
-        });
-    }
-    catch (logError) {
-        console.error("Could not extract transaction result details:", logError);
-    }
+    console.error("Transaction failed:", data.error || data.errorCode || "unknown");
     // Update UI to show failure
     dom.txProgressBar.style.width = "100%";
     dom.txProgressBar.classList.remove("from-blue-500", "to-blue-600");
@@ -165,7 +150,8 @@ export async function onTransactionFailureFromCsprClick(data) {
 }
 /**
  * Helper method to determine if we should refresh data on failure
- */ export function shouldRefreshDataOnFailure(errorMsg) {
+ */
+function shouldRefreshDataOnFailure(errorMsg) {
     // For certain errors, we might want to refresh to get the latest state
     // even though the transaction failed
     const refreshOnFailureErrors = [
@@ -215,9 +201,7 @@ export function onTransactionCancelled() {
  * Handle pre-submission transaction failure
  */
 export function onTransactionSentFailure(error, message) {
-    import("./monitor.js").then(({ hideTransactionPopup }) => {
-        hideTransactionPopup();
-    });
+    hideTransactionPopup();
     enableTransactionButtons();
     showError(`${message}: ${error.message || error}`);
 }

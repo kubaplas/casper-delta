@@ -17,6 +17,7 @@ export let balances = null;
 export let marketState = null;
 export let consolidatedData = null;
 export let marketAllowanceValue = null;
+export let csprBalance = null;
 // Position closing state
 export let currentLongClosePercentage = 0;
 export let currentShortClosePercentage = 0;
@@ -59,6 +60,9 @@ export function setConsolidatedData(value) {
 }
 export function setMarketAllowanceValue(value) {
     marketAllowanceValue = value;
+}
+export function setCsprBalance(value) {
+    csprBalance = value;
 }
 export function setCurrentLongClosePercentage(value) {
     currentLongClosePercentage = value;

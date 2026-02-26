@@ -13,43 +13,8 @@ let isDisconnecting = false;
  * Connect wallet (trigger CSPR.click sign in)
  */
 export async function connect(): Promise<void> {
-    console.log("Connect wallet button clicked, initiating sign in...");
     try {
         await client.signIn();
-        console.log("Sign in request sent successfully");
-        
-        // Failsafe: Poll for account connection status
-        // This handles cases where the onSignedIn callback might not fire properly
-        let pollAttempts = 0;
-        const maxPollAttempts = 30; // 15 seconds max
-        const pollInterval = 500; // Check every 500ms
-        
-        const pollForConnection = setInterval(async () => {
-            pollAttempts++;
-            
-            try {
-                // Check if account is now set (callback might have fired)
-                const { account: currentAccount, connected: isConnected } = await import("../data/state.js");
-                
-                if (currentAccount && currentAccount.publicKey && !isConnected) {
-                    console.log("Detected wallet connection via polling, triggering onConnect...");
-                    clearInterval(pollForConnection);
-                    await onConnect();
-                } else if (isConnected) {
-                    // Already connected via callback
-                    console.log("Already connected via callback");
-                    clearInterval(pollForConnection);
-                }
-            } catch (err) {
-                console.log("Poll check error:", err);
-            }
-            
-            if (pollAttempts >= maxPollAttempts) {
-                console.log("Polling timeout reached, stopping");
-                clearInterval(pollForConnection);
-            }
-        }, pollInterval);
-        
     } catch (error) {
         console.error("Error during sign in:", error);
         throw error;
@@ -209,7 +174,7 @@ export function enableDisconnectedMode(): void {
 /**
  * Disable read-only mode
  */
-export function disableReadOnlyMode(): void {
+function disableReadOnlyMode(): void {
     // Remove read-only indicator
     const existingIndicator = dom.disconnectSection.querySelector('.text-gray-600');
     if (existingIndicator) {
@@ -226,7 +191,7 @@ export function disableReadOnlyMode(): void {
 /**
  * Disable disconnected mode (enable trading when connected)
  */
-export function disableDisconnectedMode(): void {
+function disableDisconnectedMode(): void {
     // Re-enable all trading controls
     enableTradingControls();
 }
@@ -239,8 +204,8 @@ export function disableDisconnectedMode(): void {
 function disableTradingControls(message: string): void {
     const tradingButtons = [
         'deposit-long-btn', 'withdraw-long-btn', 'deposit-short-btn', 'withdraw-short-btn',
-        'faucet-btn', 'approve-market-btn', 'update-price-btn',
-        'wrap-cspr-btn', 'unwrap-cspr-btn',
+        'faucet-btn', 'approve-market-btn',
+        'wrap-cspr-btn', 'unwrap-cspr-btn', 'unwrap-max-btn',
         'long-close-25', 'long-close-50', 'long-close-75', 'long-close-100',
         'short-close-25', 'short-close-50', 'short-close-75', 'short-close-100'
     ];
@@ -278,8 +243,8 @@ function disableTradingControls(message: string): void {
 function enableTradingControls(): void {
     const tradingButtons = [
         'deposit-long-btn', 'withdraw-long-btn', 'deposit-short-btn', 'withdraw-short-btn',
-        'faucet-btn', 'approve-market-btn', 'update-price-btn',
-        'wrap-cspr-btn', 'unwrap-cspr-btn',
+        'faucet-btn', 'approve-market-btn',
+        'wrap-cspr-btn', 'unwrap-cspr-btn', 'unwrap-max-btn',
         'long-close-25', 'long-close-50', 'long-close-75', 'long-close-100',
         'short-close-25', 'short-close-50', 'short-close-75', 'short-close-100'
     ];
