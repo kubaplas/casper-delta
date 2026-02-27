@@ -1,6 +1,6 @@
 import { U256 } from "casper-delta-wasm-client";
 import * as dom from "../dom.js";
-import { formatNumber } from "../ui/formatters.js";
+import { formatNumber, parseAmount } from "../ui/formatters.js";
 import { consolidatedData, setCurrentLongClosePercentage, setCurrentShortClosePercentage, setCurrentLongCloseAmount, setCurrentShortCloseAmount, currentLongClosePercentage, currentShortClosePercentage, } from "../data/state.js";
 // ---------- Position Closing Functions ----------
 /**
@@ -18,7 +18,7 @@ export function updateLongCloseAmount(percentage) {
     // Update UI - show WCSPR value in input (user sees WCSPR, not tokens)
     dom.longCloseAmountInput.value = formatNumber(wcsprValueToReceive);
     dom.longCloseAmountDisplay.textContent = `${formatNumber(consolidatedData.addressMarketState.long_position_value)} WCSPR`;
-    dom.longClosePercentage.textContent = `${percentage}%`;
+    showTokenAmount(dom.longCloseTokensDisplay, tokenAmount, "LONG");
     // Update button states
     updateLongCloseButtons(percentage);
 }
@@ -37,7 +37,7 @@ export function updateShortCloseAmount(percentage) {
     // Update UI - show WCSPR value in input (user sees WCSPR, not tokens)
     dom.shortCloseAmountInput.value = formatNumber(wcsprValueToReceive);
     dom.shortCloseAmountDisplay.textContent = `${formatNumber(consolidatedData.addressMarketState.short_position_value)} WCSPR`;
-    dom.shortClosePercentage.textContent = `${percentage}%`;
+    showTokenAmount(dom.shortCloseTokensDisplay, tokenAmount, "SHORT");
     // Update button states
     updateShortCloseButtons(percentage);
 }
@@ -83,7 +83,7 @@ export function resetLongCloseAmount() {
     setCurrentLongCloseAmount(U256.fromNumber(0));
     dom.longCloseAmountInput.value = "";
     dom.longCloseAmountDisplay.textContent = "—";
-    dom.longClosePercentage.textContent = "—";
+    hideTokenAmount(dom.longCloseTokensDisplay);
     updateLongCloseButtons(0);
 }
 /**
@@ -94,7 +94,7 @@ export function resetShortCloseAmount() {
     setCurrentShortCloseAmount(U256.fromNumber(0));
     dom.shortCloseAmountInput.value = "";
     dom.shortCloseAmountDisplay.textContent = "—";
-    dom.shortClosePercentage.textContent = "—";
+    hideTokenAmount(dom.shortCloseTokensDisplay);
     updateShortCloseButtons(0);
 }
 /**
@@ -110,30 +110,41 @@ export function handleLongCloseManualInput() {
             return;
         }
         // User enters WCSPR value, we need to convert to token amount
-        const wcsprValueEntered = U256.fromHtmlInput(dom.longCloseAmountInput);
+        const wcsprValueEntered = parseAmount(dom.longCloseAmountInput);
+        if (!wcsprValueEntered) {
+            resetLongCloseAmount();
+            return;
+        }
         const maxWcsprValue = consolidatedData.addressMarketState.long_position_value;
         const maxTokens = consolidatedData.addressMarketState.long_token_balance;
         // Validate against maximum WCSPR value
+        let tokenAmount;
         if (wcsprValueEntered.gt(maxWcsprValue)) {
             dom.longCloseAmountInput.value = formatNumber(maxWcsprValue);
+            tokenAmount = maxTokens;
             setCurrentLongCloseAmount(maxTokens);
             setCurrentLongClosePercentage(100);
         }
         else {
             // Convert WCSPR value to token amount: tokenAmount = (wcsprValue * maxTokens) / maxWcsprValue
             if (maxWcsprValue.toBigInt() > 0n) {
-                setCurrentLongCloseAmount(wcsprValueEntered.mul(maxTokens).div(maxWcsprValue));
-                const percentage = Number(wcsprValueEntered.toBigInt() * 100n / maxWcsprValue.toBigInt());
+                tokenAmount = wcsprValueEntered.mul(maxTokens).div(maxWcsprValue);
+                setCurrentLongCloseAmount(tokenAmount);
+                // Calculate percentage with better precision: (value * 10000 / max) / 100
+                const percentageBigInt = (wcsprValueEntered.toBigInt() * 10000n) / maxWcsprValue.toBigInt();
+                const percentage = Number(percentageBigInt) / 100;
                 setCurrentLongClosePercentage(Math.min(100, Math.max(0, percentage)));
             }
             else {
-                setCurrentLongCloseAmount(U256.fromNumber(0));
+                tokenAmount = U256.fromNumber(0);
+                setCurrentLongCloseAmount(tokenAmount);
                 setCurrentLongClosePercentage(0);
             }
         }
-        // Update display - show max WCSPR value
+        // Update display - show max WCSPR value and token amount
         dom.longCloseAmountDisplay.textContent = `${formatNumber(maxWcsprValue)} WCSPR`;
-        dom.longClosePercentage.textContent = currentLongClosePercentage > 0 ? `${currentLongClosePercentage.toFixed(0)}%` : "—";
+        showTokenAmount(dom.longCloseTokensDisplay, tokenAmount, "LONG");
+        // Update button states based on percentage
         updateLongCloseButtons(currentLongClosePercentage);
     }
     catch (e) {
@@ -153,30 +164,41 @@ export function handleShortCloseManualInput() {
             return;
         }
         // User enters WCSPR value, we need to convert to token amount
-        const wcsprValueEntered = U256.fromHtmlInput(dom.shortCloseAmountInput);
+        const wcsprValueEntered = parseAmount(dom.shortCloseAmountInput);
+        if (!wcsprValueEntered) {
+            resetShortCloseAmount();
+            return;
+        }
         const maxWcsprValue = consolidatedData.addressMarketState.short_position_value;
         const maxTokens = consolidatedData.addressMarketState.short_token_balance;
         // Validate against maximum WCSPR value
+        let tokenAmount;
         if (wcsprValueEntered.gt(maxWcsprValue)) {
             dom.shortCloseAmountInput.value = formatNumber(maxWcsprValue);
+            tokenAmount = maxTokens;
             setCurrentShortCloseAmount(maxTokens);
             setCurrentShortClosePercentage(100);
         }
         else {
             // Convert WCSPR value to token amount: tokenAmount = (wcsprValue * maxTokens) / maxWcsprValue
             if (maxWcsprValue.toBigInt() > 0n) {
-                setCurrentShortCloseAmount(wcsprValueEntered.mul(maxTokens).div(maxWcsprValue));
-                const percentage = Number(wcsprValueEntered.toBigInt() * 100n / maxWcsprValue.toBigInt());
+                tokenAmount = wcsprValueEntered.mul(maxTokens).div(maxWcsprValue);
+                setCurrentShortCloseAmount(tokenAmount);
+                // Calculate percentage with better precision: (value * 10000 / max) / 100
+                const percentageBigInt = (wcsprValueEntered.toBigInt() * 10000n) / maxWcsprValue.toBigInt();
+                const percentage = Number(percentageBigInt) / 100;
                 setCurrentShortClosePercentage(Math.min(100, Math.max(0, percentage)));
             }
             else {
-                setCurrentShortCloseAmount(U256.fromNumber(0));
+                tokenAmount = U256.fromNumber(0);
+                setCurrentShortCloseAmount(tokenAmount);
                 setCurrentShortClosePercentage(0);
             }
         }
-        // Update display - show max WCSPR value
+        // Update display - show max WCSPR value and token amount
         dom.shortCloseAmountDisplay.textContent = `${formatNumber(maxWcsprValue)} WCSPR`;
-        dom.shortClosePercentage.textContent = currentShortClosePercentage > 0 ? `${currentShortClosePercentage.toFixed(0)}%` : "—";
+        showTokenAmount(dom.shortCloseTokensDisplay, tokenAmount, "SHORT");
+        // Update button states based on percentage
         updateShortCloseButtons(currentShortClosePercentage);
     }
     catch (e) {
@@ -243,4 +265,13 @@ export function updateCloseButtonsAvailability() {
         dom.shortCloseAmountInput.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-100');
         dom.shortCloseAmountInput.title = 'No SHORT tokens to close';
     }
+}
+// ---------- Token Amount Display Helpers ----------
+function showTokenAmount(el, tokenAmount, label) {
+    el.textContent = `≈ ${formatNumber(tokenAmount)} ${label} tokens`;
+    el.classList.remove("hidden");
+}
+function hideTokenAmount(el) {
+    el.textContent = "";
+    el.classList.add("hidden");
 }

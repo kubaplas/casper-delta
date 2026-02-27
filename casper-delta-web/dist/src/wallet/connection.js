@@ -1,18 +1,29 @@
 import * as dom from "../dom.js";
-import { setConnected, setAddress, setBalances, setConsolidatedData, client, account } from "../data/state.js";
+import { setConnected, setAddress, setBalances, setConsolidatedData, client, account, connected } from "../data/state.js";
 import { refreshAllData, refreshMarketStateOnly, setFallbackValues } from "../data/fetch.js";
 import { hideTransaction } from "../ui/modals.js";
+// ---------- Wallet Connection State ----------
+// Guard to prevent re-entrant disconnect calls (e.g., from CSPR.click callback loop)
+let isDisconnecting = false;
 // ---------- Wallet Connection Functions ----------
 /**
  * Connect wallet (trigger CSPR.click sign in)
  */
 export async function connect() {
-    await client.signIn();
+    try {
+        await client.signIn();
+    }
+    catch (error) {
+        console.error("Error during sign in:", error);
+        throw error;
+    }
 }
 /**
  * Handle successful connection
  */
-export async function onConnect() {
+export async function onConnect(skipDataLoad = false) {
+    // Reset disconnect guard when connecting
+    isDisconnecting = false;
     setConnected(true);
     const addr = account.publicKey;
     setAddress(addr);
@@ -28,23 +39,43 @@ export async function onConnect() {
     // Disable read-only mode or disconnected mode if they were enabled
     disableReadOnlyMode();
     disableDisconnectedMode();
-    // Small delay to ensure UI has time to clear before fetching new data
-    await new Promise(resolve => setTimeout(resolve, 100));
-    await refreshAllData();
+    if (!skipDataLoad) {
+        // Small delay to ensure UI has time to clear before fetching new data
+        await new Promise(resolve => setTimeout(resolve, 100));
+        await refreshAllData();
+    }
 }
 /**
  * Disconnect wallet
  */
 export async function disconnect() {
-    await client.signOut();
+    // Prevent re-entrant calls (CSPR.click callback can trigger this again)
+    if (isDisconnecting || !connected) {
+        console.log("Disconnect already in progress or not connected, skipping");
+        return;
+    }
+    isDisconnecting = true;
+    try {
+        await client.signOut();
+    }
+    catch (e) {
+        console.warn("Error during signOut:", e);
+    }
     setConnected(false);
     setAddress(null);
     setBalances(null);
-    // Clear user-specific data but keep market data
+    // Clear all user-specific data
     dom.wcsprBalanceSpan.textContent = "—";
-    dom.longTokenBalancePortfolio.textContent = "— WCSPR";
-    dom.shortTokenBalancePortfolio.textContent = "— WCSPR";
+    dom.wcsprBalanceUnwrap.textContent = "—";
+    dom.wcsprBalanceLong.textContent = "—";
+    dom.wcsprBalanceShort.textContent = "—";
+    dom.csprBalanceSpan.textContent = "—";
+    dom.longTokenBalancePortfolio.textContent = "—";
+    dom.shortTokenBalancePortfolio.textContent = "—";
+    dom.longPositionValueDisplay.textContent = "—";
+    dom.shortPositionValueDisplay.textContent = "—";
     dom.marketAllowanceSpan.textContent = "—";
+    dom.marketAllowanceOverview.textContent = "—";
     dom.totalPositionValueSpan.textContent = "—";
     hideTransaction();
     // Show connect button and disable trading functionality
@@ -56,6 +87,10 @@ export async function disconnect() {
     catch (error) {
         console.error("Failed to load market data after disconnect:", error);
         // Market data will show "—" from the error handling in refreshMarketStateOnly
+    }
+    finally {
+        // Reset the guard after everything is done
+        isDisconnecting = false;
     }
 }
 // ---------- Mode Management Functions ----------
@@ -90,7 +125,7 @@ export function enableReadOnlyMode() {
     }
     dom.disconnectSection.appendChild(readOnlyIndicator);
     // Disable all trading buttons
-    disableTradingControls("Connect wallet to enable trading");
+    disableTradingControls("Sign in to enable trading");
     // Update market status
     if (dom.marketStatusSpan) {
         dom.marketStatusSpan.textContent = "Read-Only";
@@ -113,7 +148,7 @@ export function enableDisconnectedMode() {
     dom.connectBtn.classList.remove("hidden");
     dom.disconnectSection.classList.add("hidden");
     // Disable all trading controls
-    disableTradingControls("Connect wallet to enable trading");
+    disableTradingControls("Sign in to enable trading");
     // Update market status
     if (dom.marketStatusSpan) {
         dom.marketStatusSpan.textContent = "Disconnected";
@@ -122,7 +157,7 @@ export function enableDisconnectedMode() {
 /**
  * Disable read-only mode
  */
-export function disableReadOnlyMode() {
+function disableReadOnlyMode() {
     // Remove read-only indicator
     const existingIndicator = dom.disconnectSection.querySelector('.text-gray-600');
     if (existingIndicator) {
@@ -136,7 +171,7 @@ export function disableReadOnlyMode() {
 /**
  * Disable disconnected mode (enable trading when connected)
  */
-export function disableDisconnectedMode() {
+function disableDisconnectedMode() {
     // Re-enable all trading controls
     enableTradingControls();
 }
@@ -147,8 +182,8 @@ export function disableDisconnectedMode() {
 function disableTradingControls(message) {
     const tradingButtons = [
         'deposit-long-btn', 'withdraw-long-btn', 'deposit-short-btn', 'withdraw-short-btn',
-        'faucet-btn', 'approve-market-btn', 'update-price-btn',
-        'wrap-cspr-btn', 'unwrap-cspr-btn',
+        'faucet-btn', 'approve-market-btn',
+        'wrap-cspr-btn', 'unwrap-cspr-btn', 'unwrap-max-btn',
         'long-close-25', 'long-close-50', 'long-close-75', 'long-close-100',
         'short-close-25', 'short-close-50', 'short-close-75', 'short-close-100'
     ];
@@ -182,8 +217,8 @@ function disableTradingControls(message) {
 function enableTradingControls() {
     const tradingButtons = [
         'deposit-long-btn', 'withdraw-long-btn', 'deposit-short-btn', 'withdraw-short-btn',
-        'faucet-btn', 'approve-market-btn', 'update-price-btn',
-        'wrap-cspr-btn', 'unwrap-cspr-btn',
+        'faucet-btn', 'approve-market-btn',
+        'wrap-cspr-btn', 'unwrap-cspr-btn', 'unwrap-max-btn',
         'long-close-25', 'long-close-50', 'long-close-75', 'long-close-100',
         'short-close-25', 'short-close-50', 'short-close-75', 'short-close-100'
     ];

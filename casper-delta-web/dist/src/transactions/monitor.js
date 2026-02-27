@@ -21,10 +21,11 @@ export function disableTransactionButtons() {
     dom.faucetBtn.disabled = true;
     dom.wrapCsprBtn.disabled = true;
     dom.unwrapCsprBtn.disabled = true;
+    dom.unwrapMaxBtn.disabled = true;
     dom.approveMarketBtn.disabled = true;
     // Add visual disabled state
     const buttons = [dom.depositLongBtn, dom.withdrawLongBtn, dom.depositShortBtn, dom.withdrawShortBtn,
-        dom.updatePriceBtn, dom.faucetBtn, dom.wrapCsprBtn, dom.unwrapCsprBtn, dom.approveMarketBtn];
+        dom.faucetBtn, dom.wrapCsprBtn, dom.unwrapCsprBtn, dom.unwrapMaxBtn, dom.approveMarketBtn];
     buttons.forEach(btn => {
         btn.classList.add('opacity-50', 'cursor-not-allowed');
     });
@@ -42,10 +43,11 @@ export function enableTransactionButtons() {
     dom.faucetBtn.disabled = false;
     dom.wrapCsprBtn.disabled = false;
     dom.unwrapCsprBtn.disabled = false;
+    dom.unwrapMaxBtn.disabled = false;
     dom.approveMarketBtn.disabled = false;
     // Remove visual disabled state
     const buttons = [dom.depositLongBtn, dom.withdrawLongBtn, dom.depositShortBtn, dom.withdrawShortBtn,
-        dom.updatePriceBtn, dom.faucetBtn, dom.wrapCsprBtn, dom.unwrapCsprBtn, dom.approveMarketBtn];
+        dom.faucetBtn, dom.wrapCsprBtn, dom.unwrapCsprBtn, dom.unwrapMaxBtn, dom.approveMarketBtn];
     buttons.forEach(btn => {
         btn.classList.remove('opacity-50', 'cursor-not-allowed');
     });

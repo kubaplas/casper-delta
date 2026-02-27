@@ -1,12 +1,11 @@
 import * as dom from "../dom.js";
 import { getErrorDescription } from "../config.js";
 import { showError, showErrorWithTransaction, showTransaction } from "../ui/modals.js";
-import { enableTransactionButtons, cleanup, setCurrentTransaction } from "./monitor.js";
-// Import data refresh function (will be defined in data/fetch.ts)
-// This creates a circular dependency which we'll resolve using dynamic import
-let refreshAllDataConsolidated;
+import { enableTransactionButtons, cleanup, hideTransactionPopup, setCurrentTransaction } from "./monitor.js";
+// Injected from main.ts to break a circular dependency with data/fetch.ts
+let refreshAllData;
 export function setRefreshFunction(fn) {
-    refreshAllDataConsolidated = fn;
+    refreshAllData = fn;
 }
 // ---------- Transaction Outcome Handlers ----------
 /**
@@ -34,8 +33,8 @@ export async function onTransactionSuccessFromCsprClick(data) {
         // Wait a moment for blockchain data to be available
         await new Promise(resolve => setTimeout(resolve, 2000));
         // Refresh all data and wait for completion
-        if (refreshAllDataConsolidated) {
-            await refreshAllDataConsolidated();
+        if (refreshAllData) {
+            await refreshAllData();
         }
         dom.txProgressTime.textContent = "✅ Data refreshed successfully";
     }
@@ -53,7 +52,7 @@ export async function onTransactionSuccessFromCsprClick(data) {
  * Handle failed transaction from CSPR.click
  */
 export async function onTransactionFailureFromCsprClick(data) {
-    console.error("Transaction failed from CSPR.click:", data);
+    console.error("Transaction failed:", data.error || data.errorCode || "unknown");
     // Update UI to show failure
     dom.txProgressBar.style.width = "100%";
     dom.txProgressBar.classList.remove("from-blue-500", "to-blue-600");
@@ -68,6 +67,9 @@ export async function onTransactionFailureFromCsprClick(data) {
         const error = data.error;
         const errorCode = data.errorCode;
         const isCancelled = data.isCancelled;
+        // Also check TransactionData's errorMessage if available
+        const transactionData = data.data;
+        const dataErrorMessage = transactionData?.errorMessage;
         // Check if transaction was cancelled
         if (isCancelled) {
             errorMsg = "Transaction was cancelled by user";
@@ -82,6 +84,10 @@ export async function onTransactionFailureFromCsprClick(data) {
                     errorMsg = description;
                 }
             }
+        }
+        else if (dataErrorMessage) {
+            // Use error message from TransactionData if available
+            errorMsg = dataErrorMessage;
         }
         else if (errorCode !== null && errorCode !== undefined) {
             // We have an error code but no error message
@@ -127,8 +133,8 @@ export async function onTransactionFailureFromCsprClick(data) {
             // Wait a moment for blockchain data to be available
             await new Promise(resolve => setTimeout(resolve, 1000));
             // Refresh all data even though transaction failed
-            if (refreshAllDataConsolidated) {
-                await refreshAllDataConsolidated();
+            if (refreshAllData) {
+                await refreshAllData();
             }
         }
         catch (error) {
@@ -143,7 +149,8 @@ export async function onTransactionFailureFromCsprClick(data) {
 }
 /**
  * Helper method to determine if we should refresh data on failure
- */ export function shouldRefreshDataOnFailure(errorMsg) {
+ */
+function shouldRefreshDataOnFailure(errorMsg) {
     // For certain errors, we might want to refresh to get the latest state
     // even though the transaction failed
     const refreshOnFailureErrors = [
@@ -193,9 +200,7 @@ export function onTransactionCancelled() {
  * Handle pre-submission transaction failure
  */
 export function onTransactionSentFailure(error, message) {
-    import("./monitor.js").then(({ hideTransactionPopup }) => {
-        hideTransactionPopup();
-    });
+    hideTransactionPopup();
     enableTransactionButtons();
     showError(`${message}: ${error.message || error}`);
 }

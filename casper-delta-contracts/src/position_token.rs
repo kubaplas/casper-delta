@@ -1,11 +1,11 @@
-use odra::{casper_types::U256, prelude::*, ContractRef};
-use odra_modules::access::AccessControl;
-use odra_modules::cep96::{Cep96, Cep96ContractMetadata};
-use odra_modules::{cep18::errors::Error as Cep18Error, cep18_token::Cep18};
-
 use crate::market::{MarketContractRef, MarketError};
 use crate::position_token::PositionTokenError::Misconfigured;
 use crate::roles::ShortsRole;
+use odra::{casper_types::U256, prelude::*, ContractRef};
+use odra_modules::access::AccessControl;
+use odra_modules::cep18::events::Transfer;
+use odra_modules::cep96::{Cep96, Cep96ContractMetadata};
+use odra_modules::{cep18::errors::Error as Cep18Error, cep18_token::Cep18};
 
 const CONTRACT_ICON_URI: &str = "https://casper-delta.kubaplas.pl/favicon.png";
 const CONTRACT_PROJECT_URI: &str = "https://casper-delta.kubaplas.pl/";
@@ -88,6 +88,11 @@ impl PositionToken {
                 self.env().revert(PositionTokenError::PeerTransfersDisabled);
             }
             self.token.raw_transfer(&sender, &recipient, &amount);
+            self.env().emit_event(Transfer {
+                sender,
+                recipient: *recipient,
+                amount: *amount
+            });
         }
     }
 
