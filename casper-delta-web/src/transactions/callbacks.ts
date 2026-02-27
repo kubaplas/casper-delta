@@ -34,6 +34,7 @@ export function setupCsprClickCallbacks(): void {
     }
     
     CsprClickCallbacks.onSignedIn(async (accountInfo: AccountInfo) => {
+        console.log("[TRACE] CsprClick.onSignedIn fired");
         setAccount(accountInfo);
         if (onConnectFn) {
             await onConnectFn();
@@ -41,6 +42,7 @@ export function setupCsprClickCallbacks(): void {
     });
 
     CsprClickCallbacks.onSwitchedAccount(async (accountInfo: AccountInfo) => {
+        console.log("[TRACE] CsprClick.onSwitchedAccount fired");
         setAccount(accountInfo);
         if (onConnectFn) {
             await onConnectFn();
@@ -48,6 +50,7 @@ export function setupCsprClickCallbacks(): void {
     });
 
     CsprClickCallbacks.onSignedOut(() => {
+        console.log("[TRACE] CsprClick.onSignedOut fired");
         if (onDisconnectFn) {
             onDisconnectFn();
         }

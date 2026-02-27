@@ -24,7 +24,8 @@ export async function connect(): Promise<void> {
 /**
  * Handle successful connection
  */
-export async function onConnect(): Promise<void> {
+export async function onConnect(skipDataLoad: boolean = false): Promise<void> {
+    console.log("[TRACE] onConnect called, skipDataLoad =", skipDataLoad);
     // Reset disconnect guard when connecting
     isDisconnecting = false;
     
@@ -45,10 +46,16 @@ export async function onConnect(): Promise<void> {
     disableReadOnlyMode();
     disableDisconnectedMode();
 
-    // Small delay to ensure UI has time to clear before fetching new data
-    await new Promise(resolve => setTimeout(resolve, 100));
+    if (!skipDataLoad) {
+        // Small delay to ensure UI has time to clear before fetching new data
+        await new Promise(resolve => setTimeout(resolve, 100));
 
-    await refreshAllData();
+        console.log("[TRACE] onConnect: calling refreshAllData");
+        await refreshAllData();
+        console.log("[TRACE] onConnect: refreshAllData done");
+    } else {
+        console.log("[TRACE] onConnect: skipped data load");
+    }
 }
 
 /**
@@ -72,11 +79,18 @@ export async function disconnect(): Promise<void> {
     setAddress(null);
     setBalances(null);
 
-    // Clear user-specific data but keep market data
+    // Clear all user-specific data
     dom.wcsprBalanceSpan.textContent = "—";
-    dom.longTokenBalancePortfolio.textContent = "— WCSPR";
-    dom.shortTokenBalancePortfolio.textContent = "— WCSPR";
+    dom.wcsprBalanceUnwrap.textContent = "—";
+    dom.wcsprBalanceLong.textContent = "—";
+    dom.wcsprBalanceShort.textContent = "—";
+    dom.csprBalanceSpan.textContent = "—";
+    dom.longTokenBalancePortfolio.textContent = "—";
+    dom.shortTokenBalancePortfolio.textContent = "—";
+    dom.longPositionValueDisplay.textContent = "—";
+    dom.shortPositionValueDisplay.textContent = "—";
     dom.marketAllowanceSpan.textContent = "—";
+    dom.marketAllowanceOverview.textContent = "—";
     dom.totalPositionValueSpan.textContent = "—";
 
     hideTransaction();

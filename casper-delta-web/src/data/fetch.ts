@@ -126,8 +126,10 @@ let isRefreshingMarketState = false;
  * Refresh all data using consolidated endpoint
  */
 export async function refreshAllDataConsolidated(): Promise<void> {
+    console.log("[TRACE] refreshAllDataConsolidated called, connected =", connected, ", address =", !!address);
     if (!connected || !address) {
         // If not connected, only refresh market state for price display
+        console.log("[TRACE] refreshAllDataConsolidated: not connected, delegating to refreshMarketStateOnly");
         await refreshMarketStateOnly();
         return;
     }
@@ -158,6 +160,7 @@ export async function refreshAllDataConsolidated(): Promise<void> {
         setGas(HIGH_GAS_AMOUNT);
 
         // Single call to get all data
+        console.log("[TRACE] refreshAllDataConsolidated: calling getAddressMarketState");
         const addressMarketState = await executeWithRetry(() =>
             market.getAddressMarketState(caller)
         );
@@ -169,10 +172,8 @@ export async function refreshAllDataConsolidated(): Promise<void> {
         });
 
         // Update all UI elements from the consolidated data
+        console.log("[TRACE] refreshAllDataConsolidated: getAddressMarketState returned, updating UI");
         updateUIFromConsolidatedData();
-
-        // Fetch native CSPR balance (separate RPC call)
-        await refreshCsprBalance();
 
     } catch (e: any) {
         console.error("Failed to fetch consolidated data:", e);
@@ -187,16 +188,20 @@ export async function refreshAllDataConsolidated(): Promise<void> {
         // Set fallback values
         setFallbackValues();
     } finally {
-        // Hide all loaders and show values
+        // Hide all loaders and show values immediately (don't wait for CSPR balance)
         hideAllLoaders();
         isRefreshingAllData = false;
     }
+
+    // Fetch native CSPR balance separately (non-blocking for UI)
+    refreshCsprBalance().catch(e => console.warn("Failed to fetch CSPR balance:", e));
 }
 
 /**
  * Refresh market state only (for read-only mode)
  */
 export async function refreshMarketStateOnly(): Promise<void> {
+    console.log("[TRACE] refreshMarketStateOnly called");
     // Prevent re-entrant calls
     if (isRefreshingMarketState) {
         console.log("Market state refresh already in progress, skipping duplicate call");
@@ -217,7 +222,9 @@ export async function refreshMarketStateOnly(): Promise<void> {
     try {
         // Set higher gas limit for market data fetching
         setGas(HIGH_GAS_AMOUNT);
+        console.log("[TRACE] refreshMarketStateOnly: calling getMarketState");
         const marketState = await executeWithRetry(() => market.getMarketState());
+        console.log("[TRACE] refreshMarketStateOnly: getMarketState returned, updating UI");
 
         setMarketState(marketState);
 
@@ -289,6 +296,7 @@ export async function refreshCsprBalance(): Promise<void> {
  * Update UI from consolidated data
  */
 function updateUIFromConsolidatedData(): void {
+    console.log("[TRACE] updateUIFromConsolidatedData called");
     if (!consolidatedData) return;
 
     const data = consolidatedData.addressMarketState;
@@ -363,6 +371,7 @@ function updateUIFromConsolidatedData(): void {
  * Set fallback values for all UI elements
  */
 export function setFallbackValues(): void {
+    console.log("[TRACE] setFallbackValues called", new Error().stack?.split('\n').slice(1,3).join(' <- '));
     // Market state fallbacks
     dom.currentPriceSpan.textContent = "—";
     dom.longLiquiditySpan.textContent = "—";

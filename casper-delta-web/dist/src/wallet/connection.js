@@ -21,7 +21,8 @@ export async function connect() {
 /**
  * Handle successful connection
  */
-export async function onConnect() {
+export async function onConnect(skipDataLoad = false) {
+    console.log("[TRACE] onConnect called, skipDataLoad =", skipDataLoad);
     // Reset disconnect guard when connecting
     isDisconnecting = false;
     setConnected(true);
@@ -39,9 +40,16 @@ export async function onConnect() {
     // Disable read-only mode or disconnected mode if they were enabled
     disableReadOnlyMode();
     disableDisconnectedMode();
-    // Small delay to ensure UI has time to clear before fetching new data
-    await new Promise(resolve => setTimeout(resolve, 100));
-    await refreshAllData();
+    if (!skipDataLoad) {
+        // Small delay to ensure UI has time to clear before fetching new data
+        await new Promise(resolve => setTimeout(resolve, 100));
+        console.log("[TRACE] onConnect: calling refreshAllData");
+        await refreshAllData();
+        console.log("[TRACE] onConnect: refreshAllData done");
+    }
+    else {
+        console.log("[TRACE] onConnect: skipped data load");
+    }
 }
 /**
  * Disconnect wallet
@@ -62,11 +70,18 @@ export async function disconnect() {
     setConnected(false);
     setAddress(null);
     setBalances(null);
-    // Clear user-specific data but keep market data
+    // Clear all user-specific data
     dom.wcsprBalanceSpan.textContent = "—";
-    dom.longTokenBalancePortfolio.textContent = "— WCSPR";
-    dom.shortTokenBalancePortfolio.textContent = "— WCSPR";
+    dom.wcsprBalanceUnwrap.textContent = "—";
+    dom.wcsprBalanceLong.textContent = "—";
+    dom.wcsprBalanceShort.textContent = "—";
+    dom.csprBalanceSpan.textContent = "—";
+    dom.longTokenBalancePortfolio.textContent = "—";
+    dom.shortTokenBalancePortfolio.textContent = "—";
+    dom.longPositionValueDisplay.textContent = "—";
+    dom.shortPositionValueDisplay.textContent = "—";
     dom.marketAllowanceSpan.textContent = "—";
+    dom.marketAllowanceOverview.textContent = "—";
     dom.totalPositionValueSpan.textContent = "—";
     hideTransaction();
     // Show connect button and disable trading functionality

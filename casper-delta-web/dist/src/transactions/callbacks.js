@@ -23,18 +23,21 @@ export function setupCsprClickCallbacks() {
         return;
     }
     CsprClickCallbacks.onSignedIn(async (accountInfo) => {
+        console.log("[TRACE] CsprClick.onSignedIn fired");
         setAccount(accountInfo);
         if (onConnectFn) {
             await onConnectFn();
         }
     });
     CsprClickCallbacks.onSwitchedAccount(async (accountInfo) => {
+        console.log("[TRACE] CsprClick.onSwitchedAccount fired");
         setAccount(accountInfo);
         if (onConnectFn) {
             await onConnectFn();
         }
     });
     CsprClickCallbacks.onSignedOut(() => {
+        console.log("[TRACE] CsprClick.onSignedOut fired");
         if (onDisconnectFn) {
             onDisconnectFn();
         }

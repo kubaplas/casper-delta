@@ -23,6 +23,35 @@ import { updateLongCloseAmount, updateShortCloseAmount, handleLongCloseManualInp
 // Wallet connection
 import { connect, disconnect, onConnect, enableDisconnectedMode } from "./wallet/connection.js";
 import { setCurrentLongCloseAmount, setCurrentShortCloseAmount } from "./data/state.js";
+// Track whether CSPR.click auto-restored a wallet session during init
+let walletRestoredDuringInit = false;
+let resolveWalletCheck = null;
+// During init phase: do UI setup only, don't load data (run() will handle it)
+async function onConnectInitPhase() {
+    console.log("[TRACE] onConnectInitPhase called");
+    walletRestoredDuringInit = true;
+    await onConnect(true);
+    // Resolve the wait immediately — no need to wait the full timeout
+    if (resolveWalletCheck) {
+        resolveWalletCheck();
+        resolveWalletCheck = null;
+    }
+}
+/**
+ * Wait for CSPR.click to potentially auto-restore a session.
+ * Resolves immediately if onSignedIn fires, or after timeout.
+ */
+function waitForWalletRestore(timeoutMs = 2000) {
+    if (walletRestoredDuringInit)
+        return Promise.resolve();
+    return new Promise(resolve => {
+        resolveWalletCheck = resolve;
+        setTimeout(() => {
+            resolveWalletCheck = null;
+            resolve();
+        }, timeoutMs);
+    });
+}
 // ---------- Client Initialization ----------
 async function initializeClients() {
     // Initialize WASM
@@ -32,7 +61,8 @@ async function initializeClients() {
     // Set up CSPR.click callbacks after WASM is initialized
     setupCsprClickCallbacks();
     // Set onConnect and disconnect callbacks
-    setOnConnectCallback(onConnect);
+    // During init, use the init-phase callback that skips data loading
+    setOnConnectCallback(onConnectInitPhase);
     setOnDisconnectCallback(disconnect);
     // Initialize position closing amounts
     setCurrentLongCloseAmount(U256.fromNumber(0));
@@ -198,7 +228,8 @@ async function run() {
         dom.connectBtn.textContent = "Connect Wallet";
         if (dom.marketStatusSpan)
             dom.marketStatusSpan.textContent = "Ready";
-        // Initialize and refresh chart
+        console.log("[TRACE] run(): before chart init, walletRestoredDuringInit =", walletRestoredDuringInit);
+        // Initialize and refresh chart (independent of data loading)
         if (isMarketGraphVisible()) {
             try {
                 const chart = new MarketChart('market-chart');
@@ -219,6 +250,34 @@ async function run() {
                 chartSection.style.display = 'none';
             }
         }
+        console.log("[TRACE] run(): after chart init, walletRestoredDuringInit =", walletRestoredDuringInit);
+        // Wait for CSPR.click to potentially auto-restore a wallet session.
+        // Resolves immediately if onSignedIn already fired, or after 2s timeout.
+        console.log("[TRACE] run(): waiting for CSPR.click session restore...");
+        await waitForWalletRestore();
+        console.log("[TRACE] run(): wait done, walletRestoredDuringInit =", walletRestoredDuringInit);
+        // Make exactly one data call based on connection state.
+        if (walletRestoredDuringInit) {
+            console.log("[TRACE] run(): wallet restored, calling refreshAllData (single call)");
+            try {
+                await refreshAllData();
+            }
+            catch (e) {
+                console.warn("Failed to load initial data:", e);
+            }
+        }
+        else {
+            console.log("[TRACE] run(): no wallet, calling refreshMarketStateOnly (single call)");
+            try {
+                await refreshMarketStateOnly();
+            }
+            catch (e) {
+                console.warn("Failed to load initial market data:", e);
+            }
+        }
+        console.log("[TRACE] run(): switching to normal onConnect callback");
+        // Switch to normal onConnect for all subsequent connections
+        setOnConnectCallback(onConnect);
     }
     catch (err) {
         console.error("Failed to initialize:", err);
