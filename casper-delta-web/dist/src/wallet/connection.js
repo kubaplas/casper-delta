@@ -131,7 +131,7 @@ export function enableReadOnlyMode() {
     }
     dom.disconnectSection.appendChild(readOnlyIndicator);
     // Disable all trading buttons
-    disableTradingControls("Connect wallet to enable trading");
+    disableTradingControls("Sign in to enable trading");
     // Update market status
     if (dom.marketStatusSpan) {
         dom.marketStatusSpan.textContent = "Read-Only";
@@ -154,7 +154,7 @@ export function enableDisconnectedMode() {
     dom.connectBtn.classList.remove("hidden");
     dom.disconnectSection.classList.add("hidden");
     // Disable all trading controls
-    disableTradingControls("Connect wallet to enable trading");
+    disableTradingControls("Sign in to enable trading");
     // Update market status
     if (dom.marketStatusSpan) {
         dom.marketStatusSpan.textContent = "Disconnected";

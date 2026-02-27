@@ -225,7 +225,7 @@ async function run() {
         setupEventListeners();
         // Enable the connect button now that everything is loaded
         dom.connectBtn.disabled = false;
-        dom.connectBtn.textContent = "Connect Wallet";
+        dom.connectBtn.textContent = "Sign In";
         if (dom.marketStatusSpan)
             dom.marketStatusSpan.textContent = "Ready";
         console.log("[TRACE] run(): before chart init, walletRestoredDuringInit =", walletRestoredDuringInit);
