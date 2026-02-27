@@ -91,13 +91,12 @@ async function executeWithRetry(fn, maxRetries = 3) {
 let isRefreshingAllData = false;
 let isRefreshingMarketState = false;
 /**
- * Refresh all data using consolidated endpoint
+ * Refresh all data in a single RPC call.
+ * If not connected, falls back to refreshMarketStateOnly.
  */
-export async function refreshAllDataConsolidated() {
-    console.log("[TRACE] refreshAllDataConsolidated called, connected =", connected, ", address =", !!address);
+export async function refreshAllData() {
     if (!connected || !address) {
         // If not connected, only refresh market state for price display
-        console.log("[TRACE] refreshAllDataConsolidated: not connected, delegating to refreshMarketStateOnly");
         await refreshMarketStateOnly();
         return;
     }
@@ -110,19 +109,11 @@ export async function refreshAllDataConsolidated() {
     // Show all loaders
     showAllLoaders();
     try {
-        // Get caller address from state (set during onConnect)
-        if (!address) {
-            console.warn("No address available for data fetch");
-            setFallbackValues();
-            return;
-        }
         // Convert public key string to Address type
-        // The address from cspr.click is a raw public key hex string
         const caller = Address.fromPublicKey(address);
         // Set higher gas limit for complex data fetching operation
         setGas(HIGH_GAS_AMOUNT);
         // Single call to get all data
-        console.log("[TRACE] refreshAllDataConsolidated: calling getAddressMarketState");
         const addressMarketState = await executeWithRetry(() => market.getAddressMarketState(caller));
         // Store the consolidated data
         setConsolidatedData({
@@ -130,7 +121,6 @@ export async function refreshAllDataConsolidated() {
             lastUpdated: Date.now()
         });
         // Update all UI elements from the consolidated data
-        console.log("[TRACE] refreshAllDataConsolidated: getAddressMarketState returned, updating UI");
         updateUIFromConsolidatedData();
     }
     catch (e) {
@@ -153,11 +143,16 @@ export async function refreshAllDataConsolidated() {
     // Fetch native CSPR balance separately (non-blocking for UI)
     refreshCsprBalance().catch(e => console.warn("Failed to fetch CSPR balance:", e));
 }
+// Dummy ed25519 public key used to query getAddressMarketState without a real wallet.
+// The address-specific fields (balances, allowances) are simply ignored.
+const DUMMY_PUBLIC_KEY = "01" + "0".repeat(64);
 /**
- * Refresh market state only (for read-only mode)
+ * Refresh market state only (for read-only / not-signed-in mode).
+ * Uses getAddressMarketState with a dummy address so we get the current
+ * oracle price instead of the stale price stored in the contract.
+ * Only price, liquidity and total market value are displayed.
  */
 export async function refreshMarketStateOnly() {
-    console.log("[TRACE] refreshMarketStateOnly called");
     // Prevent re-entrant calls
     if (isRefreshingMarketState) {
         console.log("Market state refresh already in progress, skipping duplicate call");
@@ -174,17 +169,17 @@ export async function refreshMarketStateOnly() {
     dom.shortLiquidityLoader.classList.remove("hidden");
     dom.totalMarketValueLoader.classList.remove("hidden");
     try {
-        // Set higher gas limit for market data fetching
+        // Set higher gas limit for data fetching
         setGas(HIGH_GAS_AMOUNT);
-        console.log("[TRACE] refreshMarketStateOnly: calling getMarketState");
-        const marketState = await executeWithRetry(() => market.getMarketState());
-        console.log("[TRACE] refreshMarketStateOnly: getMarketState returned, updating UI");
-        setMarketState(marketState);
-        dom.currentPriceSpan.textContent = formatDollarPrice(marketState.price);
-        dom.longLiquiditySpan.textContent = formatNumber(marketState.long_liquidity);
-        dom.shortLiquiditySpan.textContent = formatNumber(marketState.short_liquidity);
+        const dummyAddress = Address.fromPublicKey(DUMMY_PUBLIC_KEY);
+        const data = await executeWithRetry(() => market.getAddressMarketState(dummyAddress));
+        const ms = data.marketState;
+        setMarketState(ms);
+        dom.currentPriceSpan.textContent = formatDollarPrice(ms.price);
+        dom.longLiquiditySpan.textContent = formatNumber(ms.long_liquidity);
+        dom.shortLiquiditySpan.textContent = formatNumber(ms.short_liquidity);
         // Compute and display total market value
-        const totalMarketValue = marketState.long_liquidity.add(marketState.short_liquidity);
+        const totalMarketValue = ms.long_liquidity.add(ms.short_liquidity);
         dom.totalMarketValueSpan.textContent = formatNumber(totalMarketValue) + " WCSPR";
     }
     catch (e) {
@@ -244,7 +239,6 @@ export async function refreshCsprBalance() {
  * Update UI from consolidated data
  */
 function updateUIFromConsolidatedData() {
-    console.log("[TRACE] updateUIFromConsolidatedData called");
     if (!consolidatedData)
         return;
     const data = consolidatedData.addressMarketState;
@@ -312,7 +306,6 @@ function updateUIFromConsolidatedData() {
  * Set fallback values for all UI elements
  */
 export function setFallbackValues() {
-    console.log("[TRACE] setFallbackValues called", new Error().stack?.split('\n').slice(1, 3).join(' <- '));
     // Market state fallbacks
     dom.currentPriceSpan.textContent = "—";
     dom.longLiquiditySpan.textContent = "—";
@@ -327,10 +320,4 @@ export function setFallbackValues() {
     dom.wcsprBalanceShort.textContent = "—";
     // Position fallbacks
     dom.totalPositionValueSpan.textContent = "—";
-}
-/**
- * Refresh all application data.
- */
-export async function refreshAllData() {
-    await refreshAllDataConsolidated();
 }

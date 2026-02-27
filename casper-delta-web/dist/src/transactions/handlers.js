@@ -2,11 +2,10 @@ import * as dom from "../dom.js";
 import { getErrorDescription } from "../config.js";
 import { showError, showErrorWithTransaction, showTransaction } from "../ui/modals.js";
 import { enableTransactionButtons, cleanup, hideTransactionPopup, setCurrentTransaction } from "./monitor.js";
-// Import data refresh function (will be defined in data/fetch.ts)
-// This creates a circular dependency which we'll resolve using dynamic import
-let refreshAllDataConsolidated;
+// Injected from main.ts to break a circular dependency with data/fetch.ts
+let refreshAllData;
 export function setRefreshFunction(fn) {
-    refreshAllDataConsolidated = fn;
+    refreshAllData = fn;
 }
 // ---------- Transaction Outcome Handlers ----------
 /**
@@ -34,8 +33,8 @@ export async function onTransactionSuccessFromCsprClick(data) {
         // Wait a moment for blockchain data to be available
         await new Promise(resolve => setTimeout(resolve, 2000));
         // Refresh all data and wait for completion
-        if (refreshAllDataConsolidated) {
-            await refreshAllDataConsolidated();
+        if (refreshAllData) {
+            await refreshAllData();
         }
         dom.txProgressTime.textContent = "✅ Data refreshed successfully";
     }
@@ -134,8 +133,8 @@ export async function onTransactionFailureFromCsprClick(data) {
             // Wait a moment for blockchain data to be available
             await new Promise(resolve => setTimeout(resolve, 1000));
             // Refresh all data even though transaction failed
-            if (refreshAllDataConsolidated) {
-                await refreshAllDataConsolidated();
+            if (refreshAllData) {
+                await refreshAllData();
             }
         }
         catch (error) {

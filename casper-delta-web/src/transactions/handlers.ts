@@ -4,12 +4,11 @@ import { getErrorDescription } from "../config.js";
 import { showError, showErrorWithTransaction, showTransaction } from "../ui/modals.js";
 import { enableTransactionButtons, cleanup, hideTransactionPopup, setCurrentTransaction } from "./monitor.js";
 
-// Import data refresh function (will be defined in data/fetch.ts)
-// This creates a circular dependency which we'll resolve using dynamic import
-let refreshAllDataConsolidated: () => Promise<void>;
+// Injected from main.ts to break a circular dependency with data/fetch.ts
+let refreshAllData: () => Promise<void>;
 
 export function setRefreshFunction(fn: () => Promise<void>): void {
-    refreshAllDataConsolidated = fn;
+    refreshAllData = fn;
 }
 
 // ---------- Transaction Outcome Handlers ----------
@@ -42,8 +41,8 @@ export async function onTransactionSuccessFromCsprClick(data: TransactionResult)
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         // Refresh all data and wait for completion
-        if (refreshAllDataConsolidated) {
-            await refreshAllDataConsolidated();
+        if (refreshAllData) {
+            await refreshAllData();
         }
         dom.txProgressTime.textContent = "✅ Data refreshed successfully";
     } catch (error: any) {
@@ -151,8 +150,8 @@ export async function onTransactionFailureFromCsprClick(data: TransactionResult)
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Refresh all data even though transaction failed
-            if (refreshAllDataConsolidated) {
-                await refreshAllDataConsolidated();
+            if (refreshAllData) {
+                await refreshAllData();
             }
         } catch (error: any) {
             console.error("Error refreshing data after transaction failure:", error);

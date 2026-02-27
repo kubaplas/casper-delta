@@ -25,7 +25,6 @@ export async function connect(): Promise<void> {
  * Handle successful connection
  */
 export async function onConnect(skipDataLoad: boolean = false): Promise<void> {
-    console.log("[TRACE] onConnect called, skipDataLoad =", skipDataLoad);
     // Reset disconnect guard when connecting
     isDisconnecting = false;
     
@@ -50,11 +49,7 @@ export async function onConnect(skipDataLoad: boolean = false): Promise<void> {
         // Small delay to ensure UI has time to clear before fetching new data
         await new Promise(resolve => setTimeout(resolve, 100));
 
-        console.log("[TRACE] onConnect: calling refreshAllData");
         await refreshAllData();
-        console.log("[TRACE] onConnect: refreshAllData done");
-    } else {
-        console.log("[TRACE] onConnect: skipped data load");
     }
 }
 

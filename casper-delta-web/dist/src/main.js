@@ -28,7 +28,6 @@ let walletRestoredDuringInit = false;
 let resolveWalletCheck = null;
 // During init phase: do UI setup only, don't load data (run() will handle it)
 async function onConnectInitPhase() {
-    console.log("[TRACE] onConnectInitPhase called");
     walletRestoredDuringInit = true;
     await onConnect(true);
     // Resolve the wait immediately — no need to wait the full timeout
@@ -228,7 +227,6 @@ async function run() {
         dom.connectBtn.textContent = "Sign In";
         if (dom.marketStatusSpan)
             dom.marketStatusSpan.textContent = "Ready";
-        console.log("[TRACE] run(): before chart init, walletRestoredDuringInit =", walletRestoredDuringInit);
         // Initialize and refresh chart (independent of data loading)
         if (isMarketGraphVisible()) {
             try {
@@ -250,15 +248,11 @@ async function run() {
                 chartSection.style.display = 'none';
             }
         }
-        console.log("[TRACE] run(): after chart init, walletRestoredDuringInit =", walletRestoredDuringInit);
         // Wait for CSPR.click to potentially auto-restore a wallet session.
         // Resolves immediately if onSignedIn already fired, or after 2s timeout.
-        console.log("[TRACE] run(): waiting for CSPR.click session restore...");
         await waitForWalletRestore();
-        console.log("[TRACE] run(): wait done, walletRestoredDuringInit =", walletRestoredDuringInit);
         // Make exactly one data call based on connection state.
         if (walletRestoredDuringInit) {
-            console.log("[TRACE] run(): wallet restored, calling refreshAllData (single call)");
             try {
                 await refreshAllData();
             }
@@ -267,7 +261,6 @@ async function run() {
             }
         }
         else {
-            console.log("[TRACE] run(): no wallet, calling refreshMarketStateOnly (single call)");
             try {
                 await refreshMarketStateOnly();
             }
@@ -275,7 +268,6 @@ async function run() {
                 console.warn("Failed to load initial market data:", e);
             }
         }
-        console.log("[TRACE] run(): switching to normal onConnect callback");
         // Switch to normal onConnect for all subsequent connections
         setOnConnectCallback(onConnect);
     }
