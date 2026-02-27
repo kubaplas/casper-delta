@@ -180,6 +180,21 @@ function setupEventListeners(): void {
         dom.addressDropdownMenu.classList.add("hidden");
     });
 
+    // Price info popup toggle
+    const priceInfoBtn = document.getElementById("price-info-btn");
+    const priceInfoPopup = document.getElementById("price-info-popup");
+    if (priceInfoBtn && priceInfoPopup) {
+        priceInfoBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            priceInfoPopup.classList.toggle("hidden");
+        });
+        document.addEventListener("click", (e) => {
+            if (!priceInfoPopup.contains(e.target as Node)) {
+                priceInfoPopup.classList.add("hidden");
+            }
+        });
+    }
+
     // Trading buttons
     dom.depositLongBtn.addEventListener("click", depositLong);
     dom.withdrawLongBtn.addEventListener("click", withdrawLong);

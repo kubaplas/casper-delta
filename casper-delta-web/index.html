@@ -96,7 +96,25 @@
       <!-- Market Price -->
       <div
         class="lg:col-span-1 bg-gradient-to-br from-amber-50 to-orange-100 dark:from-slate-800 dark:to-slate-900 p-6 rounded-xl border border-amber-200 dark:border-slate-700 shadow-sm transition-colors duration-300">
-        <div class="text-sm text-amber-700 dark:text-amber-500 font-medium mb-2">WCSPR Price</div>
+        <div class="text-sm text-amber-700 dark:text-amber-500 font-medium mb-2 flex items-center gap-1 relative">
+          WCSPR Price
+          <button id="price-info-btn" type="button"
+             class="inline-flex items-center text-amber-500 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"/>
+            </svg>
+          </button>
+          <div id="price-info-popup"
+               class="hidden absolute left-0 top-full mt-2 z-50 w-64 p-3 rounded-lg shadow-lg border
+                      bg-white dark:bg-slate-800 border-amber-200 dark:border-slate-600
+                      text-xs text-amber-800 dark:text-slate-200 leading-relaxed">
+            Live price sourced from the
+            <a href="https://styks.odra.dev" target="_blank" rel="noopener noreferrer"
+               class="font-semibold underline text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300">Styks oracle</a>
+            and used for all trading calculations.
+          </div>
+        </div>
         <div id="current-price" class="text-3xl font-bold text-amber-800 dark:text-slate-100">—</div>
         <div id="price-loader" class="text-sm text-amber-600 dark:text-amber-400 hidden">Loading...</div>
       </div>
