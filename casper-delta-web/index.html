@@ -29,9 +29,9 @@
 <body
   class="bg-gradient-to-br from-orange-50 to-amber-100 dark:from-slate-950 dark:to-slate-900 min-h-screen transition-colors duration-300">
   <div id="csprclick-ui"></div>
-  <!-- CSPR.click SDK - must load after #csprclick-ui exists but before main.js -->
+  <!-- CSPR.click SDK – cspr-click.js dynamically loads the CDN script and
+       exposes window.csprClickReady (a Promise) so the app can await it. -->
   <script src="cspr-click.js"></script>
-  <script src="https://cdn.cspr.click/ui/v1.13.1/csprclick-client-1.13.1.js"></script>
   <div
     class="bg-orange-50/90 dark:bg-slate-900/90 backdrop-blur-md rounded-none shadow-none border-none p-4 sm:p-6 sm:rounded-2xl sm:shadow-xl sm:border sm:border-orange-200 dark:border-slate-800 sm:max-w-6xl sm:mx-auto transition-colors duration-300">
     <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">

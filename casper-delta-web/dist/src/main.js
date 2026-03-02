@@ -209,18 +209,17 @@ function setupEventListeners() {
 // ---------- Application Entry Point ----------
 /**
  * Wait for CSPR.click SDK to be fully available.
- * The SDK loads synchronously before this module, but we add a safety check.
+ * cspr-click.js exposes window.csprClickReady — a Promise that resolves
+ * once the CDN script has loaded AND window.csprclick is initialised.
  */
-async function waitForCsprClick(maxWaitMs = 5000) {
+async function waitForCsprClick() {
     if (window.csprclick)
         return;
-    const startTime = Date.now();
-    while (!window.csprclick) {
-        if (Date.now() - startTime > maxWaitMs) {
-            throw new Error("CSPR.click SDK failed to load - please refresh the page");
-        }
-        await new Promise(resolve => setTimeout(resolve, 50));
+    const readyPromise = window.csprClickReady;
+    if (!readyPromise) {
+        throw new Error("CSPR.click bootstrap script (cspr-click.js) did not run — check script loading order");
     }
+    await readyPromise;
 }
 async function run() {
     try {
