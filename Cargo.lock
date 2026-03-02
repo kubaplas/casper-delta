@@ -2479,8 +2479,6 @@ dependencies = [
 [[package]]
 name = "odra"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91cf598dd0318ef3dc320ac95c528663921a39e33e10b57d6021d4d01616c4cc"
 dependencies = [
  "odra-casper-wasm-env",
  "odra-core",
@@ -2491,8 +2489,6 @@ dependencies = [
 [[package]]
 name = "odra-bdd"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a23084b7f7d585371e15adc8c9f667d481dc1f32efe6a50c97ee34b8e4c1d386"
 dependencies = [
  "cucumber",
  "futures",
@@ -2502,8 +2498,6 @@ dependencies = [
 [[package]]
 name = "odra-build"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe312fbe2c12ee9a66e1416370768336679acbde733e3d9c66214af664f15995"
 dependencies = [
  "serde",
  "serde_json",
@@ -2512,8 +2506,6 @@ dependencies = [
 [[package]]
 name = "odra-casper-livenet-env"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b4ba52152027c37f7d10eea6781d2a1674ecacd654ecd09525cb77a4897c66f"
 dependencies = [
  "anyhow",
  "blake2 0.10.6",
@@ -2529,8 +2521,6 @@ dependencies = [
 [[package]]
 name = "odra-casper-rpc-client"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fa91903113963c05d7ca5783ffc2d4e4e7f47bbd8c4708213e695b972a01a47"
 dependencies = [
  "base16",
  "bytes",
@@ -2553,8 +2543,6 @@ dependencies = [
 [[package]]
 name = "odra-casper-test-vm"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d60d0d80c0acde9ed22ddf9f9ea21f20ec5abb868c239e559faf7e5d8c94d635"
 dependencies = [
  "casper-contract",
  "casper-engine-test-support",
@@ -2566,8 +2554,6 @@ dependencies = [
 [[package]]
 name = "odra-casper-wasm-env"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b227d2f2afb9b648001404f53fe58c1efef6d0dc797ecb521f20bca12ce75e32"
 dependencies = [
  "casper-contract",
  "ink_allocator",
@@ -2578,8 +2564,6 @@ dependencies = [
 [[package]]
 name = "odra-cli"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "417c789a24b0cdf0efa8d5b6cdea9306bfa7388d6372212342f6479ec36dfdce"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2601,8 +2585,6 @@ dependencies = [
 [[package]]
 name = "odra-core"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69de2585912eea5c7c664a81c4d1f65cb5f0da16afaa240bc660797fbcea4ada"
 dependencies = [
  "anyhow",
  "casper-event-standard",
@@ -2617,8 +2599,6 @@ dependencies = [
 [[package]]
 name = "odra-macros"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1addbc59b2d8bb005babffbdf96e21cbf9b92f157d6fd3614ae4cc7cef33165"
 dependencies = [
  "convert_case 0.6.0",
  "derive-try-from-ref",
@@ -2632,8 +2612,6 @@ dependencies = [
 [[package]]
 name = "odra-modules"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be0e70a830cd548ee66889dc339179852117fc5093c65f26dbc14510396944b1"
 dependencies = [
  "base64 0.22.1",
  "odra",
@@ -2643,8 +2621,6 @@ dependencies = [
 [[package]]
 name = "odra-schema"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eaf1ea705e4133d77d30c86a2cd491a0837d8ea3ff27cb7f092452a1212b14bf"
 dependencies = [
  "casper-contract-schema",
  "casper-types",
@@ -2656,8 +2632,6 @@ dependencies = [
 [[package]]
 name = "odra-test"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14a9ffb7781ccd8eeaba7e54d3df7654ca870c9ecc123a50e75409207c4052e2"
 dependencies = [
  "odra-casper-test-vm",
  "odra-core",
@@ -2667,8 +2641,6 @@ dependencies = [
 [[package]]
 name = "odra-vm"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a11e89566dfa0f3567a527e5692dac73d0d0b11700d130bd9dcd0e4f76b66a6"
 dependencies = [
  "anyhow",
  "backtrace",
@@ -2680,8 +2652,6 @@ dependencies = [
 [[package]]
 name = "odra-wasm-client"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b01f6fff2e6997447818b3e4f5fe671353f3057b1de1aa0ac72b6424622beb91"
 dependencies = [
  "casper-client",
  "casper-types",
@@ -2700,8 +2670,6 @@ dependencies = [
 [[package]]
 name = "odra-wasm-client-builder"
 version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d9236cec067c060a3034c925199f8e5adb1a5a5ba372a73eb851d85238a6246"
 dependencies = [
  "convert_case 0.6.0",
  "odra-schema",
@@ -4048,7 +4016,6 @@ dependencies = [
 [[package]]
 name = "styks-blocky-parser"
 version = "0.1.0"
-source = "git+https://github.com/odradev/styks.git?branch=feature%2Fcasper-shorts-client#46c5b3b3912d17ca061e4174fea59e446abd3f27"
 dependencies = [
  "ethabi",
  "k256",
@@ -4060,7 +4027,6 @@ dependencies = [
 [[package]]
 name = "styks-contracts"
 version = "0.1.0"
-source = "git+https://github.com/odradev/styks.git?branch=feature%2Fcasper-shorts-client#46c5b3b3912d17ca061e4174fea59e446abd3f27"
 dependencies = [
  "odra",
  "odra-build",
@@ -4072,7 +4038,6 @@ dependencies = [
 [[package]]
 name = "styks-core"
 version = "0.1.0"
-source = "git+https://github.com/odradev/styks.git?branch=feature%2Fcasper-shorts-client#46c5b3b3912d17ca061e4174fea59e446abd3f27"
 dependencies = [
  "odra",
 ]

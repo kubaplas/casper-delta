@@ -937,29 +937,412 @@ pub enum WrappedNativeTokenErrors {
 #[doc = ""]
 #[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
 #[wasm_bindgen(getter_with_clone)]
-pub struct Config {
-    #[wasm_bindgen(js_name = "longToken")]
-    long_token: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "shortToken")]
-    short_token: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "wcsprToken")]
-    wcspr_token: odra_wasm_client::OdraAddress,
+pub struct IncreaseAllowance {
+    #[wasm_bindgen(js_name = "owner")]
+    owner: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "spender")]
+    spender: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "allowance")]
+    allowance: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "incBy")]
+    inc_by: odra_wasm_client::casper_types::U256,
+}
+#[wasm_bindgen]
+impl IncreaseAllowance {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "owner")] owner: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "spender")] spender: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "allowance")] allowance: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "incBy")] inc_by: odra_wasm_client::types::U256,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            owner: odra_wasm_client::types::IntoOdraValue::into_odra_value(owner)?,
+            spender: odra_wasm_client::types::IntoOdraValue::into_odra_value(spender)?,
+            allowance: odra_wasm_client::types::IntoOdraValue::into_odra_value(allowance)?,
+            inc_by: odra_wasm_client::types::IntoOdraValue::into_odra_value(inc_by)?,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_owner(&mut self, value: odra_wasm_client::types::Address) {
+        self.owner = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn owner(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.owner.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_spender(&mut self, value: odra_wasm_client::types::Address) {
+        self.spender = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn spender(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.spender.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_allowance(&mut self, value: odra_wasm_client::types::U256) {
+        self.allowance = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn allowance(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.allowance.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_inc_by(&mut self, value: odra_wasm_client::types::U256) {
+        self.inc_by = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn inc_by(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.inc_by.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for IncreaseAllowance {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (owner, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (spender, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (allowance, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (inc_by, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((
+            Self {
+                owner,
+                spender,
+                allowance,
+                inc_by,
+            },
+            bytes,
+        ))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for IncreaseAllowance {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.owner)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.spender)?);
+        result
+            .extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.allowance)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.inc_by)?);
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.owner.serialized_length();
+        result += self.spender.serialized_length();
+        result += self.allowance.serialized_length();
+        result += self.inc_by.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for IncreaseAllowance {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<IncreaseAllowance> for IncreaseAllowance {
+    fn into_odra_value(self) -> Result<IncreaseAllowance, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<IncreaseAllowance> for IncreaseAllowance {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct LongDeposited {
+    #[wasm_bindgen(js_name = "user")]
+    user: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "wcsprAmount")]
+    wcspr_amount: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "longTokensMinted")]
+    long_tokens_minted: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "feeCollected")]
+    fee_collected: odra_wasm_client::casper_types::U256,
+}
+#[wasm_bindgen]
+impl LongDeposited {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "user")] user: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "wcsprAmount")] wcspr_amount: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "longTokensMinted")]
+        long_tokens_minted: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "feeCollected")] fee_collected: odra_wasm_client::types::U256,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            user: odra_wasm_client::types::IntoOdraValue::into_odra_value(user)?,
+            wcspr_amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(wcspr_amount)?,
+            long_tokens_minted: odra_wasm_client::types::IntoOdraValue::into_odra_value(
+                long_tokens_minted,
+            )?,
+            fee_collected: odra_wasm_client::types::IntoOdraValue::into_odra_value(fee_collected)?,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_user(&mut self, value: odra_wasm_client::types::Address) {
+        self.user = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn user(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.user.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_wcspr_amount(&mut self, value: odra_wasm_client::types::U256) {
+        self.wcspr_amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn wcspr_amount(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.wcspr_amount.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_long_tokens_minted(&mut self, value: odra_wasm_client::types::U256) {
+        self.long_tokens_minted =
+            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn long_tokens_minted(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.long_tokens_minted.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_fee_collected(&mut self, value: odra_wasm_client::types::U256) {
+        self.fee_collected =
+            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn fee_collected(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.fee_collected.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for LongDeposited {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (user, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (wcspr_amount, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (long_tokens_minted, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (fee_collected, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((
+            Self {
+                user,
+                wcspr_amount,
+                long_tokens_minted,
+                fee_collected,
+            },
+            bytes,
+        ))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for LongDeposited {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.user)?);
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.wcspr_amount)?,
+        );
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.long_tokens_minted)?,
+        );
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.fee_collected)?,
+        );
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.user.serialized_length();
+        result += self.wcspr_amount.serialized_length();
+        result += self.long_tokens_minted.serialized_length();
+        result += self.fee_collected.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for LongDeposited {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<LongDeposited> for LongDeposited {
+    fn into_odra_value(self) -> Result<LongDeposited, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<LongDeposited> for LongDeposited {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct ShortWithdrawn {
+    #[wasm_bindgen(js_name = "user")]
+    user: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "shortTokensBurned")]
+    short_tokens_burned: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "wcsprAmount")]
+    wcspr_amount: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "feeCollected")]
+    fee_collected: odra_wasm_client::casper_types::U256,
+}
+#[wasm_bindgen]
+impl ShortWithdrawn {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "user")] user: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "shortTokensBurned")]
+        short_tokens_burned: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "wcsprAmount")] wcspr_amount: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "feeCollected")] fee_collected: odra_wasm_client::types::U256,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            user: odra_wasm_client::types::IntoOdraValue::into_odra_value(user)?,
+            short_tokens_burned: odra_wasm_client::types::IntoOdraValue::into_odra_value(
+                short_tokens_burned,
+            )?,
+            wcspr_amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(wcspr_amount)?,
+            fee_collected: odra_wasm_client::types::IntoOdraValue::into_odra_value(fee_collected)?,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_user(&mut self, value: odra_wasm_client::types::Address) {
+        self.user = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn user(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.user.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_short_tokens_burned(&mut self, value: odra_wasm_client::types::U256) {
+        self.short_tokens_burned =
+            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn short_tokens_burned(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.short_tokens_burned.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_wcspr_amount(&mut self, value: odra_wasm_client::types::U256) {
+        self.wcspr_amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn wcspr_amount(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.wcspr_amount.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_fee_collected(&mut self, value: odra_wasm_client::types::U256) {
+        self.fee_collected =
+            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn fee_collected(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.fee_collected.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for ShortWithdrawn {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (user, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (short_tokens_burned, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (wcspr_amount, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (fee_collected, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((
+            Self {
+                user,
+                short_tokens_burned,
+                wcspr_amount,
+                fee_collected,
+            },
+            bytes,
+        ))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for ShortWithdrawn {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.user)?);
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(
+                &self.short_tokens_burned,
+            )?,
+        );
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.wcspr_amount)?,
+        );
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.fee_collected)?,
+        );
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.user.serialized_length();
+        result += self.short_tokens_burned.serialized_length();
+        result += self.wcspr_amount.serialized_length();
+        result += self.fee_collected.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for ShortWithdrawn {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<ShortWithdrawn> for ShortWithdrawn {
+    fn into_odra_value(self) -> Result<ShortWithdrawn, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<ShortWithdrawn> for ShortWithdrawn {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct FeeCollected {
+    #[wasm_bindgen(js_name = "amount")]
+    amount: odra_wasm_client::casper_types::U256,
     #[wasm_bindgen(js_name = "feeCollector")]
     fee_collector: odra_wasm_client::OdraAddress,
 }
 #[wasm_bindgen]
-impl Config {
+impl FeeCollected {
     #[wasm_bindgen(constructor)]
     pub fn new(
-        #[wasm_bindgen(js_name = "longToken")] long_token: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "shortToken")] short_token: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "wcsprToken")] wcspr_token: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "amount")] amount: odra_wasm_client::types::U256,
         #[wasm_bindgen(js_name = "feeCollector")] fee_collector: odra_wasm_client::types::Address,
     ) -> Result<Self, JsError> {
         Ok(Self {
-            long_token: odra_wasm_client::types::IntoOdraValue::into_odra_value(long_token)?,
-            short_token: odra_wasm_client::types::IntoOdraValue::into_odra_value(short_token)?,
-            wcspr_token: odra_wasm_client::types::IntoOdraValue::into_odra_value(wcspr_token)?,
+            amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(amount)?,
             fee_collector: odra_wasm_client::types::IntoOdraValue::into_odra_value(fee_collector)?,
         })
     }
@@ -968,28 +1351,12 @@ impl Config {
         JsValue::from_serde(self).unwrap_or(JsValue::null())
     }
     #[wasm_bindgen(setter)]
-    pub fn set_long_token(&mut self, value: odra_wasm_client::types::Address) {
-        self.long_token = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    pub fn set_amount(&mut self, value: odra_wasm_client::types::U256) {
+        self.amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
     }
     #[wasm_bindgen(getter)]
-    pub fn long_token(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.long_token.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_short_token(&mut self, value: odra_wasm_client::types::Address) {
-        self.short_token = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn short_token(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.short_token.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_wcspr_token(&mut self, value: odra_wasm_client::types::Address) {
-        self.wcspr_token = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn wcspr_token(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.wcspr_token.clone())
+    pub fn amount(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.amount.clone())
     }
     #[wasm_bindgen(setter)]
     pub fn set_fee_collector(&mut self, value: odra_wasm_client::types::Address) {
@@ -1001,41 +1368,27 @@ impl Config {
         odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.fee_collector.clone())
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Config {
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for FeeCollected {
     fn from_bytes(
         bytes: &[u8],
     ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (long_token, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (short_token, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (wcspr_token, bytes) =
+        let (amount, bytes) =
             odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
         let (fee_collector, bytes) =
             odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
         Ok((
             Self {
-                long_token,
-                short_token,
-                wcspr_token,
+                amount,
                 fee_collector,
             },
             bytes,
         ))
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Config {
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for FeeCollected {
     fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
         let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.long_token)?,
-        );
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.short_token)?,
-        );
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.wcspr_token)?,
-        );
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.amount)?);
         result.extend(
             odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.fee_collector)?,
         );
@@ -1043,24 +1396,826 @@ impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Config {
     }
     fn serialized_length(&self) -> usize {
         let mut result = 0;
-        result += self.long_token.serialized_length();
-        result += self.short_token.serialized_length();
-        result += self.wcspr_token.serialized_length();
+        result += self.amount.serialized_length();
         result += self.fee_collector.serialized_length();
         result
     }
 }
-impl odra_wasm_client::casper_types::CLTyped for Config {
+impl odra_wasm_client::casper_types::CLTyped for FeeCollected {
     fn cl_type() -> odra_wasm_client::casper_types::CLType {
         odra_wasm_client::casper_types::CLType::Any
     }
 }
-impl odra_wasm_client::types::IntoOdraValue<Config> for Config {
-    fn into_odra_value(self) -> Result<Config, JsError> {
+impl odra_wasm_client::types::IntoOdraValue<FeeCollected> for FeeCollected {
+    fn into_odra_value(self) -> Result<FeeCollected, JsError> {
         Ok(self)
     }
 }
-impl odra_wasm_client::types::IntoWasmValue<Config> for Config {
+impl odra_wasm_client::types::IntoWasmValue<FeeCollected> for FeeCollected {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct LongWithdrawn {
+    #[wasm_bindgen(js_name = "user")]
+    user: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "longTokensBurned")]
+    long_tokens_burned: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "wcsprAmount")]
+    wcspr_amount: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "feeCollected")]
+    fee_collected: odra_wasm_client::casper_types::U256,
+}
+#[wasm_bindgen]
+impl LongWithdrawn {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "user")] user: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "longTokensBurned")]
+        long_tokens_burned: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "wcsprAmount")] wcspr_amount: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "feeCollected")] fee_collected: odra_wasm_client::types::U256,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            user: odra_wasm_client::types::IntoOdraValue::into_odra_value(user)?,
+            long_tokens_burned: odra_wasm_client::types::IntoOdraValue::into_odra_value(
+                long_tokens_burned,
+            )?,
+            wcspr_amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(wcspr_amount)?,
+            fee_collected: odra_wasm_client::types::IntoOdraValue::into_odra_value(fee_collected)?,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_user(&mut self, value: odra_wasm_client::types::Address) {
+        self.user = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn user(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.user.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_long_tokens_burned(&mut self, value: odra_wasm_client::types::U256) {
+        self.long_tokens_burned =
+            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn long_tokens_burned(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.long_tokens_burned.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_wcspr_amount(&mut self, value: odra_wasm_client::types::U256) {
+        self.wcspr_amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn wcspr_amount(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.wcspr_amount.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_fee_collected(&mut self, value: odra_wasm_client::types::U256) {
+        self.fee_collected =
+            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn fee_collected(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.fee_collected.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for LongWithdrawn {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (user, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (long_tokens_burned, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (wcspr_amount, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (fee_collected, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((
+            Self {
+                user,
+                long_tokens_burned,
+                wcspr_amount,
+                fee_collected,
+            },
+            bytes,
+        ))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for LongWithdrawn {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.user)?);
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.long_tokens_burned)?,
+        );
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.wcspr_amount)?,
+        );
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.fee_collected)?,
+        );
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.user.serialized_length();
+        result += self.long_tokens_burned.serialized_length();
+        result += self.wcspr_amount.serialized_length();
+        result += self.fee_collected.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for LongWithdrawn {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<LongWithdrawn> for LongWithdrawn {
+    fn into_odra_value(self) -> Result<LongWithdrawn, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<LongWithdrawn> for LongWithdrawn {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct RoleAdminChanged {
+    #[wasm_bindgen(js_name = "role")]
+    pub role: Vec<u8>,
+    #[wasm_bindgen(js_name = "previousAdminRole")]
+    pub previous_admin_role: Vec<u8>,
+    #[wasm_bindgen(js_name = "newAdminRole")]
+    pub new_admin_role: Vec<u8>,
+}
+#[wasm_bindgen]
+impl RoleAdminChanged {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "role")] role: Vec<u8>,
+        #[wasm_bindgen(js_name = "previousAdminRole")] previous_admin_role: Vec<u8>,
+        #[wasm_bindgen(js_name = "newAdminRole")] new_admin_role: Vec<u8>,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            role,
+            previous_admin_role,
+            new_admin_role,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for RoleAdminChanged {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (role, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (previous_admin_role, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (new_admin_role, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((
+            Self {
+                role,
+                previous_admin_role,
+                new_admin_role,
+            },
+            bytes,
+        ))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for RoleAdminChanged {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.role)?);
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(
+                &self.previous_admin_role,
+            )?,
+        );
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.new_admin_role)?,
+        );
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.role.serialized_length();
+        result += self.previous_admin_role.serialized_length();
+        result += self.new_admin_role.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for RoleAdminChanged {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<RoleAdminChanged> for RoleAdminChanged {
+    fn into_odra_value(self) -> Result<RoleAdminChanged, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<RoleAdminChanged> for RoleAdminChanged {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct Burn {
+    #[wasm_bindgen(js_name = "owner")]
+    owner: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "amount")]
+    amount: odra_wasm_client::casper_types::U256,
+}
+#[wasm_bindgen]
+impl Burn {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "owner")] owner: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "amount")] amount: odra_wasm_client::types::U256,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            owner: odra_wasm_client::types::IntoOdraValue::into_odra_value(owner)?,
+            amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(amount)?,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_owner(&mut self, value: odra_wasm_client::types::Address) {
+        self.owner = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn owner(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.owner.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_amount(&mut self, value: odra_wasm_client::types::U256) {
+        self.amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn amount(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.amount.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Burn {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (owner, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (amount, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((Self { owner, amount }, bytes))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Burn {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.owner)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.amount)?);
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.owner.serialized_length();
+        result += self.amount.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for Burn {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<Burn> for Burn {
+    fn into_odra_value(self) -> Result<Burn, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<Burn> for Burn {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct ShortDeposited {
+    #[wasm_bindgen(js_name = "user")]
+    user: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "wcsprAmount")]
+    wcspr_amount: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "shortTokensMinted")]
+    short_tokens_minted: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "feeCollected")]
+    fee_collected: odra_wasm_client::casper_types::U256,
+}
+#[wasm_bindgen]
+impl ShortDeposited {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "user")] user: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "wcsprAmount")] wcspr_amount: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "shortTokensMinted")]
+        short_tokens_minted: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "feeCollected")] fee_collected: odra_wasm_client::types::U256,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            user: odra_wasm_client::types::IntoOdraValue::into_odra_value(user)?,
+            wcspr_amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(wcspr_amount)?,
+            short_tokens_minted: odra_wasm_client::types::IntoOdraValue::into_odra_value(
+                short_tokens_minted,
+            )?,
+            fee_collected: odra_wasm_client::types::IntoOdraValue::into_odra_value(fee_collected)?,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_user(&mut self, value: odra_wasm_client::types::Address) {
+        self.user = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn user(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.user.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_wcspr_amount(&mut self, value: odra_wasm_client::types::U256) {
+        self.wcspr_amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn wcspr_amount(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.wcspr_amount.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_short_tokens_minted(&mut self, value: odra_wasm_client::types::U256) {
+        self.short_tokens_minted =
+            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn short_tokens_minted(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.short_tokens_minted.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_fee_collected(&mut self, value: odra_wasm_client::types::U256) {
+        self.fee_collected =
+            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn fee_collected(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.fee_collected.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for ShortDeposited {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (user, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (wcspr_amount, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (short_tokens_minted, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (fee_collected, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((
+            Self {
+                user,
+                wcspr_amount,
+                short_tokens_minted,
+                fee_collected,
+            },
+            bytes,
+        ))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for ShortDeposited {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.user)?);
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.wcspr_amount)?,
+        );
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(
+                &self.short_tokens_minted,
+            )?,
+        );
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.fee_collected)?,
+        );
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.user.serialized_length();
+        result += self.wcspr_amount.serialized_length();
+        result += self.short_tokens_minted.serialized_length();
+        result += self.fee_collected.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for ShortDeposited {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<ShortDeposited> for ShortDeposited {
+    fn into_odra_value(self) -> Result<ShortDeposited, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<ShortDeposited> for ShortDeposited {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct PriceUpdated {
+    #[wasm_bindgen(js_name = "newPrice")]
+    new_price: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "previousPrice")]
+    previous_price: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "timestamp")]
+    pub timestamp: u64,
+}
+#[wasm_bindgen]
+impl PriceUpdated {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "newPrice")] new_price: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "previousPrice")] previous_price: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "timestamp")] timestamp: u64,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            new_price: odra_wasm_client::types::IntoOdraValue::into_odra_value(new_price)?,
+            previous_price: odra_wasm_client::types::IntoOdraValue::into_odra_value(
+                previous_price,
+            )?,
+            timestamp,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_new_price(&mut self, value: odra_wasm_client::types::U256) {
+        self.new_price = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn new_price(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.new_price.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_previous_price(&mut self, value: odra_wasm_client::types::U256) {
+        self.previous_price =
+            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn previous_price(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.previous_price.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for PriceUpdated {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (new_price, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (previous_price, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (timestamp, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((
+            Self {
+                new_price,
+                previous_price,
+                timestamp,
+            },
+            bytes,
+        ))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for PriceUpdated {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result
+            .extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.new_price)?);
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.previous_price)?,
+        );
+        result
+            .extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.timestamp)?);
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.new_price.serialized_length();
+        result += self.previous_price.serialized_length();
+        result += self.timestamp.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for PriceUpdated {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<PriceUpdated> for PriceUpdated {
+    fn into_odra_value(self) -> Result<PriceUpdated, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<PriceUpdated> for PriceUpdated {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct DecreaseAllowance {
+    #[wasm_bindgen(js_name = "owner")]
+    owner: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "spender")]
+    spender: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "allowance")]
+    allowance: odra_wasm_client::casper_types::U256,
+    #[wasm_bindgen(js_name = "decrBy")]
+    decr_by: odra_wasm_client::casper_types::U256,
+}
+#[wasm_bindgen]
+impl DecreaseAllowance {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "owner")] owner: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "spender")] spender: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "allowance")] allowance: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "decrBy")] decr_by: odra_wasm_client::types::U256,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            owner: odra_wasm_client::types::IntoOdraValue::into_odra_value(owner)?,
+            spender: odra_wasm_client::types::IntoOdraValue::into_odra_value(spender)?,
+            allowance: odra_wasm_client::types::IntoOdraValue::into_odra_value(allowance)?,
+            decr_by: odra_wasm_client::types::IntoOdraValue::into_odra_value(decr_by)?,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_owner(&mut self, value: odra_wasm_client::types::Address) {
+        self.owner = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn owner(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.owner.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_spender(&mut self, value: odra_wasm_client::types::Address) {
+        self.spender = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn spender(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.spender.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_allowance(&mut self, value: odra_wasm_client::types::U256) {
+        self.allowance = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn allowance(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.allowance.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_decr_by(&mut self, value: odra_wasm_client::types::U256) {
+        self.decr_by = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn decr_by(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.decr_by.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for DecreaseAllowance {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (owner, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (spender, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (allowance, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (decr_by, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((
+            Self {
+                owner,
+                spender,
+                allowance,
+                decr_by,
+            },
+            bytes,
+        ))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for DecreaseAllowance {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.owner)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.spender)?);
+        result
+            .extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.allowance)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.decr_by)?);
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.owner.serialized_length();
+        result += self.spender.serialized_length();
+        result += self.allowance.serialized_length();
+        result += self.decr_by.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for DecreaseAllowance {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<DecreaseAllowance> for DecreaseAllowance {
+    fn into_odra_value(self) -> Result<DecreaseAllowance, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<DecreaseAllowance> for DecreaseAllowance {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct RoleRevoked {
+    #[wasm_bindgen(js_name = "role")]
+    pub role: Vec<u8>,
+    #[wasm_bindgen(js_name = "address")]
+    address: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "sender")]
+    sender: odra_wasm_client::OdraAddress,
+}
+#[wasm_bindgen]
+impl RoleRevoked {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "role")] role: Vec<u8>,
+        #[wasm_bindgen(js_name = "address")] address: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "sender")] sender: odra_wasm_client::types::Address,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            role,
+            address: odra_wasm_client::types::IntoOdraValue::into_odra_value(address)?,
+            sender: odra_wasm_client::types::IntoOdraValue::into_odra_value(sender)?,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_address(&mut self, value: odra_wasm_client::types::Address) {
+        self.address = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn address(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.address.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_sender(&mut self, value: odra_wasm_client::types::Address) {
+        self.sender = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn sender(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.sender.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for RoleRevoked {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (role, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (address, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (sender, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((
+            Self {
+                role,
+                address,
+                sender,
+            },
+            bytes,
+        ))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for RoleRevoked {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.role)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.address)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.sender)?);
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.role.serialized_length();
+        result += self.address.serialized_length();
+        result += self.sender.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for RoleRevoked {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<RoleRevoked> for RoleRevoked {
+    fn into_odra_value(self) -> Result<RoleRevoked, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<RoleRevoked> for RoleRevoked {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen]
+pub enum LongOrShort {
+    Long = 0isize,
+    Short = 1isize,
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for LongOrShort {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (result, bytes): (u8, _) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        match result {
+            0u8 => Ok((Self::Long, bytes)),
+            1u8 => Ok((Self::Short, bytes)),
+            _ => Err(odra_wasm_client::casper_types::bytesrepr::Error::Formatting),
+        }
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for LongOrShort {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        Ok(vec![(self.clone() as u8)])
+    }
+    fn serialized_length(&self) -> usize {
+        odra_wasm_client::casper_types::bytesrepr::U8_SERIALIZED_LENGTH
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for LongOrShort {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::U8
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<LongOrShort> for LongOrShort {
+    fn into_odra_value(self) -> Result<LongOrShort, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<LongOrShort> for LongOrShort {
     fn to_wasm_value(self) -> Self {
         self
     }
@@ -1384,608 +2539,6 @@ impl odra_wasm_client::types::IntoWasmValue<AddressMarketState> for AddressMarke
 #[doc = ""]
 #[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
 #[wasm_bindgen(getter_with_clone)]
-pub struct PriceUpdated {
-    #[wasm_bindgen(js_name = "newPrice")]
-    new_price: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "previousPrice")]
-    previous_price: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "timestamp")]
-    pub timestamp: u64,
-}
-#[wasm_bindgen]
-impl PriceUpdated {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "newPrice")] new_price: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "previousPrice")] previous_price: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "timestamp")] timestamp: u64,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            new_price: odra_wasm_client::types::IntoOdraValue::into_odra_value(new_price)?,
-            previous_price: odra_wasm_client::types::IntoOdraValue::into_odra_value(
-                previous_price,
-            )?,
-            timestamp,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_new_price(&mut self, value: odra_wasm_client::types::U256) {
-        self.new_price = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn new_price(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.new_price.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_previous_price(&mut self, value: odra_wasm_client::types::U256) {
-        self.previous_price =
-            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn previous_price(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.previous_price.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for PriceUpdated {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (new_price, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (previous_price, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (timestamp, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((
-            Self {
-                new_price,
-                previous_price,
-                timestamp,
-            },
-            bytes,
-        ))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for PriceUpdated {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result
-            .extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.new_price)?);
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.previous_price)?,
-        );
-        result
-            .extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.timestamp)?);
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.new_price.serialized_length();
-        result += self.previous_price.serialized_length();
-        result += self.timestamp.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for PriceUpdated {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<PriceUpdated> for PriceUpdated {
-    fn into_odra_value(self) -> Result<PriceUpdated, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<PriceUpdated> for PriceUpdated {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct Deposit {
-    #[wasm_bindgen(js_name = "account")]
-    account: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "value")]
-    value: odra_wasm_client::casper_types::U256,
-}
-#[wasm_bindgen]
-impl Deposit {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "account")] account: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "value")] value: odra_wasm_client::types::U256,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            account: odra_wasm_client::types::IntoOdraValue::into_odra_value(account)?,
-            value: odra_wasm_client::types::IntoOdraValue::into_odra_value(value)?,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_account(&mut self, value: odra_wasm_client::types::Address) {
-        self.account = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn account(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.account.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_value(&mut self, value: odra_wasm_client::types::U256) {
-        self.value = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn value(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.value.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Deposit {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (account, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (value, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((Self { account, value }, bytes))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Deposit {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.account)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.value)?);
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.account.serialized_length();
-        result += self.value.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for Deposit {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<Deposit> for Deposit {
-    fn into_odra_value(self) -> Result<Deposit, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<Deposit> for Deposit {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct Unpaused {
-    #[wasm_bindgen(js_name = "account")]
-    account: odra_wasm_client::OdraAddress,
-}
-#[wasm_bindgen]
-impl Unpaused {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "account")] account: odra_wasm_client::types::Address,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            account: odra_wasm_client::types::IntoOdraValue::into_odra_value(account)?,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_account(&mut self, value: odra_wasm_client::types::Address) {
-        self.account = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn account(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.account.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Unpaused {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (account, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((Self { account }, bytes))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Unpaused {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.account)?);
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.account.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for Unpaused {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<Unpaused> for Unpaused {
-    fn into_odra_value(self) -> Result<Unpaused, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<Unpaused> for Unpaused {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct Withdrawal {
-    #[wasm_bindgen(js_name = "account")]
-    account: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "value")]
-    value: odra_wasm_client::casper_types::U256,
-}
-#[wasm_bindgen]
-impl Withdrawal {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "account")] account: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "value")] value: odra_wasm_client::types::U256,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            account: odra_wasm_client::types::IntoOdraValue::into_odra_value(account)?,
-            value: odra_wasm_client::types::IntoOdraValue::into_odra_value(value)?,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_account(&mut self, value: odra_wasm_client::types::Address) {
-        self.account = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn account(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.account.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_value(&mut self, value: odra_wasm_client::types::U256) {
-        self.value = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn value(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.value.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Withdrawal {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (account, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (value, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((Self { account, value }, bytes))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Withdrawal {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.account)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.value)?);
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.account.serialized_length();
-        result += self.value.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for Withdrawal {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<Withdrawal> for Withdrawal {
-    fn into_odra_value(self) -> Result<Withdrawal, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<Withdrawal> for Withdrawal {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct ShortDeposited {
-    #[wasm_bindgen(js_name = "user")]
-    user: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "wcsprAmount")]
-    wcspr_amount: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "shortTokensMinted")]
-    short_tokens_minted: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "feeCollected")]
-    fee_collected: odra_wasm_client::casper_types::U256,
-}
-#[wasm_bindgen]
-impl ShortDeposited {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "user")] user: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "wcsprAmount")] wcspr_amount: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "shortTokensMinted")]
-        short_tokens_minted: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "feeCollected")] fee_collected: odra_wasm_client::types::U256,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            user: odra_wasm_client::types::IntoOdraValue::into_odra_value(user)?,
-            wcspr_amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(wcspr_amount)?,
-            short_tokens_minted: odra_wasm_client::types::IntoOdraValue::into_odra_value(
-                short_tokens_minted,
-            )?,
-            fee_collected: odra_wasm_client::types::IntoOdraValue::into_odra_value(fee_collected)?,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_user(&mut self, value: odra_wasm_client::types::Address) {
-        self.user = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn user(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.user.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_wcspr_amount(&mut self, value: odra_wasm_client::types::U256) {
-        self.wcspr_amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn wcspr_amount(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.wcspr_amount.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_short_tokens_minted(&mut self, value: odra_wasm_client::types::U256) {
-        self.short_tokens_minted =
-            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn short_tokens_minted(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.short_tokens_minted.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_fee_collected(&mut self, value: odra_wasm_client::types::U256) {
-        self.fee_collected =
-            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn fee_collected(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.fee_collected.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for ShortDeposited {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (user, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (wcspr_amount, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (short_tokens_minted, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (fee_collected, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((
-            Self {
-                user,
-                wcspr_amount,
-                short_tokens_minted,
-                fee_collected,
-            },
-            bytes,
-        ))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for ShortDeposited {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.user)?);
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.wcspr_amount)?,
-        );
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(
-                &self.short_tokens_minted,
-            )?,
-        );
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.fee_collected)?,
-        );
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.user.serialized_length();
-        result += self.wcspr_amount.serialized_length();
-        result += self.short_tokens_minted.serialized_length();
-        result += self.fee_collected.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for ShortDeposited {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<ShortDeposited> for ShortDeposited {
-    fn into_odra_value(self) -> Result<ShortDeposited, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<ShortDeposited> for ShortDeposited {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct LongDeposited {
-    #[wasm_bindgen(js_name = "user")]
-    user: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "wcsprAmount")]
-    wcspr_amount: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "longTokensMinted")]
-    long_tokens_minted: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "feeCollected")]
-    fee_collected: odra_wasm_client::casper_types::U256,
-}
-#[wasm_bindgen]
-impl LongDeposited {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "user")] user: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "wcsprAmount")] wcspr_amount: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "longTokensMinted")]
-        long_tokens_minted: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "feeCollected")] fee_collected: odra_wasm_client::types::U256,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            user: odra_wasm_client::types::IntoOdraValue::into_odra_value(user)?,
-            wcspr_amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(wcspr_amount)?,
-            long_tokens_minted: odra_wasm_client::types::IntoOdraValue::into_odra_value(
-                long_tokens_minted,
-            )?,
-            fee_collected: odra_wasm_client::types::IntoOdraValue::into_odra_value(fee_collected)?,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_user(&mut self, value: odra_wasm_client::types::Address) {
-        self.user = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn user(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.user.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_wcspr_amount(&mut self, value: odra_wasm_client::types::U256) {
-        self.wcspr_amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn wcspr_amount(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.wcspr_amount.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_long_tokens_minted(&mut self, value: odra_wasm_client::types::U256) {
-        self.long_tokens_minted =
-            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn long_tokens_minted(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.long_tokens_minted.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_fee_collected(&mut self, value: odra_wasm_client::types::U256) {
-        self.fee_collected =
-            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn fee_collected(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.fee_collected.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for LongDeposited {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (user, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (wcspr_amount, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (long_tokens_minted, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (fee_collected, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((
-            Self {
-                user,
-                wcspr_amount,
-                long_tokens_minted,
-                fee_collected,
-            },
-            bytes,
-        ))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for LongDeposited {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.user)?);
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.wcspr_amount)?,
-        );
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.long_tokens_minted)?,
-        );
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.fee_collected)?,
-        );
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.user.serialized_length();
-        result += self.wcspr_amount.serialized_length();
-        result += self.long_tokens_minted.serialized_length();
-        result += self.fee_collected.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for LongDeposited {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<LongDeposited> for LongDeposited {
-    fn into_odra_value(self) -> Result<LongDeposited, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<LongDeposited> for LongDeposited {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
 pub struct ConfigUpdated {
     #[wasm_bindgen(js_name = "admin")]
     admin: odra_wasm_client::OdraAddress,
@@ -2134,126 +2687,29 @@ impl odra_wasm_client::types::IntoWasmValue<ConfigUpdated> for ConfigUpdated {
 #[doc = ""]
 #[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
 #[wasm_bindgen(getter_with_clone)]
-pub struct PriceFeedUpdated {
-    #[wasm_bindgen(js_name = "admin")]
-    admin: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "priceFeedAddress")]
-    price_feed_address: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "priceFeedId")]
-    pub price_feed_id: String,
-}
-#[wasm_bindgen]
-impl PriceFeedUpdated {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "admin")] admin: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "priceFeedAddress")]
-        price_feed_address: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "priceFeedId")] price_feed_id: String,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            admin: odra_wasm_client::types::IntoOdraValue::into_odra_value(admin)?,
-            price_feed_address: odra_wasm_client::types::IntoOdraValue::into_odra_value(
-                price_feed_address,
-            )?,
-            price_feed_id,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_admin(&mut self, value: odra_wasm_client::types::Address) {
-        self.admin = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn admin(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.admin.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_price_feed_address(&mut self, value: odra_wasm_client::types::Address) {
-        self.price_feed_address =
-            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn price_feed_address(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.price_feed_address.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for PriceFeedUpdated {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (admin, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (price_feed_address, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (price_feed_id, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((
-            Self {
-                admin,
-                price_feed_address,
-                price_feed_id,
-            },
-            bytes,
-        ))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for PriceFeedUpdated {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.admin)?);
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.price_feed_address)?,
-        );
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.price_feed_id)?,
-        );
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.admin.serialized_length();
-        result += self.price_feed_address.serialized_length();
-        result += self.price_feed_id.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for PriceFeedUpdated {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<PriceFeedUpdated> for PriceFeedUpdated {
-    fn into_odra_value(self) -> Result<PriceFeedUpdated, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<PriceFeedUpdated> for PriceFeedUpdated {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct FeeCollected {
-    #[wasm_bindgen(js_name = "amount")]
-    amount: odra_wasm_client::casper_types::U256,
+pub struct Config {
+    #[wasm_bindgen(js_name = "longToken")]
+    long_token: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "shortToken")]
+    short_token: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "wcsprToken")]
+    wcspr_token: odra_wasm_client::OdraAddress,
     #[wasm_bindgen(js_name = "feeCollector")]
     fee_collector: odra_wasm_client::OdraAddress,
 }
 #[wasm_bindgen]
-impl FeeCollected {
+impl Config {
     #[wasm_bindgen(constructor)]
     pub fn new(
-        #[wasm_bindgen(js_name = "amount")] amount: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "longToken")] long_token: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "shortToken")] short_token: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "wcsprToken")] wcspr_token: odra_wasm_client::types::Address,
         #[wasm_bindgen(js_name = "feeCollector")] fee_collector: odra_wasm_client::types::Address,
     ) -> Result<Self, JsError> {
         Ok(Self {
-            amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(amount)?,
+            long_token: odra_wasm_client::types::IntoOdraValue::into_odra_value(long_token)?,
+            short_token: odra_wasm_client::types::IntoOdraValue::into_odra_value(short_token)?,
+            wcspr_token: odra_wasm_client::types::IntoOdraValue::into_odra_value(wcspr_token)?,
             fee_collector: odra_wasm_client::types::IntoOdraValue::into_odra_value(fee_collector)?,
         })
     }
@@ -2262,12 +2718,28 @@ impl FeeCollected {
         JsValue::from_serde(self).unwrap_or(JsValue::null())
     }
     #[wasm_bindgen(setter)]
-    pub fn set_amount(&mut self, value: odra_wasm_client::types::U256) {
-        self.amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    pub fn set_long_token(&mut self, value: odra_wasm_client::types::Address) {
+        self.long_token = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
     }
     #[wasm_bindgen(getter)]
-    pub fn amount(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.amount.clone())
+    pub fn long_token(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.long_token.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_short_token(&mut self, value: odra_wasm_client::types::Address) {
+        self.short_token = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn short_token(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.short_token.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_wcspr_token(&mut self, value: odra_wasm_client::types::Address) {
+        self.wcspr_token = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn wcspr_token(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.wcspr_token.clone())
     }
     #[wasm_bindgen(setter)]
     pub fn set_fee_collector(&mut self, value: odra_wasm_client::types::Address) {
@@ -2279,27 +2751,41 @@ impl FeeCollected {
         odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.fee_collector.clone())
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for FeeCollected {
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Config {
     fn from_bytes(
         bytes: &[u8],
     ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (amount, bytes) =
+        let (long_token, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (short_token, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (wcspr_token, bytes) =
             odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
         let (fee_collector, bytes) =
             odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
         Ok((
             Self {
-                amount,
+                long_token,
+                short_token,
+                wcspr_token,
                 fee_collector,
             },
             bytes,
         ))
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for FeeCollected {
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Config {
     fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
         let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.amount)?);
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.long_token)?,
+        );
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.short_token)?,
+        );
+        result.extend(
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.wcspr_token)?,
+        );
         result.extend(
             odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.fee_collector)?,
         );
@@ -2307,22 +2793,24 @@ impl odra_wasm_client::casper_types::bytesrepr::ToBytes for FeeCollected {
     }
     fn serialized_length(&self) -> usize {
         let mut result = 0;
-        result += self.amount.serialized_length();
+        result += self.long_token.serialized_length();
+        result += self.short_token.serialized_length();
+        result += self.wcspr_token.serialized_length();
         result += self.fee_collector.serialized_length();
         result
     }
 }
-impl odra_wasm_client::casper_types::CLTyped for FeeCollected {
+impl odra_wasm_client::casper_types::CLTyped for Config {
     fn cl_type() -> odra_wasm_client::casper_types::CLType {
         odra_wasm_client::casper_types::CLType::Any
     }
 }
-impl odra_wasm_client::types::IntoOdraValue<FeeCollected> for FeeCollected {
-    fn into_odra_value(self) -> Result<FeeCollected, JsError> {
+impl odra_wasm_client::types::IntoOdraValue<Config> for Config {
+    fn into_odra_value(self) -> Result<Config, JsError> {
         Ok(self)
     }
 }
-impl odra_wasm_client::types::IntoWasmValue<FeeCollected> for FeeCollected {
+impl odra_wasm_client::types::IntoWasmValue<Config> for Config {
     fn to_wasm_value(self) -> Self {
         self
     }
@@ -2330,26 +2818,22 @@ impl odra_wasm_client::types::IntoWasmValue<FeeCollected> for FeeCollected {
 #[doc = ""]
 #[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
 #[wasm_bindgen(getter_with_clone)]
-pub struct RoleGranted {
-    #[wasm_bindgen(js_name = "role")]
-    pub role: Vec<u8>,
-    #[wasm_bindgen(js_name = "address")]
-    address: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "sender")]
-    sender: odra_wasm_client::OdraAddress,
+pub struct Withdrawal {
+    #[wasm_bindgen(js_name = "account")]
+    account: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "value")]
+    value: odra_wasm_client::casper_types::U256,
 }
 #[wasm_bindgen]
-impl RoleGranted {
+impl Withdrawal {
     #[wasm_bindgen(constructor)]
     pub fn new(
-        #[wasm_bindgen(js_name = "role")] role: Vec<u8>,
-        #[wasm_bindgen(js_name = "address")] address: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "sender")] sender: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "account")] account: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "value")] value: odra_wasm_client::types::U256,
     ) -> Result<Self, JsError> {
         Ok(Self {
-            role,
-            address: odra_wasm_client::types::IntoOdraValue::into_odra_value(address)?,
-            sender: odra_wasm_client::types::IntoOdraValue::into_odra_value(sender)?,
+            account: odra_wasm_client::types::IntoOdraValue::into_odra_value(account)?,
+            value: odra_wasm_client::types::IntoOdraValue::into_odra_value(value)?,
         })
     }
     #[wasm_bindgen(js_name = "toJson")]
@@ -2357,69 +2841,58 @@ impl RoleGranted {
         JsValue::from_serde(self).unwrap_or(JsValue::null())
     }
     #[wasm_bindgen(setter)]
-    pub fn set_address(&mut self, value: odra_wasm_client::types::Address) {
-        self.address = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    pub fn set_account(&mut self, value: odra_wasm_client::types::Address) {
+        self.account = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
     }
     #[wasm_bindgen(getter)]
-    pub fn address(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.address.clone())
+    pub fn account(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.account.clone())
     }
     #[wasm_bindgen(setter)]
-    pub fn set_sender(&mut self, value: odra_wasm_client::types::Address) {
-        self.sender = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    pub fn set_value(&mut self, value: odra_wasm_client::types::U256) {
+        self.value = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
     }
     #[wasm_bindgen(getter)]
-    pub fn sender(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.sender.clone())
+    pub fn value(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.value.clone())
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for RoleGranted {
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Withdrawal {
     fn from_bytes(
         bytes: &[u8],
     ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (role, bytes) =
+        let (account, bytes) =
             odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (address, bytes) =
+        let (value, bytes) =
             odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (sender, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((
-            Self {
-                role,
-                address,
-                sender,
-            },
-            bytes,
-        ))
+        Ok((Self { account, value }, bytes))
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for RoleGranted {
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Withdrawal {
     fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
         let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.role)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.address)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.sender)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.account)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.value)?);
         Ok(result)
     }
     fn serialized_length(&self) -> usize {
         let mut result = 0;
-        result += self.role.serialized_length();
-        result += self.address.serialized_length();
-        result += self.sender.serialized_length();
+        result += self.account.serialized_length();
+        result += self.value.serialized_length();
         result
     }
 }
-impl odra_wasm_client::casper_types::CLTyped for RoleGranted {
+impl odra_wasm_client::casper_types::CLTyped for Withdrawal {
     fn cl_type() -> odra_wasm_client::casper_types::CLType {
         odra_wasm_client::casper_types::CLType::Any
     }
 }
-impl odra_wasm_client::types::IntoOdraValue<RoleGranted> for RoleGranted {
-    fn into_odra_value(self) -> Result<RoleGranted, JsError> {
+impl odra_wasm_client::types::IntoOdraValue<Withdrawal> for Withdrawal {
+    fn into_odra_value(self) -> Result<Withdrawal, JsError> {
         Ok(self)
     }
 }
-impl odra_wasm_client::types::IntoWasmValue<RoleGranted> for RoleGranted {
+impl odra_wasm_client::types::IntoWasmValue<Withdrawal> for Withdrawal {
     fn to_wasm_value(self) -> Self {
         self
     }
@@ -2550,12 +3023,215 @@ impl odra_wasm_client::types::IntoWasmValue<TransferFrom> for TransferFrom {
 #[doc = ""]
 #[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
 #[wasm_bindgen(getter_with_clone)]
-pub struct Paused {
+pub struct RoleGranted {
+    #[wasm_bindgen(js_name = "role")]
+    pub role: Vec<u8>,
+    #[wasm_bindgen(js_name = "address")]
+    address: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "sender")]
+    sender: odra_wasm_client::OdraAddress,
+}
+#[wasm_bindgen]
+impl RoleGranted {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "role")] role: Vec<u8>,
+        #[wasm_bindgen(js_name = "address")] address: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "sender")] sender: odra_wasm_client::types::Address,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            role,
+            address: odra_wasm_client::types::IntoOdraValue::into_odra_value(address)?,
+            sender: odra_wasm_client::types::IntoOdraValue::into_odra_value(sender)?,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_address(&mut self, value: odra_wasm_client::types::Address) {
+        self.address = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn address(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.address.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_sender(&mut self, value: odra_wasm_client::types::Address) {
+        self.sender = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn sender(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.sender.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for RoleGranted {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (role, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (address, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (sender, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((
+            Self {
+                role,
+                address,
+                sender,
+            },
+            bytes,
+        ))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for RoleGranted {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.role)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.address)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.sender)?);
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.role.serialized_length();
+        result += self.address.serialized_length();
+        result += self.sender.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for RoleGranted {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<RoleGranted> for RoleGranted {
+    fn into_odra_value(self) -> Result<RoleGranted, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<RoleGranted> for RoleGranted {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct Transfer {
+    #[wasm_bindgen(js_name = "sender")]
+    sender: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "recipient")]
+    recipient: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "amount")]
+    amount: odra_wasm_client::casper_types::U256,
+}
+#[wasm_bindgen]
+impl Transfer {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "sender")] sender: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "recipient")] recipient: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "amount")] amount: odra_wasm_client::types::U256,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            sender: odra_wasm_client::types::IntoOdraValue::into_odra_value(sender)?,
+            recipient: odra_wasm_client::types::IntoOdraValue::into_odra_value(recipient)?,
+            amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(amount)?,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_sender(&mut self, value: odra_wasm_client::types::Address) {
+        self.sender = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn sender(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.sender.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_recipient(&mut self, value: odra_wasm_client::types::Address) {
+        self.recipient = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn recipient(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.recipient.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_amount(&mut self, value: odra_wasm_client::types::U256) {
+        self.amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn amount(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.amount.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Transfer {
+    fn from_bytes(
+        bytes: &[u8],
+    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
+        let (sender, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (recipient, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        let (amount, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((
+            Self {
+                sender,
+                recipient,
+                amount,
+            },
+            bytes,
+        ))
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Transfer {
+    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.sender)?);
+        result
+            .extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.recipient)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.amount)?);
+        Ok(result)
+    }
+    fn serialized_length(&self) -> usize {
+        let mut result = 0;
+        result += self.sender.serialized_length();
+        result += self.recipient.serialized_length();
+        result += self.amount.serialized_length();
+        result
+    }
+}
+impl odra_wasm_client::casper_types::CLTyped for Transfer {
+    fn cl_type() -> odra_wasm_client::casper_types::CLType {
+        odra_wasm_client::casper_types::CLType::Any
+    }
+}
+impl odra_wasm_client::types::IntoOdraValue<Transfer> for Transfer {
+    fn into_odra_value(self) -> Result<Transfer, JsError> {
+        Ok(self)
+    }
+}
+impl odra_wasm_client::types::IntoWasmValue<Transfer> for Transfer {
+    fn to_wasm_value(self) -> Self {
+        self
+    }
+}
+#[doc = ""]
+#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct Unpaused {
     #[wasm_bindgen(js_name = "account")]
     account: odra_wasm_client::OdraAddress,
 }
 #[wasm_bindgen]
-impl Paused {
+impl Unpaused {
     #[wasm_bindgen(constructor)]
     pub fn new(
         #[wasm_bindgen(js_name = "account")] account: odra_wasm_client::types::Address,
@@ -2577,7 +3253,7 @@ impl Paused {
         odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.account.clone())
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Paused {
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Unpaused {
     fn from_bytes(
         bytes: &[u8],
     ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
@@ -2586,7 +3262,7 @@ impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Paused {
         Ok((Self { account }, bytes))
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Paused {
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Unpaused {
     fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
         let mut result = Vec::with_capacity(self.serialized_length());
         result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.account)?);
@@ -2598,17 +3274,17 @@ impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Paused {
         result
     }
 }
-impl odra_wasm_client::casper_types::CLTyped for Paused {
+impl odra_wasm_client::casper_types::CLTyped for Unpaused {
     fn cl_type() -> odra_wasm_client::casper_types::CLType {
         odra_wasm_client::casper_types::CLType::Any
     }
 }
-impl odra_wasm_client::types::IntoOdraValue<Paused> for Paused {
-    fn into_odra_value(self) -> Result<Paused, JsError> {
+impl odra_wasm_client::types::IntoOdraValue<Unpaused> for Unpaused {
+    fn into_odra_value(self) -> Result<Unpaused, JsError> {
         Ok(self)
     }
 }
-impl odra_wasm_client::types::IntoWasmValue<Paused> for Paused {
+impl odra_wasm_client::types::IntoWasmValue<Unpaused> for Unpaused {
     fn to_wasm_value(self) -> Self {
         self
     }
@@ -2777,130 +3453,29 @@ impl odra_wasm_client::types::IntoWasmValue<MarketState> for MarketState {
 #[doc = ""]
 #[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
 #[wasm_bindgen(getter_with_clone)]
-pub struct RoleRevoked {
-    #[wasm_bindgen(js_name = "role")]
-    pub role: Vec<u8>,
-    #[wasm_bindgen(js_name = "address")]
-    address: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "sender")]
-    sender: odra_wasm_client::OdraAddress,
+pub struct PriceFeedUpdated {
+    #[wasm_bindgen(js_name = "admin")]
+    admin: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "priceFeedAddress")]
+    price_feed_address: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "priceFeedId")]
+    pub price_feed_id: String,
 }
 #[wasm_bindgen]
-impl RoleRevoked {
+impl PriceFeedUpdated {
     #[wasm_bindgen(constructor)]
     pub fn new(
-        #[wasm_bindgen(js_name = "role")] role: Vec<u8>,
-        #[wasm_bindgen(js_name = "address")] address: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "sender")] sender: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "admin")] admin: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "priceFeedAddress")]
+        price_feed_address: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "priceFeedId")] price_feed_id: String,
     ) -> Result<Self, JsError> {
         Ok(Self {
-            role,
-            address: odra_wasm_client::types::IntoOdraValue::into_odra_value(address)?,
-            sender: odra_wasm_client::types::IntoOdraValue::into_odra_value(sender)?,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_address(&mut self, value: odra_wasm_client::types::Address) {
-        self.address = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn address(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.address.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_sender(&mut self, value: odra_wasm_client::types::Address) {
-        self.sender = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn sender(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.sender.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for RoleRevoked {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (role, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (address, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (sender, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((
-            Self {
-                role,
-                address,
-                sender,
-            },
-            bytes,
-        ))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for RoleRevoked {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.role)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.address)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.sender)?);
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.role.serialized_length();
-        result += self.address.serialized_length();
-        result += self.sender.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for RoleRevoked {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<RoleRevoked> for RoleRevoked {
-    fn into_odra_value(self) -> Result<RoleRevoked, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<RoleRevoked> for RoleRevoked {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct ShortWithdrawn {
-    #[wasm_bindgen(js_name = "user")]
-    user: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "shortTokensBurned")]
-    short_tokens_burned: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "wcsprAmount")]
-    wcspr_amount: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "feeCollected")]
-    fee_collected: odra_wasm_client::casper_types::U256,
-}
-#[wasm_bindgen]
-impl ShortWithdrawn {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "user")] user: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "shortTokensBurned")]
-        short_tokens_burned: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "wcsprAmount")] wcspr_amount: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "feeCollected")] fee_collected: odra_wasm_client::types::U256,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            user: odra_wasm_client::types::IntoOdraValue::into_odra_value(user)?,
-            short_tokens_burned: odra_wasm_client::types::IntoOdraValue::into_odra_value(
-                short_tokens_burned,
+            admin: odra_wasm_client::types::IntoOdraValue::into_odra_value(admin)?,
+            price_feed_address: odra_wasm_client::types::IntoOdraValue::into_odra_value(
+                price_feed_address,
             )?,
-            wcspr_amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(wcspr_amount)?,
-            fee_collected: odra_wasm_client::types::IntoOdraValue::into_odra_value(fee_collected)?,
+            price_feed_id,
         })
     }
     #[wasm_bindgen(js_name = "toJson")]
@@ -2908,100 +3483,74 @@ impl ShortWithdrawn {
         JsValue::from_serde(self).unwrap_or(JsValue::null())
     }
     #[wasm_bindgen(setter)]
-    pub fn set_user(&mut self, value: odra_wasm_client::types::Address) {
-        self.user = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    pub fn set_admin(&mut self, value: odra_wasm_client::types::Address) {
+        self.admin = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
     }
     #[wasm_bindgen(getter)]
-    pub fn user(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.user.clone())
+    pub fn admin(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.admin.clone())
     }
     #[wasm_bindgen(setter)]
-    pub fn set_short_tokens_burned(&mut self, value: odra_wasm_client::types::U256) {
-        self.short_tokens_burned =
+    pub fn set_price_feed_address(&mut self, value: odra_wasm_client::types::Address) {
+        self.price_feed_address =
             odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
     }
     #[wasm_bindgen(getter)]
-    pub fn short_tokens_burned(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.short_tokens_burned.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_wcspr_amount(&mut self, value: odra_wasm_client::types::U256) {
-        self.wcspr_amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn wcspr_amount(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.wcspr_amount.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_fee_collected(&mut self, value: odra_wasm_client::types::U256) {
-        self.fee_collected =
-            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn fee_collected(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.fee_collected.clone())
+    pub fn price_feed_address(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.price_feed_address.clone())
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for ShortWithdrawn {
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for PriceFeedUpdated {
     fn from_bytes(
         bytes: &[u8],
     ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (user, bytes) =
+        let (admin, bytes) =
             odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (short_tokens_burned, bytes) =
+        let (price_feed_address, bytes) =
             odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (wcspr_amount, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (fee_collected, bytes) =
+        let (price_feed_id, bytes) =
             odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
         Ok((
             Self {
-                user,
-                short_tokens_burned,
-                wcspr_amount,
-                fee_collected,
+                admin,
+                price_feed_address,
+                price_feed_id,
             },
             bytes,
         ))
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for ShortWithdrawn {
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for PriceFeedUpdated {
     fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
         let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.user)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.admin)?);
         result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(
-                &self.short_tokens_burned,
-            )?,
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.price_feed_address)?,
         );
         result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.wcspr_amount)?,
-        );
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.fee_collected)?,
+            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.price_feed_id)?,
         );
         Ok(result)
     }
     fn serialized_length(&self) -> usize {
         let mut result = 0;
-        result += self.user.serialized_length();
-        result += self.short_tokens_burned.serialized_length();
-        result += self.wcspr_amount.serialized_length();
-        result += self.fee_collected.serialized_length();
+        result += self.admin.serialized_length();
+        result += self.price_feed_address.serialized_length();
+        result += self.price_feed_id.serialized_length();
         result
     }
 }
-impl odra_wasm_client::casper_types::CLTyped for ShortWithdrawn {
+impl odra_wasm_client::casper_types::CLTyped for PriceFeedUpdated {
     fn cl_type() -> odra_wasm_client::casper_types::CLType {
         odra_wasm_client::casper_types::CLType::Any
     }
 }
-impl odra_wasm_client::types::IntoOdraValue<ShortWithdrawn> for ShortWithdrawn {
-    fn into_odra_value(self) -> Result<ShortWithdrawn, JsError> {
+impl odra_wasm_client::types::IntoOdraValue<PriceFeedUpdated> for PriceFeedUpdated {
+    fn into_odra_value(self) -> Result<PriceFeedUpdated, JsError> {
         Ok(self)
     }
 }
-impl odra_wasm_client::types::IntoWasmValue<ShortWithdrawn> for ShortWithdrawn {
+impl odra_wasm_client::types::IntoWasmValue<PriceFeedUpdated> for PriceFeedUpdated {
     fn to_wasm_value(self) -> Self {
         self
     }
@@ -3009,30 +3558,18 @@ impl odra_wasm_client::types::IntoWasmValue<ShortWithdrawn> for ShortWithdrawn {
 #[doc = ""]
 #[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
 #[wasm_bindgen(getter_with_clone)]
-pub struct IncreaseAllowance {
-    #[wasm_bindgen(js_name = "owner")]
-    owner: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "spender")]
-    spender: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "allowance")]
-    allowance: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "incBy")]
-    inc_by: odra_wasm_client::casper_types::U256,
+pub struct Paused {
+    #[wasm_bindgen(js_name = "account")]
+    account: odra_wasm_client::OdraAddress,
 }
 #[wasm_bindgen]
-impl IncreaseAllowance {
+impl Paused {
     #[wasm_bindgen(constructor)]
     pub fn new(
-        #[wasm_bindgen(js_name = "owner")] owner: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "spender")] spender: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "allowance")] allowance: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "incBy")] inc_by: odra_wasm_client::types::U256,
+        #[wasm_bindgen(js_name = "account")] account: odra_wasm_client::types::Address,
     ) -> Result<Self, JsError> {
         Ok(Self {
-            owner: odra_wasm_client::types::IntoOdraValue::into_odra_value(owner)?,
-            spender: odra_wasm_client::types::IntoOdraValue::into_odra_value(spender)?,
-            allowance: odra_wasm_client::types::IntoOdraValue::into_odra_value(allowance)?,
-            inc_by: odra_wasm_client::types::IntoOdraValue::into_odra_value(inc_by)?,
+            account: odra_wasm_client::types::IntoOdraValue::into_odra_value(account)?,
         })
     }
     #[wasm_bindgen(js_name = "toJson")]
@@ -3040,535 +3577,46 @@ impl IncreaseAllowance {
         JsValue::from_serde(self).unwrap_or(JsValue::null())
     }
     #[wasm_bindgen(setter)]
-    pub fn set_owner(&mut self, value: odra_wasm_client::types::Address) {
-        self.owner = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    pub fn set_account(&mut self, value: odra_wasm_client::types::Address) {
+        self.account = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
     }
     #[wasm_bindgen(getter)]
-    pub fn owner(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.owner.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_spender(&mut self, value: odra_wasm_client::types::Address) {
-        self.spender = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn spender(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.spender.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_allowance(&mut self, value: odra_wasm_client::types::U256) {
-        self.allowance = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn allowance(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.allowance.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_inc_by(&mut self, value: odra_wasm_client::types::U256) {
-        self.inc_by = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn inc_by(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.inc_by.clone())
+    pub fn account(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.account.clone())
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for IncreaseAllowance {
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Paused {
     fn from_bytes(
         bytes: &[u8],
     ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (owner, bytes) =
+        let (account, bytes) =
             odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (spender, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (allowance, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (inc_by, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((
-            Self {
-                owner,
-                spender,
-                allowance,
-                inc_by,
-            },
-            bytes,
-        ))
+        Ok((Self { account }, bytes))
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for IncreaseAllowance {
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Paused {
     fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
         let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.owner)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.spender)?);
-        result
-            .extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.allowance)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.inc_by)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.account)?);
         Ok(result)
     }
     fn serialized_length(&self) -> usize {
         let mut result = 0;
-        result += self.owner.serialized_length();
-        result += self.spender.serialized_length();
-        result += self.allowance.serialized_length();
-        result += self.inc_by.serialized_length();
+        result += self.account.serialized_length();
         result
     }
 }
-impl odra_wasm_client::casper_types::CLTyped for IncreaseAllowance {
+impl odra_wasm_client::casper_types::CLTyped for Paused {
     fn cl_type() -> odra_wasm_client::casper_types::CLType {
         odra_wasm_client::casper_types::CLType::Any
     }
 }
-impl odra_wasm_client::types::IntoOdraValue<IncreaseAllowance> for IncreaseAllowance {
-    fn into_odra_value(self) -> Result<IncreaseAllowance, JsError> {
+impl odra_wasm_client::types::IntoOdraValue<Paused> for Paused {
+    fn into_odra_value(self) -> Result<Paused, JsError> {
         Ok(self)
     }
 }
-impl odra_wasm_client::types::IntoWasmValue<IncreaseAllowance> for IncreaseAllowance {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct Transfer {
-    #[wasm_bindgen(js_name = "sender")]
-    sender: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "recipient")]
-    recipient: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "amount")]
-    amount: odra_wasm_client::casper_types::U256,
-}
-#[wasm_bindgen]
-impl Transfer {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "sender")] sender: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "recipient")] recipient: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "amount")] amount: odra_wasm_client::types::U256,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            sender: odra_wasm_client::types::IntoOdraValue::into_odra_value(sender)?,
-            recipient: odra_wasm_client::types::IntoOdraValue::into_odra_value(recipient)?,
-            amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(amount)?,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_sender(&mut self, value: odra_wasm_client::types::Address) {
-        self.sender = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn sender(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.sender.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_recipient(&mut self, value: odra_wasm_client::types::Address) {
-        self.recipient = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn recipient(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.recipient.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_amount(&mut self, value: odra_wasm_client::types::U256) {
-        self.amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn amount(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.amount.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Transfer {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (sender, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (recipient, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (amount, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((
-            Self {
-                sender,
-                recipient,
-                amount,
-            },
-            bytes,
-        ))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Transfer {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.sender)?);
-        result
-            .extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.recipient)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.amount)?);
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.sender.serialized_length();
-        result += self.recipient.serialized_length();
-        result += self.amount.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for Transfer {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<Transfer> for Transfer {
-    fn into_odra_value(self) -> Result<Transfer, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<Transfer> for Transfer {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct LongWithdrawn {
-    #[wasm_bindgen(js_name = "user")]
-    user: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "longTokensBurned")]
-    long_tokens_burned: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "wcsprAmount")]
-    wcspr_amount: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "feeCollected")]
-    fee_collected: odra_wasm_client::casper_types::U256,
-}
-#[wasm_bindgen]
-impl LongWithdrawn {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "user")] user: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "longTokensBurned")]
-        long_tokens_burned: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "wcsprAmount")] wcspr_amount: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "feeCollected")] fee_collected: odra_wasm_client::types::U256,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            user: odra_wasm_client::types::IntoOdraValue::into_odra_value(user)?,
-            long_tokens_burned: odra_wasm_client::types::IntoOdraValue::into_odra_value(
-                long_tokens_burned,
-            )?,
-            wcspr_amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(wcspr_amount)?,
-            fee_collected: odra_wasm_client::types::IntoOdraValue::into_odra_value(fee_collected)?,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_user(&mut self, value: odra_wasm_client::types::Address) {
-        self.user = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn user(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.user.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_long_tokens_burned(&mut self, value: odra_wasm_client::types::U256) {
-        self.long_tokens_burned =
-            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn long_tokens_burned(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.long_tokens_burned.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_wcspr_amount(&mut self, value: odra_wasm_client::types::U256) {
-        self.wcspr_amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn wcspr_amount(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.wcspr_amount.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_fee_collected(&mut self, value: odra_wasm_client::types::U256) {
-        self.fee_collected =
-            odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn fee_collected(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.fee_collected.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for LongWithdrawn {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (user, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (long_tokens_burned, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (wcspr_amount, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (fee_collected, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((
-            Self {
-                user,
-                long_tokens_burned,
-                wcspr_amount,
-                fee_collected,
-            },
-            bytes,
-        ))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for LongWithdrawn {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.user)?);
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.long_tokens_burned)?,
-        );
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.wcspr_amount)?,
-        );
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.fee_collected)?,
-        );
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.user.serialized_length();
-        result += self.long_tokens_burned.serialized_length();
-        result += self.wcspr_amount.serialized_length();
-        result += self.fee_collected.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for LongWithdrawn {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<LongWithdrawn> for LongWithdrawn {
-    fn into_odra_value(self) -> Result<LongWithdrawn, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<LongWithdrawn> for LongWithdrawn {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct DecreaseAllowance {
-    #[wasm_bindgen(js_name = "owner")]
-    owner: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "spender")]
-    spender: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "allowance")]
-    allowance: odra_wasm_client::casper_types::U256,
-    #[wasm_bindgen(js_name = "decrBy")]
-    decr_by: odra_wasm_client::casper_types::U256,
-}
-#[wasm_bindgen]
-impl DecreaseAllowance {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "owner")] owner: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "spender")] spender: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "allowance")] allowance: odra_wasm_client::types::U256,
-        #[wasm_bindgen(js_name = "decrBy")] decr_by: odra_wasm_client::types::U256,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            owner: odra_wasm_client::types::IntoOdraValue::into_odra_value(owner)?,
-            spender: odra_wasm_client::types::IntoOdraValue::into_odra_value(spender)?,
-            allowance: odra_wasm_client::types::IntoOdraValue::into_odra_value(allowance)?,
-            decr_by: odra_wasm_client::types::IntoOdraValue::into_odra_value(decr_by)?,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_owner(&mut self, value: odra_wasm_client::types::Address) {
-        self.owner = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn owner(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.owner.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_spender(&mut self, value: odra_wasm_client::types::Address) {
-        self.spender = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn spender(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.spender.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_allowance(&mut self, value: odra_wasm_client::types::U256) {
-        self.allowance = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn allowance(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.allowance.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_decr_by(&mut self, value: odra_wasm_client::types::U256) {
-        self.decr_by = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn decr_by(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.decr_by.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for DecreaseAllowance {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (owner, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (spender, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (allowance, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (decr_by, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((
-            Self {
-                owner,
-                spender,
-                allowance,
-                decr_by,
-            },
-            bytes,
-        ))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for DecreaseAllowance {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.owner)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.spender)?);
-        result
-            .extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.allowance)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.decr_by)?);
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.owner.serialized_length();
-        result += self.spender.serialized_length();
-        result += self.allowance.serialized_length();
-        result += self.decr_by.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for DecreaseAllowance {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<DecreaseAllowance> for DecreaseAllowance {
-    fn into_odra_value(self) -> Result<DecreaseAllowance, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<DecreaseAllowance> for DecreaseAllowance {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct Burn {
-    #[wasm_bindgen(js_name = "owner")]
-    owner: odra_wasm_client::OdraAddress,
-    #[wasm_bindgen(js_name = "amount")]
-    amount: odra_wasm_client::casper_types::U256,
-}
-#[wasm_bindgen]
-impl Burn {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "owner")] owner: odra_wasm_client::types::Address,
-        #[wasm_bindgen(js_name = "amount")] amount: odra_wasm_client::types::U256,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            owner: odra_wasm_client::types::IntoOdraValue::into_odra_value(owner)?,
-            amount: odra_wasm_client::types::IntoOdraValue::into_odra_value(amount)?,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_owner(&mut self, value: odra_wasm_client::types::Address) {
-        self.owner = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn owner(&self) -> odra_wasm_client::types::Address {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.owner.clone())
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_amount(&mut self, value: odra_wasm_client::types::U256) {
-        self.amount = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
-    }
-    #[wasm_bindgen(getter)]
-    pub fn amount(&self) -> odra_wasm_client::types::U256 {
-        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.amount.clone())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Burn {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (owner, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (amount, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((Self { owner, amount }, bytes))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Burn {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.owner)?);
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.amount)?);
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.owner.serialized_length();
-        result += self.amount.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for Burn {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<Burn> for Burn {
-    fn into_odra_value(self) -> Result<Burn, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<Burn> for Burn {
+impl odra_wasm_client::types::IntoWasmValue<Paused> for Paused {
     fn to_wasm_value(self) -> Self {
         self
     }
@@ -3652,93 +3700,6 @@ impl odra_wasm_client::types::IntoOdraValue<Mint> for Mint {
     }
 }
 impl odra_wasm_client::types::IntoWasmValue<Mint> for Mint {
-    fn to_wasm_value(self) -> Self {
-        self
-    }
-}
-#[doc = ""]
-#[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen(getter_with_clone)]
-pub struct RoleAdminChanged {
-    #[wasm_bindgen(js_name = "role")]
-    pub role: Vec<u8>,
-    #[wasm_bindgen(js_name = "previousAdminRole")]
-    pub previous_admin_role: Vec<u8>,
-    #[wasm_bindgen(js_name = "newAdminRole")]
-    pub new_admin_role: Vec<u8>,
-}
-#[wasm_bindgen]
-impl RoleAdminChanged {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        #[wasm_bindgen(js_name = "role")] role: Vec<u8>,
-        #[wasm_bindgen(js_name = "previousAdminRole")] previous_admin_role: Vec<u8>,
-        #[wasm_bindgen(js_name = "newAdminRole")] new_admin_role: Vec<u8>,
-    ) -> Result<Self, JsError> {
-        Ok(Self {
-            role,
-            previous_admin_role,
-            new_admin_role,
-        })
-    }
-    #[wasm_bindgen(js_name = "toJson")]
-    pub fn to_json(&self) -> JsValue {
-        JsValue::from_serde(self).unwrap_or(JsValue::null())
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for RoleAdminChanged {
-    fn from_bytes(
-        bytes: &[u8],
-    ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (role, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (previous_admin_role, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        let (new_admin_role, bytes) =
-            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        Ok((
-            Self {
-                role,
-                previous_admin_role,
-                new_admin_role,
-            },
-            bytes,
-        ))
-    }
-}
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for RoleAdminChanged {
-    fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        let mut result = Vec::with_capacity(self.serialized_length());
-        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.role)?);
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(
-                &self.previous_admin_role,
-            )?,
-        );
-        result.extend(
-            odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.new_admin_role)?,
-        );
-        Ok(result)
-    }
-    fn serialized_length(&self) -> usize {
-        let mut result = 0;
-        result += self.role.serialized_length();
-        result += self.previous_admin_role.serialized_length();
-        result += self.new_admin_role.serialized_length();
-        result
-    }
-}
-impl odra_wasm_client::casper_types::CLTyped for RoleAdminChanged {
-    fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::Any
-    }
-}
-impl odra_wasm_client::types::IntoOdraValue<RoleAdminChanged> for RoleAdminChanged {
-    fn into_odra_value(self) -> Result<RoleAdminChanged, JsError> {
-        Ok(self)
-    }
-}
-impl odra_wasm_client::types::IntoWasmValue<RoleAdminChanged> for RoleAdminChanged {
     fn to_wasm_value(self) -> Self {
         self
     }
@@ -3851,43 +3812,82 @@ impl odra_wasm_client::types::IntoWasmValue<SetAllowance> for SetAllowance {
 }
 #[doc = ""]
 #[derive(Debug, Clone, serde :: Serialize, serde :: Deserialize)]
-#[wasm_bindgen]
-pub enum LongOrShort {
-    Long = 0isize,
-    Short = 1isize,
+#[wasm_bindgen(getter_with_clone)]
+pub struct Deposit {
+    #[wasm_bindgen(js_name = "account")]
+    account: odra_wasm_client::OdraAddress,
+    #[wasm_bindgen(js_name = "value")]
+    value: odra_wasm_client::casper_types::U256,
 }
-impl odra_wasm_client::casper_types::bytesrepr::FromBytes for LongOrShort {
+#[wasm_bindgen]
+impl Deposit {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        #[wasm_bindgen(js_name = "account")] account: odra_wasm_client::types::Address,
+        #[wasm_bindgen(js_name = "value")] value: odra_wasm_client::types::U256,
+    ) -> Result<Self, JsError> {
+        Ok(Self {
+            account: odra_wasm_client::types::IntoOdraValue::into_odra_value(account)?,
+            value: odra_wasm_client::types::IntoOdraValue::into_odra_value(value)?,
+        })
+    }
+    #[wasm_bindgen(js_name = "toJson")]
+    pub fn to_json(&self) -> JsValue {
+        JsValue::from_serde(self).unwrap_or(JsValue::null())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_account(&mut self, value: odra_wasm_client::types::Address) {
+        self.account = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn account(&self) -> odra_wasm_client::types::Address {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.account.clone())
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_value(&mut self, value: odra_wasm_client::types::U256) {
+        self.value = odra_wasm_client::types::IntoOdraValue::into_odra_value(value).unwrap();
+    }
+    #[wasm_bindgen(getter)]
+    pub fn value(&self) -> odra_wasm_client::types::U256 {
+        odra_wasm_client::types::IntoWasmValue::to_wasm_value(self.value.clone())
+    }
+}
+impl odra_wasm_client::casper_types::bytesrepr::FromBytes for Deposit {
     fn from_bytes(
         bytes: &[u8],
     ) -> Result<(Self, &[u8]), odra_wasm_client::casper_types::bytesrepr::Error> {
-        let (result, bytes): (u8, _) =
+        let (account, bytes) =
             odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
-        match result {
-            0u8 => Ok((Self::Long, bytes)),
-            1u8 => Ok((Self::Short, bytes)),
-            _ => Err(odra_wasm_client::casper_types::bytesrepr::Error::Formatting),
-        }
+        let (value, bytes) =
+            odra_wasm_client::casper_types::bytesrepr::FromBytes::from_bytes(bytes)?;
+        Ok((Self { account, value }, bytes))
     }
 }
-impl odra_wasm_client::casper_types::bytesrepr::ToBytes for LongOrShort {
+impl odra_wasm_client::casper_types::bytesrepr::ToBytes for Deposit {
     fn to_bytes(&self) -> Result<Vec<u8>, odra_wasm_client::casper_types::bytesrepr::Error> {
-        Ok(vec![(self.clone() as u8)])
+        let mut result = Vec::with_capacity(self.serialized_length());
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.account)?);
+        result.extend(odra_wasm_client::casper_types::bytesrepr::ToBytes::to_bytes(&self.value)?);
+        Ok(result)
     }
     fn serialized_length(&self) -> usize {
-        odra_wasm_client::casper_types::bytesrepr::U8_SERIALIZED_LENGTH
+        let mut result = 0;
+        result += self.account.serialized_length();
+        result += self.value.serialized_length();
+        result
     }
 }
-impl odra_wasm_client::casper_types::CLTyped for LongOrShort {
+impl odra_wasm_client::casper_types::CLTyped for Deposit {
     fn cl_type() -> odra_wasm_client::casper_types::CLType {
-        odra_wasm_client::casper_types::CLType::U8
+        odra_wasm_client::casper_types::CLType::Any
     }
 }
-impl odra_wasm_client::types::IntoOdraValue<LongOrShort> for LongOrShort {
-    fn into_odra_value(self) -> Result<LongOrShort, JsError> {
+impl odra_wasm_client::types::IntoOdraValue<Deposit> for Deposit {
+    fn into_odra_value(self) -> Result<Deposit, JsError> {
         Ok(self)
     }
 }
-impl odra_wasm_client::types::IntoWasmValue<LongOrShort> for LongOrShort {
+impl odra_wasm_client::types::IntoWasmValue<Deposit> for Deposit {
     fn to_wasm_value(self) -> Self {
         self
     }

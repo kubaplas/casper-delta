@@ -18,48 +18,55 @@ features = []
 
 [workspace.dependencies.odra]
 version = "2.5.0"
+path = "../odra/odra/odra"
 features = []
 
 [workspace.dependencies.odra-bdd]
 version = "2.5.0"
+path = "../odra/odra/odra-bdd"
 features = []
 
 [workspace.dependencies.odra-build]
 version = "2.5.0"
+path = "../odra/odra/odra-build"
 features = []
 
 [workspace.dependencies.odra-cli]
 version = "2.5.0"
+path = "../odra/odra/odra-cli"
 features = []
 
 [workspace.dependencies.odra-core]
 version = "2.5.0"
+path = "../odra/odra/core"
 features = []
 
 [workspace.dependencies.odra-modules]
 version = "2.5.0"
+path = "../odra/odra/modules"
 features = []
 
 [workspace.dependencies.odra-test]
 version = "2.5.0"
+path = "../odra/odra/odra-test"
 features = []
 
 [workspace.dependencies.odra-wasm-client]
 version = "2.5.0"
+path = "../odra/odra/odra-wasm-client"
 features = []
 
 [workspace.dependencies.odra-wasm-client-builder]
 version = "2.5.0"
+path = "../odra/odra/odra-wasm-client-builder"
 features = []
 
 [workspace.dependencies.styks-contracts]
-git = "https://github.com/odradev/styks.git"
-branch = "feature/casper-shorts-client"
+path = "../styks/styks-contracts"
 features = []
 
 [workspace.dependencies.styks-core]
-git = "https://github.com/odradev/styks.git"
-branch = "feature/casper-shorts-client"
+path = "../styks/styks-core"
 features = []
 
 [profile.release]
