@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import Database from 'better-sqlite3';
 import fs from 'fs';
+import crypto from 'crypto';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // Correctly handle paths when running from dist or root
@@ -11,6 +12,28 @@ const isDist = __dirname.endsWith('dist');
 const baseDir = isDist ? path.join(__dirname, '..') : __dirname;
 const port = 3003;
 const app = express();
+// Compute a cache-busting version hash from key JS build artifacts.
+// The hash changes only when file contents change, so browser caches
+// are invalidated exactly when a new version is deployed.
+function computeBuildHash() {
+    const filesToHash = [
+        path.join(baseDir, 'dist', 'src', 'main.js'),
+        path.join(baseDir, 'cspr-click.js'),
+        path.join(baseDir, 'node_modules', 'casper-delta-wasm-client', 'casper_delta_wasm_client.js'),
+    ];
+    const hash = crypto.createHash('md5');
+    for (const file of filesToHash) {
+        try {
+            hash.update(fs.readFileSync(file));
+        }
+        catch {
+            // File may not exist yet (e.g. before first build)
+        }
+    }
+    return hash.digest('hex').substring(0, 8);
+}
+const buildHash = computeBuildHash();
+console.log(`Cache-busting hash: ${buildHash}`);
 const dbPath = path.join(baseDir, '..', 'market_data.db');
 let db = null;
 if (fs.existsSync(dbPath)) {
@@ -87,7 +110,7 @@ app.get('/', (req, res) => {
     import('fs').then(fs => {
         fs.promises.readFile(htmlPath, 'utf-8').then(html => {
             // Inject config as global variables before other scripts
-            const injectedHtml = html.replace('<head>', `<head>\n  <script>
+            let injectedHtml = html.replace('<head>', `<head>\n  <script>
     window.APP_MODE = '${appMode}';
     window.RPC_URL = '${rpcUrl}';
     window.SPECULATIVE_RPC_URL = '${speculativeRpcUrl}';
@@ -100,6 +123,11 @@ app.get('/', (req, res) => {
     window.CSPR_CLICK_APP_NAME = '${csprClickAppName}';
     window.CSPR_CLICK_APP_ID = '${csprClickAppId}';
   </script>`);
+            // Cache-busting: append ?v=HASH to local script sources and importmap entries
+            injectedHtml = injectedHtml
+                .replace(/src="(cspr-click\.js)"/g, `src="$1?v=${buildHash}"`)
+                .replace(/src="(dist\/src\/main\.js)"/g, `src="$1?v=${buildHash}"`)
+                .replace(/("\.\/(node_modules\/[^"]+\.(?:js|mjs))")/g, `"./$2?v=${buildHash}"`);
             res.send(injectedHtml);
         });
     });
@@ -109,19 +137,19 @@ app.get('/', (req, res) => {
 app.use(express.static(baseDir, {
     index: false,
     maxAge: '5m', // 5 minutes (300 seconds)
-    immutable: true,
     setHeaders: (res, filePath) => {
-        // Longer cache for WASM files (they're large and versioned)
+        // Longer cache for WASM files (they're large and change with builds)
         if (filePath.endsWith('.wasm')) {
-            res.setHeader('Cache-Control', 'public, max-age=86400, immutable'); // 1 day
+            res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
         }
         // Longer cache for fonts and images
         else if (filePath.match(/\.(woff2?|ttf|eot|png|jpg|jpeg|gif|svg|ico)$/)) {
             res.setHeader('Cache-Control', 'public, max-age=86400, immutable'); // 1 day
         }
-        // Standard cache for JS/CSS
-        else if (filePath.match(/\.(js|css)$/)) {
-            res.setHeader('Cache-Control', 'public, max-age=300, immutable'); // 5 minutes
+        // JS/CSS: rely on query-string cache busting; use must-revalidate
+        // so browsers check for new versions after max-age expires
+        else if (filePath.match(/\.(js|mjs|css)$/)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year (busted via ?v= in HTML)
         }
     }
 }));
