@@ -1,6 +1,6 @@
-import { CsprClickCallbacks, TransactionResult, TransactionStatus, AccountInfo } from "casper-delta-wasm-client";
+import { CsprClickCallbacks, TransactionResult, TransactionStatus } from "casper-delta-wasm-client";
 import * as dom from "../dom.js";
-import { setAccount } from "../data/state.js";
+import { client } from "../data/state.js";
 import {
     onTransactionSuccessFromCsprClick,
     onTransactionFailureFromCsprClick,
@@ -10,10 +10,10 @@ import {
 import { showTransactionHashInProgress, setCurrentTransaction, currentTransaction, onTransactionTimeout } from "./monitor.js";
 
 // Import functions that will be set from main.ts
-let onConnectFn: () => Promise<void>;
-let onDisconnectFn: () => void;
+let onConnectFn: ((publicKey: string) => Promise<void>) | null = null;
+let onDisconnectFn: (() => void) | null = null;
 
-export function setOnConnectCallback(fn: () => Promise<void>): void {
+export function setOnConnectCallback(fn: (publicKey: string) => Promise<void>): void {
     onConnectFn = fn;
 }
 
@@ -24,38 +24,74 @@ export function setOnDisconnectCallback(fn: () => void): void {
 // ---------- CSPR.click Integration ----------
 
 /**
- * Set up CSPR.click callbacks
+ * Fetch the active public key from the SDK and trigger the onConnect
+ * callback.  Reads directly from window.csprclick (not the WASM wrapper)
+ * because the WASM bridge crashes when getActivePublicKey() returns
+ * undefined (no session).
+ */
+async function handleSignIn(): Promise<void> {
+    try {
+        const csprclick = (window as any).csprclick;
+        const publicKey: string | undefined = await csprclick?.getActivePublicKey?.();
+        if (publicKey) {
+            if (onConnectFn) {
+                await onConnectFn(publicKey);
+            }
+        }
+    } catch (error) {
+        console.error("Failed to get active account after sign-in:", error);
+    }
+}
+
+/**
+ * Set up CSPR.click callbacks.
+ *
+ * Account events (signed_in, switched_account, signed_out) are registered
+ * directly on window.csprclick — the same pattern the ghostminter reference
+ * app uses.  This avoids a layer of WASM indirection that was silently
+ * swallowing events.
+ *
+ * Transaction status updates still go through the WASM CsprClickCallbacks
+ * because they provide proper TransactionStatus / TransactionResult types.
+ *
+ * MUST be called after both WASM init() and waitForCsprClick() have
+ * completed — at that point window.csprclick (from the CDN SDK) and the
+ * WASM module are both available.
  */
 export function setupCsprClickCallbacks(): void {
-    if (!CsprClickCallbacks || typeof CsprClickCallbacks.onSignedIn !== 'function') {
-        console.error("CsprClickCallbacks not available - wallet integration may fail");
-        setTimeout(setupCsprClickCallbacks, 1000);
-        return;
+    const csprclick = (window as any).csprclick;
+    if (!csprclick) {
+        throw new Error(
+            "window.csprclick not available — ensure waitForCsprClick() " +
+            "resolved before calling setupCsprClickCallbacks()."
+        );
     }
-    
-    CsprClickCallbacks.onSignedIn(async (accountInfo: AccountInfo) => {
-        setAccount(accountInfo);
-        if (onConnectFn) {
-            await onConnectFn();
-        }
+
+    // --- Account events (direct SDK registration) ---
+
+    csprclick.on('csprclick:signed_in', async () => {
+        await handleSignIn();
     });
 
-    CsprClickCallbacks.onSwitchedAccount(async (accountInfo: AccountInfo) => {
-        setAccount(accountInfo);
-        if (onConnectFn) {
-            await onConnectFn();
-        }
+    csprclick.on('csprclick:switched_account', async () => {
+        await handleSignIn();
     });
 
-    CsprClickCallbacks.onSignedOut(() => {
+    csprclick.on('csprclick:signed_out', () => {
         if (onDisconnectFn) {
             onDisconnectFn();
         }
     });
 
-    CsprClickCallbacks.onTransactionStatusUpdate((status: TransactionStatus, result: TransactionResult) => {
-        handleCsprClickStatusUpdate(status, result);
-    });
+    // --- Transaction events (WASM layer for type conversion) ---
+
+    if (CsprClickCallbacks && typeof CsprClickCallbacks.onTransactionStatusUpdate === 'function') {
+        CsprClickCallbacks.onTransactionStatusUpdate((status: TransactionStatus, result: TransactionResult) => {
+            handleCsprClickStatusUpdate(status, result);
+        });
+    } else {
+        console.warn("CsprClickCallbacks.onTransactionStatusUpdate not available — transaction monitoring may not work");
+    }
 }
 
 /**

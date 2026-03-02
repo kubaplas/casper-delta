@@ -1,5 +1,5 @@
 import * as dom from "../dom.js";
-import { setConnected, setAddress, setBalances, setConsolidatedData, client, address, account, connected } from "../data/state.js";
+import { setConnected, setAddress, setBalances, setConsolidatedData, client, address, connected } from "../data/state.js";
 import { refreshAllData, refreshMarketStateOnly, setFallbackValues } from "../data/fetch.js";
 import { hideTransaction } from "../ui/modals.js";
 
@@ -10,11 +10,17 @@ let isDisconnecting = false;
 // ---------- Wallet Connection Functions ----------
 
 /**
- * Connect wallet (trigger CSPR.click sign in)
+ * Connect wallet — calls window.csprclick.connect('casper-wallet') directly
+ * to bypass the CSPR.click account-selector modal and go straight to the
+ * Casper Wallet extension.
  */
 export async function connect(): Promise<void> {
     try {
-        await client.signIn();
+        const csprclick = (window as any).csprclick;
+        if (!csprclick) {
+            throw new Error("CSPR.click SDK not loaded");
+        }
+        await csprclick.connect('casper-wallet');
     } catch (error) {
         console.error("Error during sign in:", error);
         throw error;
@@ -22,14 +28,32 @@ export async function connect(): Promise<void> {
 }
 
 /**
- * Handle successful connection
+ * Handle successful connection.
+ * @param publicKey — the active account's public key hex string,
+ *                     passed in by the CSPR.click event handler.
  */
-export async function onConnect(skipDataLoad: boolean = false): Promise<void> {
+export async function onConnect(publicKey?: string): Promise<void> {
     // Reset disconnect guard when connecting
     isDisconnecting = false;
     
     setConnected(true);
-    const addr = account.publicKey;
+
+    // Determine the address: prefer the explicitly-passed key,
+    // fall back to asking the SDK directly.
+    let addr = publicKey;
+    if (!addr) {
+        try {
+            addr = await client.getActivePublicKey();
+        } catch (e) {
+            console.error("Unable to obtain active public key:", e);
+        }
+    }
+
+    if (!addr) {
+        console.error("onConnect called but no public key available");
+        return;
+    }
+
     setAddress(addr);
     dom.addressSpan.textContent = `${addr.slice(0, 5)}...${addr.slice(-5)}`;
     dom.connectBtn.classList.add("hidden");
@@ -45,12 +69,10 @@ export async function onConnect(skipDataLoad: boolean = false): Promise<void> {
     disableReadOnlyMode();
     disableDisconnectedMode();
 
-    if (!skipDataLoad) {
-        // Small delay to ensure UI has time to clear before fetching new data
-        await new Promise(resolve => setTimeout(resolve, 100));
+    // Small delay to ensure UI has time to clear before fetching new data
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-        await refreshAllData();
-    }
+    await refreshAllData();
 }
 
 /**
@@ -65,7 +87,10 @@ export async function disconnect(): Promise<void> {
     isDisconnecting = true;
 
     try {
-        await client.signOut();
+        const csprclick = (window as any).csprclick;
+        if (csprclick) {
+            csprclick.signOut();
+        }
     } catch (e) {
         console.warn("Error during signOut:", e);
     }

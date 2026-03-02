@@ -1,5 +1,5 @@
 import * as dom from "../dom.js";
-import { setConnected, setAddress, setBalances, setConsolidatedData, client, account, connected } from "../data/state.js";
+import { setConnected, setAddress, setBalances, setConsolidatedData, client, connected } from "../data/state.js";
 import { refreshAllData, refreshMarketStateOnly, setFallbackValues } from "../data/fetch.js";
 import { hideTransaction } from "../ui/modals.js";
 // ---------- Wallet Connection State ----------
@@ -7,11 +7,17 @@ import { hideTransaction } from "../ui/modals.js";
 let isDisconnecting = false;
 // ---------- Wallet Connection Functions ----------
 /**
- * Connect wallet (trigger CSPR.click sign in)
+ * Connect wallet — calls window.csprclick.connect('casper-wallet') directly
+ * to bypass the CSPR.click account-selector modal and go straight to the
+ * Casper Wallet extension.
  */
 export async function connect() {
     try {
-        await client.signIn();
+        const csprclick = window.csprclick;
+        if (!csprclick) {
+            throw new Error("CSPR.click SDK not loaded");
+        }
+        await csprclick.connect('casper-wallet');
     }
     catch (error) {
         console.error("Error during sign in:", error);
@@ -19,13 +25,29 @@ export async function connect() {
     }
 }
 /**
- * Handle successful connection
+ * Handle successful connection.
+ * @param publicKey — the active account's public key hex string,
+ *                     passed in by the CSPR.click event handler.
  */
-export async function onConnect(skipDataLoad = false) {
+export async function onConnect(publicKey) {
     // Reset disconnect guard when connecting
     isDisconnecting = false;
     setConnected(true);
-    const addr = account.publicKey;
+    // Determine the address: prefer the explicitly-passed key,
+    // fall back to asking the SDK directly.
+    let addr = publicKey;
+    if (!addr) {
+        try {
+            addr = await client.getActivePublicKey();
+        }
+        catch (e) {
+            console.error("Unable to obtain active public key:", e);
+        }
+    }
+    if (!addr) {
+        console.error("onConnect called but no public key available");
+        return;
+    }
     setAddress(addr);
     dom.addressSpan.textContent = `${addr.slice(0, 5)}...${addr.slice(-5)}`;
     dom.connectBtn.classList.add("hidden");
@@ -39,11 +61,9 @@ export async function onConnect(skipDataLoad = false) {
     // Disable read-only mode or disconnected mode if they were enabled
     disableReadOnlyMode();
     disableDisconnectedMode();
-    if (!skipDataLoad) {
-        // Small delay to ensure UI has time to clear before fetching new data
-        await new Promise(resolve => setTimeout(resolve, 100));
-        await refreshAllData();
-    }
+    // Small delay to ensure UI has time to clear before fetching new data
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await refreshAllData();
 }
 /**
  * Disconnect wallet
@@ -56,7 +76,10 @@ export async function disconnect() {
     }
     isDisconnecting = true;
     try {
-        await client.signOut();
+        const csprclick = window.csprclick;
+        if (csprclick) {
+            csprclick.signOut();
+        }
     }
     catch (e) {
         console.warn("Error during signOut:", e);
