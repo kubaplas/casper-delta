@@ -21,6 +21,22 @@ let onDisconnectFn: (() => void) | null = null;
 // active".
 let knownActivePublicKey: string | null = null;
 
+/**
+ * Normalise a TransactionResult object in-place so that
+ * csprCloudTransaction fields match the types the WASM binary expects.
+ * The CSPR.click SDK can return null for fields the Rust struct defines
+ * as non-optional String/u64 (contract_hash, contract_package_hash,
+ * entry_point_id).
+ */
+function normalizeTransactionResult(result: any): void {
+    if (!result || typeof result !== 'object') return;
+    const tx = result.csprCloudTransaction;
+    if (!tx || typeof tx !== 'object') return;
+    if (tx.contract_hash == null) tx.contract_hash = "";
+    if (tx.contract_package_hash == null) tx.contract_package_hash = "";
+    if (tx.entry_point_id == null) tx.entry_point_id = 0;
+}
+
 export function setOnConnectCallback(fn: (publicKey: string) => Promise<void>): void {
     onConnectFn = fn;
 }
@@ -77,6 +93,14 @@ export function setupCsprClickCallbacks(): void {
         );
     }
 
+    // --- WASM account callbacks ---
+    // Register callbacks via CsprClickCallbacks so the WASM event closure
+    // stores the account in its internal ACCOUNT thread-local.  Without
+    // this, get_account() (used by caller_and_public_key()) always fails
+    // because ACCOUNT stays JsValue::NULL.
+    CsprClickCallbacks.onSignedIn(() => {});
+    CsprClickCallbacks.onSwitchedAccount(() => {});
+
     // --- Account events (direct SDK registration) ---
 
     csprclick.on('csprclick:signed_in', async (eventData: any) => {
@@ -119,12 +143,28 @@ export function setupCsprClickCallbacks(): void {
 
     const originalSend = csprclick.send?.bind(csprclick);
     if (originalSend) {
-        csprclick.send = function (deployJson: string, signingPublicKey: string, accountInfo: any) {
+        csprclick.send = function (deployJson: string, signingPublicKey: string, onStatusUpdate: any, ...rest: any[]) {
             const keyToUse = knownActivePublicKey || signingPublicKey;
-            if (accountInfo && knownActivePublicKey) {
-                accountInfo.public_key = knownActivePublicKey;
+
+            // Wrap the status update callback to normalise the result
+            // before the WASM binary tries into_serde::<TransactionResult>.
+            const wrappedOnStatusUpdate = typeof onStatusUpdate === 'function'
+                ? function (status: any, result: any) {
+                    normalizeTransactionResult(result);
+                    return onStatusUpdate(status, result);
+                }
+                : onStatusUpdate;
+
+            const promise = originalSend(deployJson, keyToUse, wrappedOnStatusUpdate, ...rest);
+
+            // Also normalise the final resolved value of the send() promise.
+            if (promise && typeof promise.then === 'function') {
+                return promise.then((result: any) => {
+                    normalizeTransactionResult(result);
+                    return result;
+                });
             }
-            return originalSend(deployJson, keyToUse, accountInfo);
+            return promise;
         };
     }
 

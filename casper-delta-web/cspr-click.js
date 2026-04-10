@@ -16,6 +16,45 @@ window.clickSDKOptions = {
     providers: ['casper-wallet', 'ledger'],
 };
 
+// Normalise CSPR.click account event data so the WASM binary's
+// into_serde::<WrappedAccountInfo>() always succeeds.  The WASM struct
+// expects { account: { provider, public_key, connected_at (i64), … } }.
+// Different SDK versions may send slightly different shapes (camelCase vs
+// snake_case, string vs number for connected_at, extra unknown fields).
+function normalizeAccountEvent(data) {
+    if (!data || typeof data !== 'object') return data;
+    var a = data.account;
+    if (!a || typeof a !== 'object') return data;
+    // Coerce connected_at to integer (some versions send a string)
+    var connAt = a.connected_at != null ? a.connected_at : a.connectedAt;
+    if (typeof connAt === 'string') connAt = parseInt(connAt, 10) || 0;
+    if (typeof connAt !== 'number') connAt = 0;
+    a.connected_at = connAt;
+    // Ensure balance fields are strings (serde expects Option<String>)
+    if (a.balance != null && typeof a.balance !== 'string') a.balance = String(a.balance);
+    if (a.liquid_balance != null && typeof a.liquid_balance !== 'string') a.liquid_balance = String(a.liquid_balance);
+    return data;
+}
+
+// Wrap window.csprclick.on BEFORE the WASM module registers its listeners.
+// This listener fires before the WASM's csprclick:loaded handler because
+// cspr-click.js is loaded before the WASM init() call.
+window.addEventListener('csprclick:loaded', function patchCsprClickOn() {
+    window.removeEventListener('csprclick:loaded', patchCsprClickOn);
+    if (!window.csprclick || !window.csprclick.on) return;
+    var realOn = window.csprclick.on.bind(window.csprclick);
+    window.csprclick.on = function (event, callback) {
+        if (event === 'csprclick:signed_in' ||
+            event === 'csprclick:switched_account' ||
+            event === 'csprclick:unsolicited_account_change') {
+            return realOn(event, function (eventData) {
+                callback(normalizeAccountEvent(eventData));
+            });
+        }
+        return realOn(event, callback);
+    };
+});
+
 // Expose a promise that resolves when the CSPR.click SDK is fully
 // initialised (window.csprclick is available).
 //

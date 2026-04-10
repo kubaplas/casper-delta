@@ -17,56 +17,49 @@ version = "0.21.0"
 features = []
 
 [workspace.dependencies.odra]
-version = "2.5.0"
-path = "../odra/odra/odra"
+version = "2.6.0"
 features = []
 
 [workspace.dependencies.odra-bdd]
-version = "2.5.0"
-path = "../odra/odra/odra-bdd"
+version = "2.6.0"
 features = []
 
 [workspace.dependencies.odra-build]
-version = "2.5.0"
-path = "../odra/odra/odra-build"
+version = "2.6.0"
 features = []
 
 [workspace.dependencies.odra-cli]
-version = "2.5.0"
-path = "../odra/odra/odra-cli"
+version = "2.6.0"
 features = []
 
 [workspace.dependencies.odra-core]
-version = "2.5.0"
-path = "../odra/odra/core"
+version = "2.6.0"
 features = []
 
 [workspace.dependencies.odra-modules]
-version = "2.5.0"
-path = "../odra/odra/modules"
+version = "2.6.0"
 features = []
 
 [workspace.dependencies.odra-test]
-version = "2.5.0"
-path = "../odra/odra/odra-test"
+version = "2.6.0"
 features = []
 
 [workspace.dependencies.odra-wasm-client]
-version = "2.5.0"
-path = "../odra/odra/odra-wasm-client"
+version = "2.6.0"
 features = []
 
 [workspace.dependencies.odra-wasm-client-builder]
-version = "2.5.0"
-path = "../odra/odra/odra-wasm-client-builder"
+version = "2.6.0"
 features = []
 
 [workspace.dependencies.styks-contracts]
-path = "../styks/styks-contracts"
+git = "https://github.com/odradev/styks.git"
+branch = "main"
 features = []
 
 [workspace.dependencies.styks-core]
-path = "../styks/styks-core"
+git = "https://github.com/odradev/styks.git"
+branch = "main"
 features = []
 
 [profile.release]

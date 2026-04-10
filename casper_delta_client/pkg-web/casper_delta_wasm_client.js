@@ -247,18 +247,42 @@ function getArrayU8FromWasm0(ptr, len) {
     return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-}
-
 function passArray8ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 1, 1) >>> 0;
     getUint8ArrayMemory0().set(arg, ptr / 1);
     WASM_VECTOR_LEN = arg.length;
     return ptr;
 }
+
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+
+export function run() {
+    wasm.run();
+}
+
+/**
+ * @returns {AccountInfo}
+ */
+export function getCurrentAccount() {
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        wasm.getCurrentAccount(retptr);
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+        var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+        if (r2) {
+            throw takeObject(r1);
+        }
+        return AccountInfo.__wrap(r0);
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+    }
+}
+
 /**
  * Returns the gas limit for the client for the next calls.
  * @returns {bigint}
@@ -294,24 +318,6 @@ function getArrayJsValueFromWasm0(ptr, len) {
     }
     return result;
 }
-/**
- * @returns {AccountInfo}
- */
-export function getCurrentAccount() {
-    try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-        wasm.getCurrentAccount(retptr);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-        if (r2) {
-            throw takeObject(r1);
-        }
-        return AccountInfo.__wrap(r0);
-    } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
-    }
-}
 
 let stack_pointer = 128;
 
@@ -320,11 +326,6 @@ function addBorrowedObject(obj) {
     heap[--stack_pointer] = obj;
     return stack_pointer;
 }
-
-export function run() {
-    wasm.run();
-}
-
 function __wbg_adapter_38(arg0, arg1, arg2, arg3) {
     wasm.__wbindgen_export_5(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
@@ -341,7 +342,7 @@ function __wbg_adapter_47(arg0, arg1, arg2) {
     wasm.__wbindgen_export_8(arg0, arg1, addHeapObject(arg2));
 }
 
-function __wbg_adapter_706(arg0, arg1, arg2, arg3) {
+function __wbg_adapter_694(arg0, arg1, arg2, arg3) {
     wasm.__wbindgen_export_9(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
@@ -558,9 +559,9 @@ export class AccountInfo {
             publicKey: this.publicKey,
             connectedAt: this.connectedAt,
             logo: this.logo,
+            liquidBalance: this.liquidBalance,
             address: this.address,
             balance: this.balance,
-            liquidBalance: this.liquidBalance,
         };
     }
 
@@ -689,6 +690,14 @@ export class AccountInfo {
         }
     }
     /**
+     * Liquid balance of the account in CSPR motes (includes liquid +staked balance)
+     * @returns {U512}
+     */
+    get liquidBalance() {
+        const ret = wasm.accountinfo_liquidBalance(this.__wbg_ptr);
+        return U512.__wrap(ret);
+    }
+    /**
      * The account address derived from the public key.
      * @returns {Address}
      */
@@ -713,14 +722,6 @@ export class AccountInfo {
      */
     get balance() {
         const ret = wasm.accountinfo_balance(this.__wbg_ptr);
-        return U512.__wrap(ret);
-    }
-    /**
-     * Liquid balance of the account in CSPR motes (includes liquid +staked balance)
-     * @returns {U512}
-     */
-    get liquidBalance() {
-        const ret = wasm.accountinfo_liquidBalance(this.__wbg_ptr);
         return U512.__wrap(ret);
     }
 }
@@ -761,28 +762,6 @@ export class Address {
         wasm.__wbg_address_free(ptr, 0);
     }
     /**
-     * @param {string} address
-     */
-    constructor(address) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passStringToWasm0(address, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.address_new(retptr, ptr0, len0);
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            this.__wbg_ptr = r0 >>> 0;
-            AddressFinalization.register(this, this.__wbg_ptr, this);
-            return this;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
      * @param {HTMLInputElement} input
      * @returns {Address}
      */
@@ -818,6 +797,28 @@ export class Address {
                 throw takeObject(r1);
             }
             return Address.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * @param {string} address
+     */
+    constructor(address) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passStringToWasm0(address, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
+            const len0 = WASM_VECTOR_LEN;
+            wasm.address_new(retptr, ptr0, len0);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            this.__wbg_ptr = r0 >>> 0;
+            AddressFinalization.register(this, this.__wbg_ptr, this);
+            return this;
         } finally {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
@@ -912,6 +913,148 @@ export class AddressMarketState {
         wasm.__wbg_set_addressmarketstate_config(this.__wbg_ptr, ptr0);
     }
     /**
+     * @returns {U256}
+     */
+    get wcspr_balance() {
+        const ret = wasm.addressmarketstate_wcspr_balance(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get market_allowance() {
+        const ret = wasm.addressmarketstate_market_allowance(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set wcspr_balance(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.addressmarketstate_set_wcspr_balance(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get long_token_balance() {
+        const ret = wasm.addressmarketstate_long_token_balance(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get long_position_value() {
+        const ret = wasm.addressmarketstate_long_position_value(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get short_token_balance() {
+        const ret = wasm.addressmarketstate_short_token_balance(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set market_allowance(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.addressmarketstate_set_market_allowance(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get short_position_value() {
+        const ret = wasm.addressmarketstate_short_position_value(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get total_position_value() {
+        const ret = wasm.addressmarketstate_total_position_value(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get long_share_percentage() {
+        const ret = wasm.addressmarketstate_long_share_percentage(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set long_token_balance(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.addressmarketstate_set_long_token_balance(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get short_share_percentage() {
+        const ret = wasm.addressmarketstate_short_share_percentage(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set long_position_value(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.addressmarketstate_set_long_position_value(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set short_token_balance(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.addressmarketstate_set_short_token_balance(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set short_position_value(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.addressmarketstate_set_short_position_value(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set total_position_value(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.addressmarketstate_set_total_position_value(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set long_share_percentage(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.addressmarketstate_set_long_share_percentage(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set short_share_percentage(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.addressmarketstate_set_short_share_percentage(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get fee() {
+        const ret = wasm.addressmarketstate_fee(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
      * @param {MarketState} marketState
      * @param {boolean} isPaused
      * @param {U256} fee
@@ -968,13 +1111,6 @@ export class AddressMarketState {
         }
     }
     /**
-     * @returns {any}
-     */
-    toJson() {
-        const ret = wasm.addressmarketstate_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
      * @param {U256} value
      */
     set fee(value) {
@@ -983,146 +1119,11 @@ export class AddressMarketState {
         wasm.addressmarketstate_set_fee(this.__wbg_ptr, ptr0);
     }
     /**
-     * @returns {U256}
+     * @returns {any}
      */
-    get fee() {
-        const ret = wasm.addressmarketstate_fee(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set wcspr_balance(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.addressmarketstate_set_wcspr_balance(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get wcspr_balance() {
-        const ret = wasm.addressmarketstate_wcspr_balance(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set long_token_balance(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.addressmarketstate_set_long_token_balance(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get long_token_balance() {
-        const ret = wasm.addressmarketstate_long_token_balance(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set short_token_balance(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.addressmarketstate_set_short_token_balance(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get short_token_balance() {
-        const ret = wasm.addressmarketstate_short_token_balance(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set market_allowance(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.addressmarketstate_set_market_allowance(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get market_allowance() {
-        const ret = wasm.addressmarketstate_market_allowance(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set long_position_value(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.addressmarketstate_set_long_position_value(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get long_position_value() {
-        const ret = wasm.addressmarketstate_long_position_value(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set short_position_value(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.addressmarketstate_set_short_position_value(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get short_position_value() {
-        const ret = wasm.addressmarketstate_short_position_value(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set total_position_value(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.addressmarketstate_set_total_position_value(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get total_position_value() {
-        const ret = wasm.addressmarketstate_total_position_value(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set long_share_percentage(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.addressmarketstate_set_long_share_percentage(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get long_share_percentage() {
-        const ret = wasm.addressmarketstate_long_share_percentage(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set short_share_percentage(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.addressmarketstate_set_short_share_percentage(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get short_share_percentage() {
-        const ret = wasm.addressmarketstate_short_share_percentage(this.__wbg_ptr);
-        return U256.__wrap(ret);
+    toJson() {
+        const ret = wasm.addressmarketstate_toJson(this.__wbg_ptr);
+        return takeObject(ret);
     }
 }
 
@@ -1152,14 +1153,15 @@ export class BalanceFormatter {
         wasm.__wbg_balanceformatter_free(ptr, 0);
     }
     /**
+     * @param {number} precision
      * @returns {string}
      */
-    fmt() {
+    fmtWithPrecision(precision) {
         let deferred1_0;
         let deferred1_1;
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.balanceformatter_fmt(retptr, this.__wbg_ptr);
+            wasm.balanceformatter_fmtWithPrecision(retptr, this.__wbg_ptr, precision);
             var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
             var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
             deferred1_0 = r0;
@@ -1171,15 +1173,14 @@ export class BalanceFormatter {
         }
     }
     /**
-     * @param {number} precision
      * @returns {string}
      */
-    fmtWithPrecision(precision) {
+    fmt() {
         let deferred1_0;
         let deferred1_1;
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.balanceformatter_fmtWithPrecision(retptr, this.__wbg_ptr, precision);
+            wasm.balanceformatter_fmt(retptr, this.__wbg_ptr);
             var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
             var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
             deferred1_0 = r0;
@@ -1210,6 +1211,14 @@ export class Burn {
         wasm.__wbg_burn_free(ptr, 0);
     }
     /**
+     * @param {U256} value
+     */
+    set amount(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.burn_set_amount(this.__wbg_ptr, ptr0);
+    }
+    /**
      * @param {Address} owner
      * @param {U256} amount
      */
@@ -1235,6 +1244,20 @@ export class Burn {
         }
     }
     /**
+     * @returns {Address}
+     */
+    get owner() {
+        const ret = wasm.burn_owner(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get amount() {
+        const ret = wasm.burn_amount(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
      * @returns {any}
      */
     toJson() {
@@ -1248,28 +1271,6 @@ export class Burn {
         _assertClass(value, Address);
         var ptr0 = value.__destroy_into_raw();
         wasm.burn_set_owner(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get owner() {
-        const ret = wasm.burn_owner(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set amount(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.burn_set_amount(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get amount() {
-        const ret = wasm.burn_amount(this.__wbg_ptr);
-        return U256.__wrap(ret);
     }
 }
 
@@ -1298,12 +1299,6 @@ export class Bytes {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_bytes_free(ptr, 0);
     }
-    constructor() {
-        const ret = wasm.bytes_new();
-        this.__wbg_ptr = ret >>> 0;
-        BytesFinalization.register(this, this.__wbg_ptr, this);
-        return this;
-    }
     /**
      * @param {Uint8Array} uint8_array
      * @returns {Bytes}
@@ -1312,10 +1307,16 @@ export class Bytes {
         const ret = wasm.bytes_fromUint8Array(addHeapObject(uint8_array));
         return Bytes.__wrap(ret);
     }
+    constructor() {
+        const ret = wasm.bytes_new();
+        this.__wbg_ptr = ret >>> 0;
+        BytesFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
     /**
      * @returns {string}
      */
-    toString() {
+    get value() {
         let deferred1_0;
         let deferred1_1;
         try {
@@ -1334,7 +1335,7 @@ export class Bytes {
     /**
      * @returns {string}
      */
-    get value() {
+    toString() {
         let deferred1_0;
         let deferred1_1;
         try {
@@ -1378,6 +1379,66 @@ export class Config {
         wasm.__wbg_config_free(ptr, 0);
     }
     /**
+     * @returns {Address}
+     */
+    get long_token() {
+        const ret = wasm.config_long_token(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
+     * @returns {Address}
+     */
+    get short_token() {
+        const ret = wasm.config_short_token(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
+     * @returns {Address}
+     */
+    get wcspr_token() {
+        const ret = wasm.config_wcspr_token(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
+     * @returns {Address}
+     */
+    get fee_collector() {
+        const ret = wasm.config_fee_collector(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
+     * @param {Address} value
+     */
+    set long_token(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.config_set_long_token(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set short_token(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.config_set_short_token(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set wcspr_token(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.config_set_wcspr_token(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set fee_collector(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.config_set_fee_collector(this.__wbg_ptr, ptr0);
+    }
+    /**
      * @param {Address} longToken
      * @param {Address} shortToken
      * @param {Address} wcsprToken
@@ -1415,66 +1476,6 @@ export class Config {
         const ret = wasm.config_toJson(this.__wbg_ptr);
         return takeObject(ret);
     }
-    /**
-     * @param {Address} value
-     */
-    set long_token(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.config_set_long_token(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get long_token() {
-        const ret = wasm.config_long_token(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set short_token(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.config_set_short_token(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get short_token() {
-        const ret = wasm.config_short_token(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set wcspr_token(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.config_set_wcspr_token(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get wcspr_token() {
-        const ret = wasm.config_wcspr_token(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set fee_collector(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.config_set_fee_collector(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get fee_collector() {
-        const ret = wasm.config_fee_collector(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
 }
 
 const ConfigUpdatedFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -1493,6 +1494,66 @@ export class ConfigUpdated {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_configupdated_free(ptr, 0);
+    }
+    /**
+     * @returns {Address}
+     */
+    get long_token() {
+        const ret = wasm.configupdated_long_token(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
+     * @returns {Address}
+     */
+    get short_token() {
+        const ret = wasm.configupdated_short_token(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
+     * @returns {Address}
+     */
+    get wcspr_token() {
+        const ret = wasm.configupdated_wcspr_token(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
+     * @returns {Address}
+     */
+    get fee_collector() {
+        const ret = wasm.configupdated_fee_collector(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
+     * @param {Address} value
+     */
+    set long_token(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.configupdated_set_long_token(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set short_token(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.configupdated_set_short_token(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set wcspr_token(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.configupdated_set_wcspr_token(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set fee_collector(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.configupdated_set_fee_collector(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} admin
@@ -1529,6 +1590,13 @@ export class ConfigUpdated {
         }
     }
     /**
+     * @returns {Address}
+     */
+    get admin() {
+        const ret = wasm.configupdated_admin(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
      * @returns {any}
      */
     toJson() {
@@ -1542,73 +1610,6 @@ export class ConfigUpdated {
         _assertClass(value, Address);
         var ptr0 = value.__destroy_into_raw();
         wasm.configupdated_set_admin(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get admin() {
-        const ret = wasm.configupdated_admin(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set long_token(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.configupdated_set_long_token(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get long_token() {
-        const ret = wasm.configupdated_long_token(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set short_token(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.configupdated_set_short_token(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get short_token() {
-        const ret = wasm.configupdated_short_token(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set wcspr_token(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.configupdated_set_wcspr_token(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get wcspr_token() {
-        const ret = wasm.configupdated_wcspr_token(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set fee_collector(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.configupdated_set_fee_collector(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get fee_collector() {
-        const ret = wasm.configupdated_fee_collector(this.__wbg_ptr);
-        return Address.__wrap(ret);
     }
 }
 
@@ -1783,36 +1784,6 @@ export class Contracts {
         wasm.__wbg_contracts_free(ptr, 0);
     }
     /**
-     * Creates a new `Contracts` instance from a JavaScript value.
-     *
-     * # Arguments
-     * * `js` - JavaScript value containing contract data in JSON format
-     *
-     * # Returns
-     * * `Result<Self, JsError>` - New Contracts instance or error if parsing fails
-     *
-     * # Errors
-     * Returns `JsError` if the JavaScript value cannot be deserialized into a Contracts struct.
-     * @param {any} js
-     */
-    constructor(js) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.contracts_new(retptr, addHeapObject(js));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            this.__wbg_ptr = r0 >>> 0;
-            ContractsFinalization.register(this, this.__wbg_ptr, this);
-            return this;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
      * Asynchronously loads contract information from a remote JSON file.
      *
      * This method fetches contract data from the specified URL path using the browser's
@@ -1873,6 +1844,36 @@ export class Contracts {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
+    /**
+     * Creates a new `Contracts` instance from a JavaScript value.
+     *
+     * # Arguments
+     * * `js` - JavaScript value containing contract data in JSON format
+     *
+     * # Returns
+     * * `Result<Self, JsError>` - New Contracts instance or error if parsing fails
+     *
+     * # Errors
+     * Returns `JsError` if the JavaScript value cannot be deserialized into a Contracts struct.
+     * @param {any} js
+     */
+    constructor(js) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.contracts_new(retptr, addHeapObject(js));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            this.__wbg_ptr = r0 >>> 0;
+            ContractsFinalization.register(this, this.__wbg_ptr, this);
+            return this;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
 }
 
 const CsprClickCallbacksFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -1901,18 +1902,6 @@ export class CsprClickCallbacks {
     /**
      * @param {Function} callback
      */
-    static onSwitchedAccount(callback) {
-        wasm.csprclickcallbacks_onSwitchedAccount(addHeapObject(callback));
-    }
-    /**
-     * @param {Function} callback
-     */
-    static onUnsolicitedAccountChange(callback) {
-        wasm.csprclickcallbacks_onUnsolicitedAccountChange(addHeapObject(callback));
-    }
-    /**
-     * @param {Function} callback
-     */
     static onSignedOut(callback) {
         wasm.csprclickcallbacks_onSignedOut(addHeapObject(callback));
     }
@@ -1925,8 +1914,20 @@ export class CsprClickCallbacks {
     /**
      * @param {Function} callback
      */
+    static onSwitchedAccount(callback) {
+        wasm.csprclickcallbacks_onSwitchedAccount(addHeapObject(callback));
+    }
+    /**
+     * @param {Function} callback
+     */
     static onTransactionStatusUpdate(callback) {
         wasm.csprclickcallbacks_onTransactionStatusUpdate(addHeapObject(callback));
+    }
+    /**
+     * @param {Function} callback
+     */
+    static onUnsolicitedAccountChange(callback) {
+        wasm.csprclickcallbacks_onUnsolicitedAccountChange(addHeapObject(callback));
     }
 }
 
@@ -1946,6 +1947,30 @@ export class DecreaseAllowance {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_decreaseallowance_free(ptr, 0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set decr_by(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.decreaseallowance_set_decr_by(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set spender(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.decreaseallowance_set_spender(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set allowance(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.decreaseallowance_set_allowance(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} owner
@@ -1979,21 +2004,6 @@ export class DecreaseAllowance {
         }
     }
     /**
-     * @returns {any}
-     */
-    toJson() {
-        const ret = wasm.decreaseallowance_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set owner(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.decreaseallowance_set_owner(this.__wbg_ptr, ptr0);
-    }
-    /**
      * @returns {Address}
      */
     get owner() {
@@ -2001,12 +2011,11 @@ export class DecreaseAllowance {
         return Address.__wrap(ret);
     }
     /**
-     * @param {Address} value
+     * @returns {U256}
      */
-    set spender(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.decreaseallowance_set_spender(this.__wbg_ptr, ptr0);
+    get decr_by() {
+        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
+        return U256.__wrap(ret);
     }
     /**
      * @returns {Address}
@@ -2016,12 +2025,11 @@ export class DecreaseAllowance {
         return Address.__wrap(ret);
     }
     /**
-     * @param {U256} value
+     * @returns {any}
      */
-    set allowance(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.decreaseallowance_set_allowance(this.__wbg_ptr, ptr0);
+    toJson() {
+        const ret = wasm.decreaseallowance_toJson(this.__wbg_ptr);
+        return takeObject(ret);
     }
     /**
      * @returns {U256}
@@ -2031,19 +2039,12 @@ export class DecreaseAllowance {
         return U256.__wrap(ret);
     }
     /**
-     * @param {U256} value
+     * @param {Address} value
      */
-    set decr_by(value) {
-        _assertClass(value, U256);
+    set owner(value) {
+        _assertClass(value, Address);
         var ptr0 = value.__destroy_into_raw();
-        wasm.decreaseallowance_set_decr_by(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get decr_by() {
-        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
-        return U256.__wrap(ret);
+        wasm.decreaseallowance_set_owner(this.__wbg_ptr, ptr0);
     }
 }
 
@@ -2063,6 +2064,14 @@ export class Deposit {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_deposit_free(ptr, 0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set account(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.deposit_set_account(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} account
@@ -2090,19 +2099,11 @@ export class Deposit {
         }
     }
     /**
-     * @returns {any}
+     * @returns {U256}
      */
-    toJson() {
-        const ret = wasm.deposit_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set account(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.deposit_set_account(this.__wbg_ptr, ptr0);
+    get value() {
+        const ret = wasm.burn_amount(this.__wbg_ptr);
+        return U256.__wrap(ret);
     }
     /**
      * @returns {Address}
@@ -2112,19 +2113,19 @@ export class Deposit {
         return Address.__wrap(ret);
     }
     /**
+     * @returns {any}
+     */
+    toJson() {
+        const ret = wasm.deposit_toJson(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
      * @param {U256} value
      */
     set value(value) {
         _assertClass(value, U256);
         var ptr0 = value.__destroy_into_raw();
         wasm.deposit_set_value(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get value() {
-        const ret = wasm.burn_amount(this.__wbg_ptr);
-        return U256.__wrap(ret);
     }
 }
 
@@ -2146,95 +2147,14 @@ export class FaucetableWcsprWasmClient {
         wasm.__wbg_faucetablewcsprwasmclient_free(ptr, 0);
     }
     /**
-     * @param {OdraWasmClient} wasmClient
+     * Delegated. See `self.wcspr.balance_of()` for details.
      * @param {Address} address
+     * @returns {Promise<U256>}
      */
-    constructor(wasmClient, address) {
-        _assertClass(wasmClient, OdraWasmClient);
+    balanceOf(address) {
         _assertClass(address, Address);
         var ptr0 = address.__destroy_into_raw();
-        const ret = wasm.faucetablewcsprwasmclient_new(wasmClient.__wbg_ptr, ptr0);
-        this.__wbg_ptr = ret >>> 0;
-        FaucetableWcsprWasmClientFinalization.register(this, this.__wbg_ptr, this);
-        return this;
-    }
-    /**
-     * @param {Address} recipient
-     * @param {U256} amount
-     * @returns {Promise<TransactionResult>}
-     */
-    transfer(recipient, amount) {
-        _assertClass(recipient, Address);
-        var ptr0 = recipient.__destroy_into_raw();
-        _assertClass(amount, U256);
-        var ptr1 = amount.__destroy_into_raw();
-        const ret = wasm.faucetablewcsprwasmclient_transfer(this.__wbg_ptr, ptr0, ptr1);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} owner
-     * @param {Address} recipient
-     * @param {U256} amount
-     * @returns {Promise<TransactionResult>}
-     */
-    transferFrom(owner, recipient, amount) {
-        _assertClass(owner, Address);
-        var ptr0 = owner.__destroy_into_raw();
-        _assertClass(recipient, Address);
-        var ptr1 = recipient.__destroy_into_raw();
-        _assertClass(amount, U256);
-        var ptr2 = amount.__destroy_into_raw();
-        const ret = wasm.faucetablewcsprwasmclient_transferFrom(this.__wbg_ptr, ptr0, ptr1, ptr2);
-        return takeObject(ret);
-    }
-    /**
-     * @returns {Promise<TransactionResult>}
-     */
-    faucet() {
-        const ret = wasm.faucetablewcsprwasmclient_faucet(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @returns {Promise<Address[]>}
-     */
-    participants() {
-        const ret = wasm.faucetablewcsprwasmclient_participants(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Add a new transfer manager (admin only)
-     * @param {Address} address
-     * @returns {Promise<TransactionResult>}
-     */
-    addTransferManager(address) {
-        _assertClass(address, Address);
-        var ptr0 = address.__destroy_into_raw();
-        const ret = wasm.faucetablewcsprwasmclient_addTransferManager(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
-     * Remove a transfer manager (admin only)
-     * @param {Address} address
-     * @returns {Promise<TransactionResult>}
-     */
-    removeTransferManager(address) {
-        _assertClass(address, Address);
-        var ptr0 = address.__destroy_into_raw();
-        const ret = wasm.faucetablewcsprwasmclient_removeTransferManager(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
-     * Delegated. See `self.access_control.has_role()` for details.
-     * @param {Uint8Array} role
-     * @param {Address} address
-     * @returns {Promise<boolean>}
-     */
-    hasRole(role, address) {
-        const ptr0 = passArray8ToWasm0(role, wasm.__wbindgen_export_1);
-        const len0 = WASM_VECTOR_LEN;
-        _assertClass(address, Address);
-        var ptr1 = address.__destroy_into_raw();
-        const ret = wasm.faucetablewcsprwasmclient_hasRole(this.__wbg_ptr, ptr0, len0, ptr1);
+        const ret = wasm.faucetablewcsprwasmclient_balanceOf(this.__wbg_ptr, ptr0);
         return takeObject(ret);
     }
     /**
@@ -2266,14 +2186,26 @@ export class FaucetableWcsprWasmClient {
         return takeObject(ret);
     }
     /**
-     * Delegated. See `self.access_control.get_role_admin()` for details.
-     * @param {Uint8Array} role
-     * @returns {Promise<Uint8Array>}
+     * @returns {Promise<Address[]>}
      */
-    getRoleAdmin(role) {
-        const ptr0 = passArray8ToWasm0(role, wasm.__wbindgen_export_1);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.faucetablewcsprwasmclient_getRoleAdmin(this.__wbg_ptr, ptr0, len0);
+    participants() {
+        const ret = wasm.faucetablewcsprwasmclient_participants(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Delegated. See `self.wcspr.total_supply()` for details.
+     * @returns {Promise<U256>}
+     */
+    totalSupply() {
+        const ret = wasm.faucetablewcsprwasmclient_totalSupply(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Delegated. See `self.metadata.contract_name()` for details.
+     * @returns {Promise<string | undefined>}
+     */
+    contractName() {
+        const ret = wasm.faucetablewcsprwasmclient_contractName(this.__wbg_ptr);
         return takeObject(ret);
     }
     /**
@@ -2291,6 +2223,79 @@ export class FaucetableWcsprWasmClient {
         return takeObject(ret);
     }
     /**
+     * @param {Address} owner
+     * @param {Address} recipient
+     * @param {U256} amount
+     * @returns {Promise<TransactionResult>}
+     */
+    transferFrom(owner, recipient, amount) {
+        _assertClass(owner, Address);
+        var ptr0 = owner.__destroy_into_raw();
+        _assertClass(recipient, Address);
+        var ptr1 = recipient.__destroy_into_raw();
+        _assertClass(amount, U256);
+        var ptr2 = amount.__destroy_into_raw();
+        const ret = wasm.faucetablewcsprwasmclient_transferFrom(this.__wbg_ptr, ptr0, ptr1, ptr2);
+        return takeObject(ret);
+    }
+    /**
+     * Delegated. See `self.access_control.get_role_admin()` for details.
+     * @param {Uint8Array} role
+     * @returns {Promise<Uint8Array>}
+     */
+    getRoleAdmin(role) {
+        const ptr0 = passArray8ToWasm0(role, wasm.__wbindgen_export_1);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.faucetablewcsprwasmclient_getRoleAdmin(this.__wbg_ptr, ptr0, len0);
+        return takeObject(ret);
+    }
+    /**
+     * Delegated. See `self.metadata.contract_icon_uri()` for details.
+     * @returns {Promise<string | undefined>}
+     */
+    contractIconUri() {
+        const ret = wasm.faucetablewcsprwasmclient_contractIconUri(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Add a new transfer manager (admin only)
+     * @param {Address} address
+     * @returns {Promise<TransactionResult>}
+     */
+    addTransferManager(address) {
+        _assertClass(address, Address);
+        var ptr0 = address.__destroy_into_raw();
+        const ret = wasm.faucetablewcsprwasmclient_addTransferManager(this.__wbg_ptr, ptr0);
+        return takeObject(ret);
+    }
+    /**
+     * Delegated. See `self.metadata.contract_description()` for details.
+     * @returns {Promise<string | undefined>}
+     */
+    contractDescription() {
+        const ret = wasm.faucetablewcsprwasmclient_contractDescription(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Delegated. See `self.metadata.contract_project_uri()` for details.
+     * @returns {Promise<string | undefined>}
+     */
+    contractProjectUri() {
+        const ret = wasm.faucetablewcsprwasmclient_contractProjectUri(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Remove a transfer manager (admin only)
+     * @param {Address} address
+     * @returns {Promise<TransactionResult>}
+     */
+    removeTransferManager(address) {
+        _assertClass(address, Address);
+        var ptr0 = address.__destroy_into_raw();
+        const ret = wasm.faucetablewcsprwasmclient_removeTransferManager(this.__wbg_ptr, ptr0);
+        return takeObject(ret);
+    }
+    /**
      * Delegated. See `self.wcspr.name()` for details.
      * @returns {Promise<string>}
      */
@@ -2299,52 +2304,18 @@ export class FaucetableWcsprWasmClient {
         return takeObject(ret);
     }
     /**
+     * @returns {Promise<TransactionResult>}
+     */
+    faucet() {
+        const ret = wasm.faucetablewcsprwasmclient_faucet(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
      * Delegated. See `self.wcspr.symbol()` for details.
      * @returns {Promise<string>}
      */
     symbol() {
         const ret = wasm.faucetablewcsprwasmclient_symbol(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Delegated. See `self.wcspr.decimals()` for details.
-     * @returns {Promise<number>}
-     */
-    decimals() {
-        const ret = wasm.faucetablewcsprwasmclient_decimals(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Delegated. See `self.wcspr.total_supply()` for details.
-     * @returns {Promise<U256>}
-     */
-    totalSupply() {
-        const ret = wasm.faucetablewcsprwasmclient_totalSupply(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Delegated. See `self.wcspr.balance_of()` for details.
-     * @param {Address} address
-     * @returns {Promise<U256>}
-     */
-    balanceOf(address) {
-        _assertClass(address, Address);
-        var ptr0 = address.__destroy_into_raw();
-        const ret = wasm.faucetablewcsprwasmclient_balanceOf(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
-     * Delegated. See `self.wcspr.allowance()` for details.
-     * @param {Address} owner
-     * @param {Address} spender
-     * @returns {Promise<U256>}
-     */
-    allowance(owner, spender) {
-        _assertClass(owner, Address);
-        var ptr0 = owner.__destroy_into_raw();
-        _assertClass(spender, Address);
-        var ptr1 = spender.__destroy_into_raw();
-        const ret = wasm.faucetablewcsprwasmclient_allowance(this.__wbg_ptr, ptr0, ptr1);
         return takeObject(ret);
     }
     /**
@@ -2362,36 +2333,66 @@ export class FaucetableWcsprWasmClient {
         return takeObject(ret);
     }
     /**
-     * Delegated. See `self.metadata.contract_name()` for details.
-     * @returns {Promise<string | undefined>}
+     * Delegated. See `self.wcspr.decimals()` for details.
+     * @returns {Promise<number>}
      */
-    contractName() {
-        const ret = wasm.faucetablewcsprwasmclient_contractName(this.__wbg_ptr);
+    decimals() {
+        const ret = wasm.faucetablewcsprwasmclient_decimals(this.__wbg_ptr);
         return takeObject(ret);
     }
     /**
-     * Delegated. See `self.metadata.contract_description()` for details.
-     * @returns {Promise<string | undefined>}
+     * Delegated. See `self.access_control.has_role()` for details.
+     * @param {Uint8Array} role
+     * @param {Address} address
+     * @returns {Promise<boolean>}
      */
-    contractDescription() {
-        const ret = wasm.faucetablewcsprwasmclient_contractDescription(this.__wbg_ptr);
+    hasRole(role, address) {
+        const ptr0 = passArray8ToWasm0(role, wasm.__wbindgen_export_1);
+        const len0 = WASM_VECTOR_LEN;
+        _assertClass(address, Address);
+        var ptr1 = address.__destroy_into_raw();
+        const ret = wasm.faucetablewcsprwasmclient_hasRole(this.__wbg_ptr, ptr0, len0, ptr1);
         return takeObject(ret);
     }
     /**
-     * Delegated. See `self.metadata.contract_icon_uri()` for details.
-     * @returns {Promise<string | undefined>}
+     * @param {Address} recipient
+     * @param {U256} amount
+     * @returns {Promise<TransactionResult>}
      */
-    contractIconUri() {
-        const ret = wasm.faucetablewcsprwasmclient_contractIconUri(this.__wbg_ptr);
+    transfer(recipient, amount) {
+        _assertClass(recipient, Address);
+        var ptr0 = recipient.__destroy_into_raw();
+        _assertClass(amount, U256);
+        var ptr1 = amount.__destroy_into_raw();
+        const ret = wasm.faucetablewcsprwasmclient_transfer(this.__wbg_ptr, ptr0, ptr1);
         return takeObject(ret);
     }
     /**
-     * Delegated. See `self.metadata.contract_project_uri()` for details.
-     * @returns {Promise<string | undefined>}
+     * Delegated. See `self.wcspr.allowance()` for details.
+     * @param {Address} owner
+     * @param {Address} spender
+     * @returns {Promise<U256>}
      */
-    contractProjectUri() {
-        const ret = wasm.faucetablewcsprwasmclient_contractProjectUri(this.__wbg_ptr);
+    allowance(owner, spender) {
+        _assertClass(owner, Address);
+        var ptr0 = owner.__destroy_into_raw();
+        _assertClass(spender, Address);
+        var ptr1 = spender.__destroy_into_raw();
+        const ret = wasm.faucetablewcsprwasmclient_allowance(this.__wbg_ptr, ptr0, ptr1);
         return takeObject(ret);
+    }
+    /**
+     * @param {OdraWasmClient} wasmClient
+     * @param {Address} address
+     */
+    constructor(wasmClient, address) {
+        _assertClass(wasmClient, OdraWasmClient);
+        _assertClass(address, Address);
+        var ptr0 = address.__destroy_into_raw();
+        const ret = wasm.faucetablewcsprwasmclient_new(wasmClient.__wbg_ptr, ptr0);
+        this.__wbg_ptr = ret >>> 0;
+        FaucetableWcsprWasmClientFinalization.register(this, this.__wbg_ptr, this);
+        return this;
     }
 }
 
@@ -2411,6 +2412,29 @@ export class FeeCollected {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_feecollected_free(ptr, 0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set amount(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.feecollected_set_amount(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {Address}
+     */
+    get fee_collector() {
+        const ret = wasm.burn_owner(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
+     * @param {Address} value
+     */
+    set fee_collector(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.feecollected_set_fee_collector(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {U256} amount
@@ -2438,21 +2462,6 @@ export class FeeCollected {
         }
     }
     /**
-     * @returns {any}
-     */
-    toJson() {
-        const ret = wasm.feecollected_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set amount(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.feecollected_set_amount(this.__wbg_ptr, ptr0);
-    }
-    /**
      * @returns {U256}
      */
     get amount() {
@@ -2460,19 +2469,11 @@ export class FeeCollected {
         return U256.__wrap(ret);
     }
     /**
-     * @param {Address} value
+     * @returns {any}
      */
-    set fee_collector(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.feecollected_set_fee_collector(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get fee_collector() {
-        const ret = wasm.burn_owner(this.__wbg_ptr);
-        return Address.__wrap(ret);
+    toJson() {
+        const ret = wasm.feecollected_toJson(this.__wbg_ptr);
+        return takeObject(ret);
     }
 }
 
@@ -2492,6 +2493,30 @@ export class IncreaseAllowance {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_increaseallowance_free(ptr, 0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set inc_by(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.increaseallowance_set_inc_by(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set spender(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.increaseallowance_set_spender(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set allowance(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.increaseallowance_set_allowance(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} owner
@@ -2525,21 +2550,6 @@ export class IncreaseAllowance {
         }
     }
     /**
-     * @returns {any}
-     */
-    toJson() {
-        const ret = wasm.increaseallowance_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set owner(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.increaseallowance_set_owner(this.__wbg_ptr, ptr0);
-    }
-    /**
      * @returns {Address}
      */
     get owner() {
@@ -2547,12 +2557,11 @@ export class IncreaseAllowance {
         return Address.__wrap(ret);
     }
     /**
-     * @param {Address} value
+     * @returns {U256}
      */
-    set spender(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.increaseallowance_set_spender(this.__wbg_ptr, ptr0);
+    get inc_by() {
+        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
+        return U256.__wrap(ret);
     }
     /**
      * @returns {Address}
@@ -2562,12 +2571,11 @@ export class IncreaseAllowance {
         return Address.__wrap(ret);
     }
     /**
-     * @param {U256} value
+     * @returns {any}
      */
-    set allowance(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.increaseallowance_set_allowance(this.__wbg_ptr, ptr0);
+    toJson() {
+        const ret = wasm.increaseallowance_toJson(this.__wbg_ptr);
+        return takeObject(ret);
     }
     /**
      * @returns {U256}
@@ -2577,19 +2585,12 @@ export class IncreaseAllowance {
         return U256.__wrap(ret);
     }
     /**
-     * @param {U256} value
+     * @param {Address} value
      */
-    set inc_by(value) {
-        _assertClass(value, U256);
+    set owner(value) {
+        _assertClass(value, Address);
         var ptr0 = value.__destroy_into_raw();
-        wasm.increaseallowance_set_inc_by(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get inc_by() {
-        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
-        return U256.__wrap(ret);
+        wasm.increaseallowance_set_owner(this.__wbg_ptr, ptr0);
     }
 }
 
@@ -2609,6 +2610,51 @@ export class LongDeposited {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_longdeposited_free(ptr, 0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get wcspr_amount() {
+        const ret = wasm.decreaseallowance_allowance(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get fee_collected() {
+        const ret = wasm.longdeposited_fee_collected(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set wcspr_amount(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.longdeposited_set_wcspr_amount(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set fee_collected(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.longdeposited_set_fee_collected(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get long_tokens_minted() {
+        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set long_tokens_minted(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.longdeposited_set_long_tokens_minted(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} user
@@ -2642,6 +2688,13 @@ export class LongDeposited {
         }
     }
     /**
+     * @returns {Address}
+     */
+    get user() {
+        const ret = wasm.longdeposited_user(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
      * @returns {any}
      */
     toJson() {
@@ -2655,58 +2708,6 @@ export class LongDeposited {
         _assertClass(value, Address);
         var ptr0 = value.__destroy_into_raw();
         wasm.longdeposited_set_user(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get user() {
-        const ret = wasm.longdeposited_user(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set wcspr_amount(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.longdeposited_set_wcspr_amount(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get wcspr_amount() {
-        const ret = wasm.decreaseallowance_allowance(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set long_tokens_minted(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.longdeposited_set_long_tokens_minted(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get long_tokens_minted() {
-        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set fee_collected(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.longdeposited_set_fee_collected(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get fee_collected() {
-        const ret = wasm.longdeposited_fee_collected(this.__wbg_ptr);
-        return U256.__wrap(ret);
     }
 }
 
@@ -2726,6 +2727,51 @@ export class LongWithdrawn {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_longwithdrawn_free(ptr, 0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get wcspr_amount() {
+        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get fee_collected() {
+        const ret = wasm.longdeposited_fee_collected(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set wcspr_amount(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.longwithdrawn_set_wcspr_amount(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set fee_collected(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.longwithdrawn_set_fee_collected(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get long_tokens_burned() {
+        const ret = wasm.decreaseallowance_allowance(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set long_tokens_burned(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.longwithdrawn_set_long_tokens_burned(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} user
@@ -2759,6 +2805,13 @@ export class LongWithdrawn {
         }
     }
     /**
+     * @returns {Address}
+     */
+    get user() {
+        const ret = wasm.longdeposited_user(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
      * @returns {any}
      */
     toJson() {
@@ -2772,58 +2825,6 @@ export class LongWithdrawn {
         _assertClass(value, Address);
         var ptr0 = value.__destroy_into_raw();
         wasm.longwithdrawn_set_user(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get user() {
-        const ret = wasm.longdeposited_user(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set long_tokens_burned(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.longwithdrawn_set_long_tokens_burned(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get long_tokens_burned() {
-        const ret = wasm.decreaseallowance_allowance(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set wcspr_amount(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.longwithdrawn_set_wcspr_amount(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get wcspr_amount() {
-        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set fee_collected(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.longwithdrawn_set_fee_collected(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get fee_collected() {
-        const ret = wasm.longdeposited_fee_collected(this.__wbg_ptr);
-        return U256.__wrap(ret);
     }
 }
 
@@ -2851,6 +2852,66 @@ export class MarketState {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_marketstate_free(ptr, 0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get long_liquidity() {
+        const ret = wasm.marketstate_long_liquidity(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get short_liquidity() {
+        const ret = wasm.marketstate_short_liquidity(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get long_total_supply() {
+        const ret = wasm.marketstate_long_total_supply(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set long_liquidity(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.marketstate_set_long_liquidity(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get short_total_supply() {
+        const ret = wasm.marketstate_short_total_supply(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set short_liquidity(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.marketstate_set_short_liquidity(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set long_total_supply(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.marketstate_set_long_total_supply(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set short_total_supply(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.marketstate_set_short_total_supply(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {U256} longTotalSupply
@@ -2887,6 +2948,13 @@ export class MarketState {
         }
     }
     /**
+     * @returns {U256}
+     */
+    get price() {
+        const ret = wasm.marketstate_price(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
      * @returns {any}
      */
     toJson() {
@@ -2896,77 +2964,10 @@ export class MarketState {
     /**
      * @param {U256} value
      */
-    set long_total_supply(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.marketstate_set_long_total_supply(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get long_total_supply() {
-        const ret = wasm.marketstate_long_total_supply(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set short_total_supply(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.marketstate_set_short_total_supply(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get short_total_supply() {
-        const ret = wasm.marketstate_short_total_supply(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set long_liquidity(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.marketstate_set_long_liquidity(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get long_liquidity() {
-        const ret = wasm.marketstate_long_liquidity(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set short_liquidity(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.marketstate_set_short_liquidity(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get short_liquidity() {
-        const ret = wasm.marketstate_short_liquidity(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
     set price(value) {
         _assertClass(value, U256);
         var ptr0 = value.__destroy_into_raw();
         wasm.marketstate_set_price(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get price() {
-        const ret = wasm.marketstate_price(this.__wbg_ptr);
-        return U256.__wrap(ret);
     }
 }
 
@@ -2988,198 +2989,10 @@ export class MarketWasmClient {
         wasm.__wbg_marketwasmclient_free(ptr, 0);
     }
     /**
-     * @param {OdraWasmClient} wasmClient
-     * @param {Address} address
-     */
-    constructor(wasmClient, address) {
-        _assertClass(wasmClient, OdraWasmClient);
-        _assertClass(address, Address);
-        var ptr0 = address.__destroy_into_raw();
-        const ret = wasm.faucetablewcsprwasmclient_new(wasmClient.__wbg_ptr, ptr0);
-        this.__wbg_ptr = ret >>> 0;
-        MarketWasmClientFinalization.register(this, this.__wbg_ptr, this);
-        return this;
-    }
-    /**
-     * @returns {Promise<TransactionResult>}
-     */
-    pause() {
-        const ret = wasm.marketwasmclient_pause(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @returns {Promise<TransactionResult>}
-     */
-    unpause() {
-        const ret = wasm.marketwasmclient_unpause(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @returns {Promise<boolean>}
-     */
-    isPaused() {
-        const ret = wasm.marketwasmclient_isPaused(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @returns {Promise<TransactionResult>}
-     */
-    updatePrice() {
-        const ret = wasm.marketwasmclient_updatePrice(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {U256} wcsprAmount
-     * @returns {Promise<TransactionResult>}
-     */
-    depositLong(wcsprAmount) {
-        _assertClass(wcsprAmount, U256);
-        var ptr0 = wcsprAmount.__destroy_into_raw();
-        const ret = wasm.marketwasmclient_depositLong(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} sender
-     * @param {U256} wcsprAmount
-     * @returns {Promise<TransactionResult>}
-     */
-    depositLongFrom(sender, wcsprAmount) {
-        _assertClass(sender, Address);
-        var ptr0 = sender.__destroy_into_raw();
-        _assertClass(wcsprAmount, U256);
-        var ptr1 = wcsprAmount.__destroy_into_raw();
-        const ret = wasm.marketwasmclient_depositLongFrom(this.__wbg_ptr, ptr0, ptr1);
-        return takeObject(ret);
-    }
-    /**
-     * @param {U256} wcsprAmount
-     * @returns {Promise<TransactionResult>}
-     */
-    depositShort(wcsprAmount) {
-        _assertClass(wcsprAmount, U256);
-        var ptr0 = wcsprAmount.__destroy_into_raw();
-        const ret = wasm.marketwasmclient_depositShort(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} sender
-     * @param {U256} wcsprAmount
-     * @returns {Promise<TransactionResult>}
-     */
-    depositShortFrom(sender, wcsprAmount) {
-        _assertClass(sender, Address);
-        var ptr0 = sender.__destroy_into_raw();
-        _assertClass(wcsprAmount, U256);
-        var ptr1 = wcsprAmount.__destroy_into_raw();
-        const ret = wasm.marketwasmclient_depositShortFrom(this.__wbg_ptr, ptr0, ptr1);
-        return takeObject(ret);
-    }
-    /**
-     * @param {U256} longTokenAmount
-     * @returns {Promise<TransactionResult>}
-     */
-    withdrawLong(longTokenAmount) {
-        _assertClass(longTokenAmount, U256);
-        var ptr0 = longTokenAmount.__destroy_into_raw();
-        const ret = wasm.marketwasmclient_withdrawLong(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} sender
-     * @param {U256} longTokenAmount
-     * @returns {Promise<TransactionResult>}
-     */
-    withdrawLongFrom(sender, longTokenAmount) {
-        _assertClass(sender, Address);
-        var ptr0 = sender.__destroy_into_raw();
-        _assertClass(longTokenAmount, U256);
-        var ptr1 = longTokenAmount.__destroy_into_raw();
-        const ret = wasm.marketwasmclient_withdrawLongFrom(this.__wbg_ptr, ptr0, ptr1);
-        return takeObject(ret);
-    }
-    /**
-     * @param {U256} shortTokenAmount
-     * @returns {Promise<TransactionResult>}
-     */
-    withdrawShort(shortTokenAmount) {
-        _assertClass(shortTokenAmount, U256);
-        var ptr0 = shortTokenAmount.__destroy_into_raw();
-        const ret = wasm.marketwasmclient_withdrawShort(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} sender
-     * @param {U256} shortTokenAmount
-     * @returns {Promise<TransactionResult>}
-     */
-    withdrawShortFrom(sender, shortTokenAmount) {
-        _assertClass(sender, Address);
-        var ptr0 = sender.__destroy_into_raw();
-        _assertClass(shortTokenAmount, U256);
-        var ptr1 = shortTokenAmount.__destroy_into_raw();
-        const ret = wasm.marketwasmclient_withdrawShortFrom(this.__wbg_ptr, ptr0, ptr1);
-        return takeObject(ret);
-    }
-    /**
-     * @returns {Promise<MarketState>}
-     */
-    getMarketState() {
-        const ret = wasm.marketwasmclient_getMarketState(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Config} cfg
-     * @returns {Promise<TransactionResult>}
-     */
-    setConfig(cfg) {
-        _assertClass(cfg, Config);
-        var ptr0 = cfg.__destroy_into_raw();
-        const ret = wasm.marketwasmclient_setConfig(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
      * @returns {Promise<Config>}
      */
     getConfig() {
         const ret = wasm.marketwasmclient_getConfig(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} priceFeedAddress
-     * @param {string} priceFeedId
-     * @returns {Promise<TransactionResult>}
-     */
-    setPriceFeed(priceFeedAddress, priceFeedId) {
-        _assertClass(priceFeedAddress, Address);
-        var ptr0 = priceFeedAddress.__destroy_into_raw();
-        const ptr1 = passStringToWasm0(priceFeedId, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
-        const len1 = WASM_VECTOR_LEN;
-        const ret = wasm.marketwasmclient_setPriceFeed(this.__wbg_ptr, ptr0, ptr1, len1);
-        return takeObject(ret);
-    }
-    /**
-     * Returns comprehensive market and user data in a single call for frontend efficiency.
-     * @param {Address} address
-     * @returns {Promise<AddressMarketState>}
-     */
-    getAddressMarketState(address) {
-        _assertClass(address, Address);
-        var ptr0 = address.__destroy_into_raw();
-        const ret = wasm.marketwasmclient_getAddressMarketState(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
-     * Delegated. See `self.access_control.has_role()` for details.
-     * @param {Uint8Array} role
-     * @param {Address} address
-     * @returns {Promise<boolean>}
-     */
-    hasRole(role, address) {
-        const ptr0 = passArray8ToWasm0(role, wasm.__wbindgen_export_1);
-        const len0 = WASM_VECTOR_LEN;
-        _assertClass(address, Address);
-        var ptr1 = address.__destroy_into_raw();
-        const ret = wasm.marketwasmclient_hasRole(this.__wbg_ptr, ptr0, len0, ptr1);
         return takeObject(ret);
     }
     /**
@@ -3197,6 +3010,16 @@ export class MarketWasmClient {
         return takeObject(ret);
     }
     /**
+     * @param {Config} cfg
+     * @returns {Promise<TransactionResult>}
+     */
+    setConfig(cfg) {
+        _assertClass(cfg, Config);
+        var ptr0 = cfg.__destroy_into_raw();
+        const ret = wasm.marketwasmclient_setConfig(this.__wbg_ptr, ptr0);
+        return takeObject(ret);
+    }
+    /**
      * Delegated. See `self.access_control.revoke_role()` for details.
      * @param {Uint8Array} role
      * @param {Address} address
@@ -3211,14 +3034,38 @@ export class MarketWasmClient {
         return takeObject(ret);
     }
     /**
-     * Delegated. See `self.access_control.get_role_admin()` for details.
-     * @param {Uint8Array} role
-     * @returns {Promise<Uint8Array>}
+     * @param {U256} wcsprAmount
+     * @returns {Promise<TransactionResult>}
      */
-    getRoleAdmin(role) {
-        const ptr0 = passArray8ToWasm0(role, wasm.__wbindgen_export_1);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.marketwasmclient_getRoleAdmin(this.__wbg_ptr, ptr0, len0);
+    depositLong(wcsprAmount) {
+        _assertClass(wcsprAmount, U256);
+        var ptr0 = wcsprAmount.__destroy_into_raw();
+        const ret = wasm.marketwasmclient_depositLong(this.__wbg_ptr, ptr0);
+        return takeObject(ret);
+    }
+    /**
+     * @returns {Promise<TransactionResult>}
+     */
+    updatePrice() {
+        const ret = wasm.marketwasmclient_updatePrice(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Delegated. See `self.metadata.contract_name()` for details.
+     * @returns {Promise<string | undefined>}
+     */
+    contractName() {
+        const ret = wasm.marketwasmclient_contractName(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @param {U256} wcsprAmount
+     * @returns {Promise<TransactionResult>}
+     */
+    depositShort(wcsprAmount) {
+        _assertClass(wcsprAmount, U256);
+        var ptr0 = wcsprAmount.__destroy_into_raw();
+        const ret = wasm.marketwasmclient_depositShort(this.__wbg_ptr, ptr0);
         return takeObject(ret);
     }
     /**
@@ -3236,19 +3083,54 @@ export class MarketWasmClient {
         return takeObject(ret);
     }
     /**
-     * Delegated. See `self.metadata.contract_name()` for details.
-     * @returns {Promise<string | undefined>}
+     * @param {U256} longTokenAmount
+     * @returns {Promise<TransactionResult>}
      */
-    contractName() {
-        const ret = wasm.marketwasmclient_contractName(this.__wbg_ptr);
+    withdrawLong(longTokenAmount) {
+        _assertClass(longTokenAmount, U256);
+        var ptr0 = longTokenAmount.__destroy_into_raw();
+        const ret = wasm.marketwasmclient_withdrawLong(this.__wbg_ptr, ptr0);
         return takeObject(ret);
     }
     /**
-     * Delegated. See `self.metadata.contract_description()` for details.
-     * @returns {Promise<string | undefined>}
+     * Delegated. See `self.access_control.get_role_admin()` for details.
+     * @param {Uint8Array} role
+     * @returns {Promise<Uint8Array>}
      */
-    contractDescription() {
-        const ret = wasm.marketwasmclient_contractDescription(this.__wbg_ptr);
+    getRoleAdmin(role) {
+        const ptr0 = passArray8ToWasm0(role, wasm.__wbindgen_export_1);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.marketwasmclient_getRoleAdmin(this.__wbg_ptr, ptr0, len0);
+        return takeObject(ret);
+    }
+    /**
+     * @param {Address} priceFeedAddress
+     * @param {string} priceFeedId
+     * @returns {Promise<TransactionResult>}
+     */
+    setPriceFeed(priceFeedAddress, priceFeedId) {
+        _assertClass(priceFeedAddress, Address);
+        var ptr0 = priceFeedAddress.__destroy_into_raw();
+        const ptr1 = passStringToWasm0(priceFeedId, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.marketwasmclient_setPriceFeed(this.__wbg_ptr, ptr0, ptr1, len1);
+        return takeObject(ret);
+    }
+    /**
+     * @param {U256} shortTokenAmount
+     * @returns {Promise<TransactionResult>}
+     */
+    withdrawShort(shortTokenAmount) {
+        _assertClass(shortTokenAmount, U256);
+        var ptr0 = shortTokenAmount.__destroy_into_raw();
+        const ret = wasm.marketwasmclient_withdrawShort(this.__wbg_ptr, ptr0);
+        return takeObject(ret);
+    }
+    /**
+     * @returns {Promise<MarketState>}
+     */
+    getMarketState() {
+        const ret = wasm.marketwasmclient_getMarketState(this.__wbg_ptr);
         return takeObject(ret);
     }
     /**
@@ -3260,12 +3142,131 @@ export class MarketWasmClient {
         return takeObject(ret);
     }
     /**
+     * @param {Address} sender
+     * @param {U256} wcsprAmount
+     * @returns {Promise<TransactionResult>}
+     */
+    depositLongFrom(sender, wcsprAmount) {
+        _assertClass(sender, Address);
+        var ptr0 = sender.__destroy_into_raw();
+        _assertClass(wcsprAmount, U256);
+        var ptr1 = wcsprAmount.__destroy_into_raw();
+        const ret = wasm.marketwasmclient_depositLongFrom(this.__wbg_ptr, ptr0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * @param {Address} sender
+     * @param {U256} wcsprAmount
+     * @returns {Promise<TransactionResult>}
+     */
+    depositShortFrom(sender, wcsprAmount) {
+        _assertClass(sender, Address);
+        var ptr0 = sender.__destroy_into_raw();
+        _assertClass(wcsprAmount, U256);
+        var ptr1 = wcsprAmount.__destroy_into_raw();
+        const ret = wasm.marketwasmclient_depositShortFrom(this.__wbg_ptr, ptr0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * @param {Address} sender
+     * @param {U256} longTokenAmount
+     * @returns {Promise<TransactionResult>}
+     */
+    withdrawLongFrom(sender, longTokenAmount) {
+        _assertClass(sender, Address);
+        var ptr0 = sender.__destroy_into_raw();
+        _assertClass(longTokenAmount, U256);
+        var ptr1 = longTokenAmount.__destroy_into_raw();
+        const ret = wasm.marketwasmclient_withdrawLongFrom(this.__wbg_ptr, ptr0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * @param {Address} sender
+     * @param {U256} shortTokenAmount
+     * @returns {Promise<TransactionResult>}
+     */
+    withdrawShortFrom(sender, shortTokenAmount) {
+        _assertClass(sender, Address);
+        var ptr0 = sender.__destroy_into_raw();
+        _assertClass(shortTokenAmount, U256);
+        var ptr1 = shortTokenAmount.__destroy_into_raw();
+        const ret = wasm.marketwasmclient_withdrawShortFrom(this.__wbg_ptr, ptr0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * Delegated. See `self.metadata.contract_description()` for details.
+     * @returns {Promise<string | undefined>}
+     */
+    contractDescription() {
+        const ret = wasm.marketwasmclient_contractDescription(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
      * Delegated. See `self.metadata.contract_project_uri()` for details.
      * @returns {Promise<string | undefined>}
      */
     contractProjectUri() {
         const ret = wasm.marketwasmclient_contractProjectUri(this.__wbg_ptr);
         return takeObject(ret);
+    }
+    /**
+     * Returns comprehensive market and user data in a single call for frontend efficiency.
+     * @param {Address} address
+     * @returns {Promise<AddressMarketState>}
+     */
+    getAddressMarketState(address) {
+        _assertClass(address, Address);
+        var ptr0 = address.__destroy_into_raw();
+        const ret = wasm.marketwasmclient_getAddressMarketState(this.__wbg_ptr, ptr0);
+        return takeObject(ret);
+    }
+    /**
+     * @returns {Promise<TransactionResult>}
+     */
+    pause() {
+        const ret = wasm.marketwasmclient_pause(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @returns {Promise<TransactionResult>}
+     */
+    unpause() {
+        const ret = wasm.marketwasmclient_unpause(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Delegated. See `self.access_control.has_role()` for details.
+     * @param {Uint8Array} role
+     * @param {Address} address
+     * @returns {Promise<boolean>}
+     */
+    hasRole(role, address) {
+        const ptr0 = passArray8ToWasm0(role, wasm.__wbindgen_export_1);
+        const len0 = WASM_VECTOR_LEN;
+        _assertClass(address, Address);
+        var ptr1 = address.__destroy_into_raw();
+        const ret = wasm.marketwasmclient_hasRole(this.__wbg_ptr, ptr0, len0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * @returns {Promise<boolean>}
+     */
+    isPaused() {
+        const ret = wasm.marketwasmclient_isPaused(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @param {OdraWasmClient} wasmClient
+     * @param {Address} address
+     */
+    constructor(wasmClient, address) {
+        _assertClass(wasmClient, OdraWasmClient);
+        _assertClass(address, Address);
+        var ptr0 = address.__destroy_into_raw();
+        const ret = wasm.faucetablewcsprwasmclient_new(wasmClient.__wbg_ptr, ptr0);
+        this.__wbg_ptr = ret >>> 0;
+        MarketWasmClientFinalization.register(this, this.__wbg_ptr, this);
+        return this;
     }
 }
 
@@ -3285,6 +3286,22 @@ export class Mint {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_mint_free(ptr, 0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set amount(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.mint_set_amount(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set recipient(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.mint_set_recipient(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} recipient
@@ -3312,6 +3329,13 @@ export class Mint {
         }
     }
     /**
+     * @returns {U256}
+     */
+    get amount() {
+        const ret = wasm.burn_amount(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
      * @returns {any}
      */
     toJson() {
@@ -3319,34 +3343,11 @@ export class Mint {
         return takeObject(ret);
     }
     /**
-     * @param {Address} value
-     */
-    set recipient(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.mint_set_recipient(this.__wbg_ptr, ptr0);
-    }
-    /**
      * @returns {Address}
      */
     get recipient() {
         const ret = wasm.burn_owner(this.__wbg_ptr);
         return Address.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set amount(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.mint_set_amount(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get amount() {
-        const ret = wasm.burn_amount(this.__wbg_ptr);
-        return U256.__wrap(ret);
     }
 }
 
@@ -3374,23 +3375,34 @@ export class OdraWasmClient {
         wasm.__wbg_odrawasmclient_free(ptr, 0);
     }
     /**
-     * @param {string} node_address
-     * @param {string} speculative_node_address
-     * @param {string | null} [chain_name]
-     * @param {number | null} [ttl]
-     * @param {Verbosity | null} [verbosity]
+     * Returns the balance of the specified address.
+     * @returns {Promise<Address>}
      */
-    constructor(node_address, speculative_node_address, chain_name, ttl, verbosity) {
-        const ptr0 = passStringToWasm0(node_address, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
+    caller() {
+        const ret = wasm.odrawasmclient_caller(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Returns true if the provider is unlocked. false if the provider is locked.
+     * @param {string} provider
+     * @returns {Promise<boolean>}
+     */
+    isUnlocked(provider) {
+        const ptr0 = passStringToWasm0(provider, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
         const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(speculative_node_address, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
-        const len1 = WASM_VECTOR_LEN;
-        var ptr2 = isLikeNone(chain_name) ? 0 : passStringToWasm0(chain_name, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
-        var len2 = WASM_VECTOR_LEN;
-        const ret = wasm.odrawasmclient_new(ptr0, len0, ptr1, len1, ptr2, len2, isLikeNone(ttl) ? 0x100000001 : (ttl) >>> 0, isLikeNone(verbosity) ? 3 : verbosity);
-        this.__wbg_ptr = ret >>> 0;
-        OdraWasmClientFinalization.register(this, this.__wbg_ptr, this);
-        return this;
+        const ret = wasm.odrawasmclient_isUnlocked(this.__wbg_ptr, ptr0, len0);
+        return takeObject(ret);
+    }
+    /**
+     * Triggers the mechanisms to request your user to sign a text message with the active wallet.
+     * @param {string} message
+     * @returns {Promise<SignResult>}
+     */
+    signMessage(message) {
+        const ptr0 = passStringToWasm0(message, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.odrawasmclient_signMessage(this.__wbg_ptr, ptr0, len0);
+        return takeObject(ret);
     }
     /**
      * Returns the balance of the specified address.
@@ -3403,23 +3415,51 @@ export class OdraWasmClient {
         return takeObject(ret);
     }
     /**
-     * Returns the balance of the specified address.
-     * @returns {Promise<Address>}
+     * Gets the account for the current session (if any).
+     * @returns {Promise<AccountInfo>}
      */
-    caller() {
-        const ret = wasm.odrawasmclient_caller(this.__wbg_ptr);
+    getActiveAccount() {
+        const ret = wasm.odrawasmclient_getActiveAccount(this.__wbg_ptr);
         return takeObject(ret);
     }
     /**
-     * Transfers the specified amount to the given address.
-     * @param {Address} to
-     * @param {U512} amount
-     * @returns {Promise<TransactionResult>}
+     * Usually you will call signOut() method to close a user session. Use disconnect() when you want to clear
+     * the connection between the wallet and your app. Next time the user signs in with that wallet, he'll
+     * must grant connection permission again.
+     * @returns {Promise<boolean>}
      */
-    transfer(to, amount) {
-        _assertClass(to, Address);
-        _assertClass(amount, U512);
-        const ret = wasm.odrawasmclient_transfer(this.__wbg_ptr, to.__wbg_ptr, amount.__wbg_ptr);
+    disconnect() {
+        const ret = wasm.odrawasmclient_disconnect(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Starts a session with the indicated account. This account must be one of the accounts returned
+     * in getKnownAccounts or getSignInOptions.
+     *
+     * Note that no interaction with the account provider is required to sign-in. CSPR.click will check and restore
+     * the connection if needed when there's a transaction or message to sign.
+     * @param {AccountInfo} account
+     * @returns {Promise<AccountInfo>}
+     */
+    signInWithAccount(account) {
+        _assertClass(account, AccountInfo);
+        const ret = wasm.odrawasmclient_signInWithAccount(this.__wbg_ptr, account.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Gets the public key for the current session (if any).
+     * @returns {Promise<string>}
+     */
+    getActivePublicKey() {
+        const ret = wasm.odrawasmclient_getActivePublicKey(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Call this method to request CSPR.click UI to show the Switch Account modal window.
+     * @returns {Promise<void>}
+     */
+    switchAccount() {
+        const ret = wasm.odrawasmclient_switchAccount(this.__wbg_ptr);
         return takeObject(ret);
     }
     /**
@@ -3455,74 +3495,35 @@ export class OdraWasmClient {
         return takeObject(ret);
     }
     /**
-     * Usually you will call signOut() method to close a user session. Use disconnect() when you want to clear
-     * the connection between the wallet and your app. Next time the user signs in with that wallet, he'll
-     * must grant connection permission again.
-     * @returns {Promise<boolean>}
+     * Transfers the specified amount to the given address.
+     * @param {Address} to
+     * @param {U512} amount
+     * @returns {Promise<TransactionResult>}
      */
-    disconnect() {
-        const ret = wasm.odrawasmclient_disconnect(this.__wbg_ptr);
+    transfer(to, amount) {
+        _assertClass(to, Address);
+        _assertClass(amount, U512);
+        const ret = wasm.odrawasmclient_transfer(this.__wbg_ptr, to.__wbg_ptr, amount.__wbg_ptr);
         return takeObject(ret);
     }
     /**
-     * Starts a session with the indicated account. This account must be one of the accounts returned
-     * in getKnownAccounts or getSignInOptions.
-     *
-     * Note that no interaction with the account provider is required to sign-in. CSPR.click will check and restore
-     * the connection if needed when there's a transaction or message to sign.
-     * @param {AccountInfo} account
-     * @returns {Promise<AccountInfo>}
+     * @param {string} node_address
+     * @param {string} speculative_node_address
+     * @param {string | null} [chain_name]
+     * @param {number | null} [ttl]
+     * @param {Verbosity | null} [verbosity]
      */
-    signInWithAccount(account) {
-        _assertClass(account, AccountInfo);
-        const ret = wasm.odrawasmclient_signInWithAccount(this.__wbg_ptr, account.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Returns true if the provider is unlocked. false if the provider is locked.
-     * @param {string} provider
-     * @returns {Promise<boolean>}
-     */
-    isUnlocked(provider) {
-        const ptr0 = passStringToWasm0(provider, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
+    constructor(node_address, speculative_node_address, chain_name, ttl, verbosity) {
+        const ptr0 = passStringToWasm0(node_address, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.odrawasmclient_isUnlocked(this.__wbg_ptr, ptr0, len0);
-        return takeObject(ret);
-    }
-    /**
-     * Gets the public key for the current session (if any).
-     * @returns {Promise<string>}
-     */
-    getActivePublicKey() {
-        const ret = wasm.odrawasmclient_getActivePublicKey(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Gets the account for the current session (if any).
-     * @returns {Promise<AccountInfo>}
-     */
-    getActiveAccount() {
-        const ret = wasm.odrawasmclient_getActiveAccount(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Call this method to request CSPR.click UI to show the Switch Account modal window.
-     * @returns {Promise<void>}
-     */
-    switchAccount() {
-        const ret = wasm.odrawasmclient_switchAccount(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Triggers the mechanisms to request your user to sign a text message with the active wallet.
-     * @param {string} message
-     * @returns {Promise<SignResult>}
-     */
-    signMessage(message) {
-        const ptr0 = passStringToWasm0(message, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.odrawasmclient_signMessage(this.__wbg_ptr, ptr0, len0);
-        return takeObject(ret);
+        const ptr1 = passStringToWasm0(speculative_node_address, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
+        const len1 = WASM_VECTOR_LEN;
+        var ptr2 = isLikeNone(chain_name) ? 0 : passStringToWasm0(chain_name, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
+        var len2 = WASM_VECTOR_LEN;
+        const ret = wasm.odrawasmclient_new(ptr0, len0, ptr1, len1, ptr2, len2, isLikeNone(ttl) ? 0x100000001 : (ttl) >>> 0, isLikeNone(verbosity) ? 3 : verbosity);
+        this.__wbg_ptr = ret >>> 0;
+        OdraWasmClientFinalization.register(this, this.__wbg_ptr, this);
+        return this;
     }
 }
 
@@ -3667,6 +3668,14 @@ export class Paused {
         wasm.__wbg_paused_free(ptr, 0);
     }
     /**
+     * @param {Address} value
+     */
+    set account(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.paused_set_account(this.__wbg_ptr, ptr0);
+    }
+    /**
      * @param {Address} account
      */
     constructor(account) {
@@ -3689,26 +3698,18 @@ export class Paused {
         }
     }
     /**
-     * @returns {any}
-     */
-    toJson() {
-        const ret = wasm.paused_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set account(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.paused_set_account(this.__wbg_ptr, ptr0);
-    }
-    /**
      * @returns {Address}
      */
     get account() {
         const ret = wasm.paused_account(this.__wbg_ptr);
         return Address.__wrap(ret);
+    }
+    /**
+     * @returns {any}
+     */
+    toJson() {
+        const ret = wasm.paused_toJson(this.__wbg_ptr);
+        return takeObject(ret);
     }
 }
 
@@ -3730,29 +3731,37 @@ export class PositionTokenWasmClient {
         wasm.__wbg_positiontokenwasmclient_free(ptr, 0);
     }
     /**
-     * @param {OdraWasmClient} wasmClient
+     * Returns the balance of the given address.
      * @param {Address} address
+     * @returns {Promise<U256>}
      */
-    constructor(wasmClient, address) {
-        _assertClass(wasmClient, OdraWasmClient);
+    balanceOf(address) {
         _assertClass(address, Address);
         var ptr0 = address.__destroy_into_raw();
-        const ret = wasm.faucetablewcsprwasmclient_new(wasmClient.__wbg_ptr, ptr0);
-        this.__wbg_ptr = ret >>> 0;
-        PositionTokenWasmClientFinalization.register(this, this.__wbg_ptr, this);
-        return this;
+        const ret = wasm.positiontokenwasmclient_balanceOf(this.__wbg_ptr, ptr0);
+        return takeObject(ret);
     }
     /**
-     * @param {Address} recipient
-     * @param {U256} amount
-     * @returns {Promise<TransactionResult>}
+     * Returns the total supply of the token.
+     * @returns {Promise<U256>}
      */
-    transfer(recipient, amount) {
-        _assertClass(recipient, Address);
-        var ptr0 = recipient.__destroy_into_raw();
-        _assertClass(amount, U256);
-        var ptr1 = amount.__destroy_into_raw();
-        const ret = wasm.positiontokenwasmclient_transfer(this.__wbg_ptr, ptr0, ptr1);
+    totalSupply() {
+        const ret = wasm.positiontokenwasmclient_totalSupply(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Delegated. See `self.metadata.contract_name()` for details.
+     * @returns {Promise<string | undefined>}
+     */
+    contractName() {
+        const ret = wasm.positiontokenwasmclient_contractName(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @returns {Promise<LongOrShort>}
+     */
+    longOrShort() {
+        const ret = wasm.positiontokenwasmclient_longOrShort(this.__wbg_ptr);
         return takeObject(ret);
     }
     /**
@@ -3772,122 +3781,11 @@ export class PositionTokenWasmClient {
         return takeObject(ret);
     }
     /**
-     * Burns the given amount of tokens from the given address.
-     * @param {Address} owner
-     * @param {U256} amount
-     * @returns {Promise<TransactionResult>}
+     * Delegated. See `self.metadata.contract_icon_uri()` for details.
+     * @returns {Promise<string | undefined>}
      */
-    burn(owner, amount) {
-        _assertClass(owner, Address);
-        var ptr0 = owner.__destroy_into_raw();
-        _assertClass(amount, U256);
-        var ptr1 = amount.__destroy_into_raw();
-        const ret = wasm.positiontokenwasmclient_burn(this.__wbg_ptr, ptr0, ptr1);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} to
-     * @param {U256} amount
-     * @returns {Promise<TransactionResult>}
-     */
-    mint(to, amount) {
-        _assertClass(to, Address);
-        var ptr0 = to.__destroy_into_raw();
-        _assertClass(amount, U256);
-        var ptr1 = amount.__destroy_into_raw();
-        const ret = wasm.positiontokenwasmclient_mint(this.__wbg_ptr, ptr0, ptr1);
-        return takeObject(ret);
-    }
-    /**
-     * @returns {Promise<LongOrShort>}
-     */
-    longOrShort() {
-        const ret = wasm.positiontokenwasmclient_longOrShort(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @returns {Promise<TransactionResult>}
-     */
-    disablePeerTransfers() {
-        const ret = wasm.positiontokenwasmclient_disablePeerTransfers(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @returns {Promise<TransactionResult>}
-     */
-    enablePeerTransfers() {
-        const ret = wasm.positiontokenwasmclient_enablePeerTransfers(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Returns the name of the token.
-     * @returns {Promise<string>}
-     */
-    name() {
-        const ret = wasm.positiontokenwasmclient_name(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Returns the symbol of the token.
-     * @returns {Promise<string>}
-     */
-    symbol() {
-        const ret = wasm.positiontokenwasmclient_symbol(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Returns the number of decimals the token uses.
-     * @returns {Promise<number>}
-     */
-    decimals() {
-        const ret = wasm.positiontokenwasmclient_decimals(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Returns the total supply of the token.
-     * @returns {Promise<U256>}
-     */
-    totalSupply() {
-        const ret = wasm.positiontokenwasmclient_totalSupply(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Returns the balance of the given address.
-     * @param {Address} address
-     * @returns {Promise<U256>}
-     */
-    balanceOf(address) {
-        _assertClass(address, Address);
-        var ptr0 = address.__destroy_into_raw();
-        const ret = wasm.positiontokenwasmclient_balanceOf(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
-     * Returns the amount of tokens the owner has allowed the spender to spend.
-     * @param {Address} owner
-     * @param {Address} spender
-     * @returns {Promise<U256>}
-     */
-    allowance(owner, spender) {
-        _assertClass(owner, Address);
-        var ptr0 = owner.__destroy_into_raw();
-        _assertClass(spender, Address);
-        var ptr1 = spender.__destroy_into_raw();
-        const ret = wasm.positiontokenwasmclient_allowance(this.__wbg_ptr, ptr0, ptr1);
-        return takeObject(ret);
-    }
-    /**
-     * Approves the spender to spend the given amount of tokens on behalf of the caller.
-     * @param {Address} spender
-     * @param {U256} amount
-     * @returns {Promise<TransactionResult>}
-     */
-    approve(spender, amount) {
-        _assertClass(spender, Address);
-        var ptr0 = spender.__destroy_into_raw();
-        _assertClass(amount, U256);
-        var ptr1 = amount.__destroy_into_raw();
-        const ret = wasm.positiontokenwasmclient_approve(this.__wbg_ptr, ptr0, ptr1);
+    contractIconUri() {
+        const ret = wasm.positiontokenwasmclient_contractIconUri(this.__wbg_ptr);
         return takeObject(ret);
     }
     /**
@@ -3919,27 +3817,11 @@ export class PositionTokenWasmClient {
         return takeObject(ret);
     }
     /**
-     * Delegated. See `self.metadata.contract_name()` for details.
-     * @returns {Promise<string | undefined>}
-     */
-    contractName() {
-        const ret = wasm.positiontokenwasmclient_contractName(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
      * Delegated. See `self.metadata.contract_description()` for details.
      * @returns {Promise<string | undefined>}
      */
     contractDescription() {
         const ret = wasm.positiontokenwasmclient_contractDescription(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Delegated. See `self.metadata.contract_icon_uri()` for details.
-     * @returns {Promise<string | undefined>}
-     */
-    contractIconUri() {
-        const ret = wasm.positiontokenwasmclient_contractIconUri(this.__wbg_ptr);
         return takeObject(ret);
     }
     /**
@@ -3949,6 +3831,125 @@ export class PositionTokenWasmClient {
     contractProjectUri() {
         const ret = wasm.positiontokenwasmclient_contractProjectUri(this.__wbg_ptr);
         return takeObject(ret);
+    }
+    /**
+     * @returns {Promise<TransactionResult>}
+     */
+    enablePeerTransfers() {
+        const ret = wasm.positiontokenwasmclient_enablePeerTransfers(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @returns {Promise<TransactionResult>}
+     */
+    disablePeerTransfers() {
+        const ret = wasm.positiontokenwasmclient_disablePeerTransfers(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Burns the given amount of tokens from the given address.
+     * @param {Address} owner
+     * @param {U256} amount
+     * @returns {Promise<TransactionResult>}
+     */
+    burn(owner, amount) {
+        _assertClass(owner, Address);
+        var ptr0 = owner.__destroy_into_raw();
+        _assertClass(amount, U256);
+        var ptr1 = amount.__destroy_into_raw();
+        const ret = wasm.positiontokenwasmclient_burn(this.__wbg_ptr, ptr0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * @param {Address} to
+     * @param {U256} amount
+     * @returns {Promise<TransactionResult>}
+     */
+    mint(to, amount) {
+        _assertClass(to, Address);
+        var ptr0 = to.__destroy_into_raw();
+        _assertClass(amount, U256);
+        var ptr1 = amount.__destroy_into_raw();
+        const ret = wasm.positiontokenwasmclient_mint(this.__wbg_ptr, ptr0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * Returns the name of the token.
+     * @returns {Promise<string>}
+     */
+    name() {
+        const ret = wasm.positiontokenwasmclient_name(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Returns the symbol of the token.
+     * @returns {Promise<string>}
+     */
+    symbol() {
+        const ret = wasm.positiontokenwasmclient_symbol(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Approves the spender to spend the given amount of tokens on behalf of the caller.
+     * @param {Address} spender
+     * @param {U256} amount
+     * @returns {Promise<TransactionResult>}
+     */
+    approve(spender, amount) {
+        _assertClass(spender, Address);
+        var ptr0 = spender.__destroy_into_raw();
+        _assertClass(amount, U256);
+        var ptr1 = amount.__destroy_into_raw();
+        const ret = wasm.positiontokenwasmclient_approve(this.__wbg_ptr, ptr0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * Returns the number of decimals the token uses.
+     * @returns {Promise<number>}
+     */
+    decimals() {
+        const ret = wasm.positiontokenwasmclient_decimals(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @param {Address} recipient
+     * @param {U256} amount
+     * @returns {Promise<TransactionResult>}
+     */
+    transfer(recipient, amount) {
+        _assertClass(recipient, Address);
+        var ptr0 = recipient.__destroy_into_raw();
+        _assertClass(amount, U256);
+        var ptr1 = amount.__destroy_into_raw();
+        const ret = wasm.positiontokenwasmclient_transfer(this.__wbg_ptr, ptr0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * Returns the amount of tokens the owner has allowed the spender to spend.
+     * @param {Address} owner
+     * @param {Address} spender
+     * @returns {Promise<U256>}
+     */
+    allowance(owner, spender) {
+        _assertClass(owner, Address);
+        var ptr0 = owner.__destroy_into_raw();
+        _assertClass(spender, Address);
+        var ptr1 = spender.__destroy_into_raw();
+        const ret = wasm.positiontokenwasmclient_allowance(this.__wbg_ptr, ptr0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * @param {OdraWasmClient} wasmClient
+     * @param {Address} address
+     */
+    constructor(wasmClient, address) {
+        _assertClass(wasmClient, OdraWasmClient);
+        _assertClass(address, Address);
+        var ptr0 = address.__destroy_into_raw();
+        const ret = wasm.faucetablewcsprwasmclient_new(wasmClient.__wbg_ptr, ptr0);
+        this.__wbg_ptr = ret >>> 0;
+        PositionTokenWasmClientFinalization.register(this, this.__wbg_ptr, this);
+        return this;
     }
 }
 
@@ -3997,6 +3998,21 @@ export class PriceFeedUpdated {
         wasm.__wbg_set_pricefeedupdated_priceFeedId(this.__wbg_ptr, ptr0, len0);
     }
     /**
+     * @returns {Address}
+     */
+    get price_feed_address() {
+        const ret = wasm.pricefeedupdated_price_feed_address(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
+     * @param {Address} value
+     */
+    set price_feed_address(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.pricefeedupdated_set_price_feed_address(this.__wbg_ptr, ptr0);
+    }
+    /**
      * @param {Address} admin
      * @param {Address} priceFeedAddress
      * @param {string} priceFeedId
@@ -4025,6 +4041,13 @@ export class PriceFeedUpdated {
         }
     }
     /**
+     * @returns {Address}
+     */
+    get admin() {
+        const ret = wasm.pricefeedupdated_admin(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
      * @returns {any}
      */
     toJson() {
@@ -4038,28 +4061,6 @@ export class PriceFeedUpdated {
         _assertClass(value, Address);
         var ptr0 = value.__destroy_into_raw();
         wasm.pricefeedupdated_set_admin(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get admin() {
-        const ret = wasm.pricefeedupdated_admin(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set price_feed_address(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.pricefeedupdated_set_price_feed_address(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get price_feed_address() {
-        const ret = wasm.pricefeedupdated_price_feed_address(this.__wbg_ptr);
-        return Address.__wrap(ret);
     }
 }
 
@@ -4092,6 +4093,29 @@ export class PriceUpdated {
      */
     set timestamp(arg0) {
         wasm.__wbg_set_priceupdated_timestamp(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set new_price(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.priceupdated_set_new_price(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get previous_price() {
+        const ret = wasm.priceupdated_previous_price(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set previous_price(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.priceupdated_set_previous_price(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {U256} newPrice
@@ -4127,33 +4151,10 @@ export class PriceUpdated {
         return takeObject(ret);
     }
     /**
-     * @param {U256} value
-     */
-    set new_price(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.priceupdated_set_new_price(this.__wbg_ptr, ptr0);
-    }
-    /**
      * @returns {U256}
      */
     get new_price() {
         const ret = wasm.burn_amount(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set previous_price(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.priceupdated_set_previous_price(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get previous_price() {
-        const ret = wasm.priceupdated_previous_price(this.__wbg_ptr);
         return U256.__wrap(ret);
     }
 }
@@ -4285,7 +4286,7 @@ export class RoleAdminChanged {
     set role(arg0) {
         const ptr0 = passArray8ToWasm0(arg0, wasm.__wbindgen_export_1);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_pricefeedupdated_priceFeedId(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_roleadminchanged_role(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * @returns {Uint8Array}
@@ -4395,7 +4396,7 @@ export class RoleGranted {
     get role() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.__wbg_get_rolegranted_role(retptr, this.__wbg_ptr);
+            wasm.__wbg_get_roleadminchanged_role(retptr, this.__wbg_ptr);
             var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
             var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
             var v1 = getArrayU8FromWasm0(r0, r1).slice();
@@ -4411,7 +4412,23 @@ export class RoleGranted {
     set role(arg0) {
         const ptr0 = passArray8ToWasm0(arg0, wasm.__wbindgen_export_1);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_pricefeedupdated_priceFeedId(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_roleadminchanged_role(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set sender(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.rolegranted_set_sender(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set address(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.rolegranted_set_address(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Uint8Array} role
@@ -4442,19 +4459,11 @@ export class RoleGranted {
         }
     }
     /**
-     * @returns {any}
+     * @returns {Address}
      */
-    toJson() {
-        const ret = wasm.rolegranted_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set address(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.rolegranted_set_address(this.__wbg_ptr, ptr0);
+    get sender() {
+        const ret = wasm.pricefeedupdated_price_feed_address(this.__wbg_ptr);
+        return Address.__wrap(ret);
     }
     /**
      * @returns {Address}
@@ -4464,19 +4473,11 @@ export class RoleGranted {
         return Address.__wrap(ret);
     }
     /**
-     * @param {Address} value
+     * @returns {any}
      */
-    set sender(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.rolegranted_set_sender(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get sender() {
-        const ret = wasm.pricefeedupdated_price_feed_address(this.__wbg_ptr);
-        return Address.__wrap(ret);
+    toJson() {
+        const ret = wasm.rolegranted_toJson(this.__wbg_ptr);
+        return takeObject(ret);
     }
 }
 
@@ -4503,7 +4504,7 @@ export class RoleRevoked {
     get role() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.__wbg_get_rolerevoked_role(retptr, this.__wbg_ptr);
+            wasm.__wbg_get_roleadminchanged_role(retptr, this.__wbg_ptr);
             var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
             var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
             var v1 = getArrayU8FromWasm0(r0, r1).slice();
@@ -4519,7 +4520,23 @@ export class RoleRevoked {
     set role(arg0) {
         const ptr0 = passArray8ToWasm0(arg0, wasm.__wbindgen_export_1);
         const len0 = WASM_VECTOR_LEN;
-        wasm.__wbg_set_pricefeedupdated_priceFeedId(this.__wbg_ptr, ptr0, len0);
+        wasm.__wbg_set_roleadminchanged_role(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set sender(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.rolerevoked_set_sender(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set address(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.rolerevoked_set_address(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Uint8Array} role
@@ -4550,19 +4567,11 @@ export class RoleRevoked {
         }
     }
     /**
-     * @returns {any}
+     * @returns {Address}
      */
-    toJson() {
-        const ret = wasm.rolegranted_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set address(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.rolerevoked_set_address(this.__wbg_ptr, ptr0);
+    get sender() {
+        const ret = wasm.pricefeedupdated_price_feed_address(this.__wbg_ptr);
+        return Address.__wrap(ret);
     }
     /**
      * @returns {Address}
@@ -4572,19 +4581,11 @@ export class RoleRevoked {
         return Address.__wrap(ret);
     }
     /**
-     * @param {Address} value
+     * @returns {any}
      */
-    set sender(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.rolerevoked_set_sender(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get sender() {
-        const ret = wasm.pricefeedupdated_price_feed_address(this.__wbg_ptr);
-        return Address.__wrap(ret);
+    toJson() {
+        const ret = wasm.rolegranted_toJson(this.__wbg_ptr);
+        return takeObject(ret);
     }
 }
 
@@ -4604,6 +4605,22 @@ export class SetAllowance {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_setallowance_free(ptr, 0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set spender(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.setallowance_set_spender(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set allowance(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.setallowance_set_allowance(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} owner
@@ -4634,34 +4651,11 @@ export class SetAllowance {
         }
     }
     /**
-     * @returns {any}
-     */
-    toJson() {
-        const ret = wasm.setallowance_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set owner(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.setallowance_set_owner(this.__wbg_ptr, ptr0);
-    }
-    /**
      * @returns {Address}
      */
     get owner() {
         const ret = wasm.setallowance_owner(this.__wbg_ptr);
         return Address.__wrap(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set spender(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.setallowance_set_spender(this.__wbg_ptr, ptr0);
     }
     /**
      * @returns {Address}
@@ -4671,12 +4665,11 @@ export class SetAllowance {
         return Address.__wrap(ret);
     }
     /**
-     * @param {U256} value
+     * @returns {any}
      */
-    set allowance(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.setallowance_set_allowance(this.__wbg_ptr, ptr0);
+    toJson() {
+        const ret = wasm.setallowance_toJson(this.__wbg_ptr);
+        return takeObject(ret);
     }
     /**
      * @returns {U256}
@@ -4684,6 +4677,14 @@ export class SetAllowance {
     get allowance() {
         const ret = wasm.setallowance_allowance(this.__wbg_ptr);
         return U256.__wrap(ret);
+    }
+    /**
+     * @param {Address} value
+     */
+    set owner(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.setallowance_set_owner(this.__wbg_ptr, ptr0);
     }
 }
 
@@ -4703,6 +4704,51 @@ export class ShortDeposited {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_shortdeposited_free(ptr, 0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get wcspr_amount() {
+        const ret = wasm.decreaseallowance_allowance(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get fee_collected() {
+        const ret = wasm.longdeposited_fee_collected(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set wcspr_amount(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.shortdeposited_set_wcspr_amount(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set fee_collected(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.shortdeposited_set_fee_collected(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get short_tokens_minted() {
+        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set short_tokens_minted(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.shortdeposited_set_short_tokens_minted(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} user
@@ -4736,6 +4782,13 @@ export class ShortDeposited {
         }
     }
     /**
+     * @returns {Address}
+     */
+    get user() {
+        const ret = wasm.longdeposited_user(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
      * @returns {any}
      */
     toJson() {
@@ -4749,58 +4802,6 @@ export class ShortDeposited {
         _assertClass(value, Address);
         var ptr0 = value.__destroy_into_raw();
         wasm.shortdeposited_set_user(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get user() {
-        const ret = wasm.longdeposited_user(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set wcspr_amount(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.shortdeposited_set_wcspr_amount(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get wcspr_amount() {
-        const ret = wasm.decreaseallowance_allowance(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set short_tokens_minted(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.shortdeposited_set_short_tokens_minted(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get short_tokens_minted() {
-        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set fee_collected(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.shortdeposited_set_fee_collected(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get fee_collected() {
-        const ret = wasm.longdeposited_fee_collected(this.__wbg_ptr);
-        return U256.__wrap(ret);
     }
 }
 
@@ -4820,6 +4821,51 @@ export class ShortWithdrawn {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_shortwithdrawn_free(ptr, 0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get wcspr_amount() {
+        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    get fee_collected() {
+        const ret = wasm.longdeposited_fee_collected(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set wcspr_amount(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.shortwithdrawn_set_wcspr_amount(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set fee_collected(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.shortwithdrawn_set_fee_collected(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {U256}
+     */
+    get short_tokens_burned() {
+        const ret = wasm.decreaseallowance_allowance(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     */
+    set short_tokens_burned(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.shortwithdrawn_set_short_tokens_burned(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} user
@@ -4853,6 +4899,13 @@ export class ShortWithdrawn {
         }
     }
     /**
+     * @returns {Address}
+     */
+    get user() {
+        const ret = wasm.longdeposited_user(this.__wbg_ptr);
+        return Address.__wrap(ret);
+    }
+    /**
      * @returns {any}
      */
     toJson() {
@@ -4866,58 +4919,6 @@ export class ShortWithdrawn {
         _assertClass(value, Address);
         var ptr0 = value.__destroy_into_raw();
         wasm.shortwithdrawn_set_user(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get user() {
-        const ret = wasm.longdeposited_user(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set short_tokens_burned(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.shortwithdrawn_set_short_tokens_burned(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get short_tokens_burned() {
-        const ret = wasm.decreaseallowance_allowance(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set wcspr_amount(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.shortwithdrawn_set_wcspr_amount(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get wcspr_amount() {
-        const ret = wasm.decreaseallowance_decr_by(this.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set fee_collected(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.shortwithdrawn_set_fee_collected(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get fee_collected() {
-        const ret = wasm.longdeposited_fee_collected(this.__wbg_ptr);
-        return U256.__wrap(ret);
     }
 }
 
@@ -5490,6 +5491,30 @@ export class Transfer {
         wasm.__wbg_transfer_free(ptr, 0);
     }
     /**
+     * @param {U256} value
+     */
+    set amount(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.transfer_set_amount(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set sender(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.transfer_set_sender(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set recipient(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.transfer_set_recipient(this.__wbg_ptr, ptr0);
+    }
+    /**
      * @param {Address} sender
      * @param {Address} recipient
      * @param {U256} amount
@@ -5518,19 +5543,11 @@ export class Transfer {
         }
     }
     /**
-     * @returns {any}
+     * @returns {U256}
      */
-    toJson() {
-        const ret = wasm.transfer_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set sender(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.transfer_set_sender(this.__wbg_ptr, ptr0);
+    get amount() {
+        const ret = wasm.setallowance_allowance(this.__wbg_ptr);
+        return U256.__wrap(ret);
     }
     /**
      * @returns {Address}
@@ -5540,12 +5557,11 @@ export class Transfer {
         return Address.__wrap(ret);
     }
     /**
-     * @param {Address} value
+     * @returns {any}
      */
-    set recipient(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.transfer_set_recipient(this.__wbg_ptr, ptr0);
+    toJson() {
+        const ret = wasm.transfer_toJson(this.__wbg_ptr);
+        return takeObject(ret);
     }
     /**
      * @returns {Address}
@@ -5553,21 +5569,6 @@ export class Transfer {
     get recipient() {
         const ret = wasm.setallowance_spender(this.__wbg_ptr);
         return Address.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     */
-    set amount(value) {
-        _assertClass(value, U256);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.transfer_set_amount(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get amount() {
-        const ret = wasm.setallowance_allowance(this.__wbg_ptr);
-        return U256.__wrap(ret);
     }
 }
 
@@ -5587,6 +5588,30 @@ export class TransferFrom {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_transferfrom_free(ptr, 0);
+    }
+    /**
+     * @param {U256} value
+     */
+    set amount(value) {
+        _assertClass(value, U256);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.transferfrom_set_amount(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set spender(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.transferfrom_set_spender(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set recipient(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.transferfrom_set_recipient(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} spender
@@ -5620,19 +5645,18 @@ export class TransferFrom {
         }
     }
     /**
-     * @returns {any}
+     * @returns {Address}
      */
-    toJson() {
-        const ret = wasm.transferfrom_toJson(this.__wbg_ptr);
-        return takeObject(ret);
+    get owner() {
+        const ret = wasm.transferfrom_owner(this.__wbg_ptr);
+        return Address.__wrap(ret);
     }
     /**
-     * @param {Address} value
+     * @returns {U256}
      */
-    set spender(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.transferfrom_set_spender(this.__wbg_ptr, ptr0);
+    get amount() {
+        const ret = wasm.decreaseallowance_allowance(this.__wbg_ptr);
+        return U256.__wrap(ret);
     }
     /**
      * @returns {Address}
@@ -5642,27 +5666,11 @@ export class TransferFrom {
         return Address.__wrap(ret);
     }
     /**
-     * @param {Address} value
+     * @returns {any}
      */
-    set owner(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.transferfrom_set_owner(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {Address}
-     */
-    get owner() {
-        const ret = wasm.transferfrom_owner(this.__wbg_ptr);
-        return Address.__wrap(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set recipient(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.transferfrom_set_recipient(this.__wbg_ptr, ptr0);
+    toJson() {
+        const ret = wasm.transferfrom_toJson(this.__wbg_ptr);
+        return takeObject(ret);
     }
     /**
      * @returns {Address}
@@ -5672,19 +5680,12 @@ export class TransferFrom {
         return Address.__wrap(ret);
     }
     /**
-     * @param {U256} value
+     * @param {Address} value
      */
-    set amount(value) {
-        _assertClass(value, U256);
+    set owner(value) {
+        _assertClass(value, Address);
         var ptr0 = value.__destroy_into_raw();
-        wasm.transferfrom_set_amount(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get amount() {
-        const ret = wasm.decreaseallowance_allowance(this.__wbg_ptr);
-        return U256.__wrap(ret);
+        wasm.transferfrom_set_owner(this.__wbg_ptr, ptr0);
     }
 }
 
@@ -5724,6 +5725,256 @@ export class U128 {
         wasm.__wbg_u128_free(ptr, 0);
     }
     /**
+     * @param {U128} other
+     * @returns {OverflowingResultU128}
+     */
+    overflowingAdd(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_overflowingAdd(this.__wbg_ptr, other.__wbg_ptr);
+        return OverflowingResultU128.__wrap(ret);
+    }
+    /**
+     * @param {U128} other
+     * @returns {OverflowingResultU128}
+     */
+    overflowingMul(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_overflowingMul(this.__wbg_ptr, other.__wbg_ptr);
+        return OverflowingResultU128.__wrap(ret);
+    }
+    /**
+     * @param {number} exp
+     * @returns {OverflowingResultU128}
+     */
+    overflowingPow(exp) {
+        const ret = wasm.u128_overflowingPow(this.__wbg_ptr, exp);
+        return OverflowingResultU128.__wrap(ret);
+    }
+    /**
+     * @param {U128} other
+     * @returns {OverflowingResultU128}
+     */
+    overflowingSub(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_overflowingSub(this.__wbg_ptr, other.__wbg_ptr);
+        return OverflowingResultU128.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    toU256() {
+        const ret = wasm.u128_toU256(this.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U512}
+     */
+    toU512() {
+        const ret = wasm.u128_toU512(this.__wbg_ptr);
+        return U512.__wrap(ret);
+    }
+    /**
+     * @param {U256} value
+     * @returns {U128}
+     */
+    static fromU256(value) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            _assertClass(value, U256);
+            var ptr0 = value.__destroy_into_raw();
+            wasm.u128_fromU256(retptr, ptr0);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U128.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * @param {U512} value
+     * @returns {U128}
+     */
+    static fromU512(value) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            _assertClass(value, U512);
+            var ptr0 = value.__destroy_into_raw();
+            wasm.u128_fromU512(retptr, ptr0);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U128.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * @param {bigint} other
+     * @returns {U128}
+     */
+    addBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u128_addBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U128.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @param {bigint} other
+     * @returns {U128}
+     */
+    divBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u128_divBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U128.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @param {HTMLInputElement} input
+     * @returns {U128}
+     */
+    static fromHtmlInput(input) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u128_fromHtmlInput(retptr, addHeapObject(input));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U128.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * @param {bigint} other
+     * @returns {U128}
+     */
+    mulBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u128_mulBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U128.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @param {bigint} other
+     * @returns {U128}
+     */
+    subBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u128_subBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U128.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @returns {bigint}
+     */
+    toBigInt() {
+        const ret = wasm.u128_toBigInt(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @param {U128} other
+     * @returns {U128 | undefined}
+     */
+    checkedAdd(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_checkedAdd(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U128.__wrap(ret);
+    }
+    /**
+     * @param {U128} other
+     * @returns {U128 | undefined}
+     */
+    checkedDiv(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_checkedDiv(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U128.__wrap(ret);
+    }
+    /**
+     * @param {U128} other
+     * @returns {U128 | undefined}
+     */
+    checkedMul(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_checkedMul(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U128.__wrap(ret);
+    }
+    /**
+     * @param {number} exp
+     * @returns {U128 | undefined}
+     */
+    checkedPow(exp) {
+        const ret = wasm.u128_checkedPow(this.__wbg_ptr, exp);
+        return ret === 0 ? undefined : U128.__wrap(ret);
+    }
+    /**
+     * @param {U128} other
+     * @returns {U128 | undefined}
+     */
+    checkedRem(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_checkedRem(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U128.__wrap(ret);
+    }
+    /**
+     * @param {U128} other
+     * @returns {U128 | undefined}
+     */
+    checkedSub(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_checkedSub(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U128.__wrap(ret);
+    }
+    /**
      * @param {string} value
      */
     constructor(value) {
@@ -5741,33 +5992,6 @@ export class U128 {
             this.__wbg_ptr = r0 >>> 0;
             U128Finalization.register(this, this.__wbg_ptr, this);
             return this;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-     * @param {number} value
-     * @returns {U128}
-     */
-    static fromNumber(value) {
-        const ret = wasm.u128_fromNumber(value);
-        return U128.__wrap(ret);
-    }
-    /**
-     * @param {HTMLInputElement} input
-     * @returns {U128}
-     */
-    static fromHtmlInput(input) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u128_fromHtmlInput(retptr, addHeapObject(input));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U128.__wrap(r0);
         } finally {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
@@ -5812,212 +6036,12 @@ export class U128 {
         }
     }
     /**
-     * @returns {any}
-     */
-    toJson() {
-        const ret = wasm.u128_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {number} decimals
-     * @returns {BalanceFormatter}
-     */
-    formatter(decimals) {
-        const ret = wasm.u128_formatter(this.__wbg_ptr, decimals);
-        return BalanceFormatter.__wrap(ret);
-    }
-    /**
-     * @param {U128} other
-     * @returns {U128}
-     */
-    mul(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_mul(this.__wbg_ptr, other.__wbg_ptr);
-        return U128.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U128}
-     */
-    mulBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u128_mulBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U128.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U128} other
-     * @returns {U128}
-     */
-    div(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_div(this.__wbg_ptr, other.__wbg_ptr);
-        return U128.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U128}
-     */
-    divBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u128_divBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U128.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U128} other
-     * @returns {U128}
-     */
-    add(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_add(this.__wbg_ptr, other.__wbg_ptr);
-        return U128.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U128}
-     */
-    addBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u128_addBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U128.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U128} other
-     * @returns {U128}
-     */
-    sub(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_sub(this.__wbg_ptr, other.__wbg_ptr);
-        return U128.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U128}
-     */
-    subBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u128_subBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U128.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U128} other
-     * @returns {U128 | undefined}
-     */
-    checkedMul(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_checkedMul(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U128.__wrap(ret);
-    }
-    /**
-     * @param {U128} other
-     * @returns {U128 | undefined}
-     */
-    checkedAdd(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_checkedAdd(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U128.__wrap(ret);
-    }
-    /**
-     * @param {U128} other
-     * @returns {U128 | undefined}
-     */
-    checkedSub(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_checkedSub(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U128.__wrap(ret);
-    }
-    /**
-     * @param {U128} other
-     * @returns {U128 | undefined}
-     */
-    checkedDiv(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_checkedDiv(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U128.__wrap(ret);
-    }
-    /**
-     * @param {U128} other
-     * @returns {U128 | undefined}
-     */
-    checkedRem(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_checkedRem(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U128.__wrap(ret);
-    }
-    /**
-     * @param {number} exp
-     * @returns {U128 | undefined}
-     */
-    checkedPow(exp) {
-        const ret = wasm.u128_checkedPow(this.__wbg_ptr, exp);
-        return ret === 0 ? undefined : U128.__wrap(ret);
-    }
-    /**
-     * @returns {bigint}
-     */
-    toBigInt() {
-        const ret = wasm.u128_toBigInt(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
      * @param {U128} other
      * @returns {boolean}
      */
-    lt(other) {
+    ge(other) {
         _assertClass(other, U128);
-        const ret = wasm.u128_lt(this.__wbg_ptr, other.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @param {U128} other
-     * @returns {boolean}
-     */
-    le(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_le(this.__wbg_ptr, other.__wbg_ptr);
+        const ret = wasm.u128_ge(this.__wbg_ptr, other.__wbg_ptr);
         return ret !== 0;
     }
     /**
@@ -6033,10 +6057,62 @@ export class U128 {
      * @param {U128} other
      * @returns {boolean}
      */
-    ge(other) {
+    le(other) {
         _assertClass(other, U128);
-        const ret = wasm.u128_ge(this.__wbg_ptr, other.__wbg_ptr);
+        const ret = wasm.u128_le(this.__wbg_ptr, other.__wbg_ptr);
         return ret !== 0;
+    }
+    /**
+     * @param {U128} other
+     * @returns {boolean}
+     */
+    lt(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_lt(this.__wbg_ptr, other.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @param {U128} other
+     * @returns {U128}
+     */
+    add(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_add(this.__wbg_ptr, other.__wbg_ptr);
+        return U128.__wrap(ret);
+    }
+    /**
+     * @param {U128} other
+     * @returns {U128}
+     */
+    div(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_div(this.__wbg_ptr, other.__wbg_ptr);
+        return U128.__wrap(ret);
+    }
+    /**
+     * @param {U128} other
+     * @returns {U128}
+     */
+    mul(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_mul(this.__wbg_ptr, other.__wbg_ptr);
+        return U128.__wrap(ret);
+    }
+    /**
+     * @param {U128} other
+     * @returns {U128}
+     */
+    sub(other) {
+        _assertClass(other, U128);
+        const ret = wasm.u128_sub(this.__wbg_ptr, other.__wbg_ptr);
+        return U128.__wrap(ret);
+    }
+    /**
+     * @returns {U128}
+     */
+    static zero() {
+        const ret = wasm.u128_zero();
+        return U128.__wrap(ret);
     }
     /**
      * @returns {string}
@@ -6058,109 +6134,34 @@ export class U128 {
         }
     }
     /**
+     * @returns {any}
+     */
+    toJson() {
+        const ret = wasm.u128_toJson(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @param {number} value
+     * @returns {U128}
+     */
+    static fromNumber(value) {
+        const ret = wasm.u128_fromNumber(value);
+        return U128.__wrap(ret);
+    }
+    /**
+     * @param {number} decimals
+     * @returns {BalanceFormatter}
+     */
+    formatter(decimals) {
+        const ret = wasm.u128_formatter(this.__wbg_ptr, decimals);
+        return BalanceFormatter.__wrap(ret);
+    }
+    /**
      * @returns {U128}
      */
     static MAX() {
         const ret = wasm.u128_MAX();
         return U128.__wrap(ret);
-    }
-    /**
-     * @returns {U128}
-     */
-    static zero() {
-        const ret = wasm.u128_zero();
-        return U128.__wrap(ret);
-    }
-    /**
-     * @param {U128} other
-     * @returns {OverflowingResultU128}
-     */
-    overflowingMul(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_overflowingMul(this.__wbg_ptr, other.__wbg_ptr);
-        return OverflowingResultU128.__wrap(ret);
-    }
-    /**
-     * @param {U128} other
-     * @returns {OverflowingResultU128}
-     */
-    overflowingAdd(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_overflowingAdd(this.__wbg_ptr, other.__wbg_ptr);
-        return OverflowingResultU128.__wrap(ret);
-    }
-    /**
-     * @param {U128} other
-     * @returns {OverflowingResultU128}
-     */
-    overflowingSub(other) {
-        _assertClass(other, U128);
-        const ret = wasm.u128_overflowingSub(this.__wbg_ptr, other.__wbg_ptr);
-        return OverflowingResultU128.__wrap(ret);
-    }
-    /**
-     * @param {number} exp
-     * @returns {OverflowingResultU128}
-     */
-    overflowingPow(exp) {
-        const ret = wasm.u128_overflowingPow(this.__wbg_ptr, exp);
-        return OverflowingResultU128.__wrap(ret);
-    }
-    /**
-     * @param {U512} value
-     * @returns {U128}
-     */
-    static fromU512(value) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            _assertClass(value, U512);
-            var ptr0 = value.__destroy_into_raw();
-            wasm.u128_fromU512(retptr, ptr0);
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U128.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-     * @returns {U512}
-     */
-    toU512() {
-        const ret = wasm.u128_toU512(this.__wbg_ptr);
-        return U512.__wrap(ret);
-    }
-    /**
-     * @param {U256} value
-     * @returns {U128}
-     */
-    static fromU256(value) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            _assertClass(value, U256);
-            var ptr0 = value.__destroy_into_raw();
-            wasm.u128_fromU256(retptr, ptr0);
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U128.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-     * @returns {U256}
-     */
-    toU256() {
-        const ret = wasm.u128_toU256(this.__wbg_ptr);
-        return U256.__wrap(ret);
     }
 }
 
@@ -6200,6 +6201,228 @@ export class U256 {
         wasm.__wbg_u256_free(ptr, 0);
     }
     /**
+     * @param {U256} other
+     * @returns {OverflowingResultU256}
+     */
+    overflowingAdd(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_overflowingAdd(this.__wbg_ptr, other.__wbg_ptr);
+        return OverflowingResultU256.__wrap(ret);
+    }
+    /**
+     * @param {U256} other
+     * @returns {OverflowingResultU256}
+     */
+    overflowingMul(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_overflowingMul(this.__wbg_ptr, other.__wbg_ptr);
+        return OverflowingResultU256.__wrap(ret);
+    }
+    /**
+     * @param {number} exp
+     * @returns {OverflowingResultU256}
+     */
+    overflowingPow(exp) {
+        const ret = wasm.u256_overflowingPow(this.__wbg_ptr, exp);
+        return OverflowingResultU256.__wrap(ret);
+    }
+    /**
+     * @param {U256} other
+     * @returns {OverflowingResultU256}
+     */
+    overflowingSub(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_overflowingSub(this.__wbg_ptr, other.__wbg_ptr);
+        return OverflowingResultU256.__wrap(ret);
+    }
+    /**
+     * @returns {U512}
+     */
+    toU512() {
+        const ret = wasm.u256_toU512(this.__wbg_ptr);
+        return U512.__wrap(ret);
+    }
+    /**
+     * @param {U512} value
+     * @returns {U256}
+     */
+    static fromU512(value) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            _assertClass(value, U512);
+            var ptr0 = value.__destroy_into_raw();
+            wasm.u256_fromU512(retptr, ptr0);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U256.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * @param {bigint} other
+     * @returns {U256}
+     */
+    addBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u256_addBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U256.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @param {bigint} other
+     * @returns {U256}
+     */
+    divBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u256_divBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U256.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @param {HTMLInputElement} input
+     * @returns {U256}
+     */
+    static fromHtmlInput(input) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u256_fromHtmlInput(retptr, addHeapObject(input));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U256.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * @param {bigint} other
+     * @returns {U256}
+     */
+    mulBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u256_mulBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U256.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @param {bigint} other
+     * @returns {U256}
+     */
+    subBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u256_subBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U256.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @returns {bigint}
+     */
+    toBigInt() {
+        const ret = wasm.u256_toBigInt(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @param {U256} other
+     * @returns {U256 | undefined}
+     */
+    checkedAdd(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_checkedAdd(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} other
+     * @returns {U256 | undefined}
+     */
+    checkedDiv(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_checkedDiv(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} other
+     * @returns {U256 | undefined}
+     */
+    checkedMul(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_checkedMul(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U256.__wrap(ret);
+    }
+    /**
+     * @param {number} exp
+     * @returns {U256 | undefined}
+     */
+    checkedPow(exp) {
+        const ret = wasm.u256_checkedPow(this.__wbg_ptr, exp);
+        return ret === 0 ? undefined : U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} other
+     * @returns {U256 | undefined}
+     */
+    checkedRem(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_checkedRem(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} other
+     * @returns {U256 | undefined}
+     */
+    checkedSub(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_checkedSub(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U256.__wrap(ret);
+    }
+    /**
      * @param {string} value
      */
     constructor(value) {
@@ -6217,33 +6440,6 @@ export class U256 {
             this.__wbg_ptr = r0 >>> 0;
             U256Finalization.register(this, this.__wbg_ptr, this);
             return this;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-     * @param {number} value
-     * @returns {U256}
-     */
-    static fromNumber(value) {
-        const ret = wasm.u256_fromNumber(value);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {HTMLInputElement} input
-     * @returns {U256}
-     */
-    static fromHtmlInput(input) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u256_fromHtmlInput(retptr, addHeapObject(input));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U256.__wrap(r0);
         } finally {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
@@ -6288,212 +6484,12 @@ export class U256 {
         }
     }
     /**
-     * @returns {any}
-     */
-    toJson() {
-        const ret = wasm.u256_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {number} decimals
-     * @returns {BalanceFormatter}
-     */
-    formatter(decimals) {
-        const ret = wasm.u256_formatter(this.__wbg_ptr, decimals);
-        return BalanceFormatter.__wrap(ret);
-    }
-    /**
-     * @param {U256} other
-     * @returns {U256}
-     */
-    mul(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_mul(this.__wbg_ptr, other.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U256}
-     */
-    mulBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u256_mulBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U256.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U256} other
-     * @returns {U256}
-     */
-    div(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_div(this.__wbg_ptr, other.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U256}
-     */
-    divBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u256_divBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U256.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U256} other
-     * @returns {U256}
-     */
-    add(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_add(this.__wbg_ptr, other.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U256}
-     */
-    addBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u256_addBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U256.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U256} other
-     * @returns {U256}
-     */
-    sub(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_sub(this.__wbg_ptr, other.__wbg_ptr);
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U256}
-     */
-    subBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u256_subBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U256.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U256} other
-     * @returns {U256 | undefined}
-     */
-    checkedMul(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_checkedMul(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} other
-     * @returns {U256 | undefined}
-     */
-    checkedAdd(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_checkedAdd(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} other
-     * @returns {U256 | undefined}
-     */
-    checkedSub(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_checkedSub(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} other
-     * @returns {U256 | undefined}
-     */
-    checkedDiv(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_checkedDiv(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} other
-     * @returns {U256 | undefined}
-     */
-    checkedRem(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_checkedRem(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U256.__wrap(ret);
-    }
-    /**
-     * @param {number} exp
-     * @returns {U256 | undefined}
-     */
-    checkedPow(exp) {
-        const ret = wasm.u256_checkedPow(this.__wbg_ptr, exp);
-        return ret === 0 ? undefined : U256.__wrap(ret);
-    }
-    /**
-     * @returns {bigint}
-     */
-    toBigInt() {
-        const ret = wasm.u256_toBigInt(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
      * @param {U256} other
      * @returns {boolean}
      */
-    lt(other) {
+    ge(other) {
         _assertClass(other, U256);
-        const ret = wasm.u256_lt(this.__wbg_ptr, other.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @param {U256} other
-     * @returns {boolean}
-     */
-    le(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_le(this.__wbg_ptr, other.__wbg_ptr);
+        const ret = wasm.u256_ge(this.__wbg_ptr, other.__wbg_ptr);
         return ret !== 0;
     }
     /**
@@ -6509,10 +6505,62 @@ export class U256 {
      * @param {U256} other
      * @returns {boolean}
      */
-    ge(other) {
+    le(other) {
         _assertClass(other, U256);
-        const ret = wasm.u256_ge(this.__wbg_ptr, other.__wbg_ptr);
+        const ret = wasm.u256_le(this.__wbg_ptr, other.__wbg_ptr);
         return ret !== 0;
+    }
+    /**
+     * @param {U256} other
+     * @returns {boolean}
+     */
+    lt(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_lt(this.__wbg_ptr, other.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @param {U256} other
+     * @returns {U256}
+     */
+    add(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_add(this.__wbg_ptr, other.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} other
+     * @returns {U256}
+     */
+    div(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_div(this.__wbg_ptr, other.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} other
+     * @returns {U256}
+     */
+    mul(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_mul(this.__wbg_ptr, other.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {U256} other
+     * @returns {U256}
+     */
+    sub(other) {
+        _assertClass(other, U256);
+        const ret = wasm.u256_sub(this.__wbg_ptr, other.__wbg_ptr);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @returns {U256}
+     */
+    static zero() {
+        const ret = wasm.u256_zero();
+        return U256.__wrap(ret);
     }
     /**
      * @returns {string}
@@ -6534,81 +6582,34 @@ export class U256 {
         }
     }
     /**
+     * @returns {any}
+     */
+    toJson() {
+        const ret = wasm.u256_toJson(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @param {number} value
+     * @returns {U256}
+     */
+    static fromNumber(value) {
+        const ret = wasm.u256_fromNumber(value);
+        return U256.__wrap(ret);
+    }
+    /**
+     * @param {number} decimals
+     * @returns {BalanceFormatter}
+     */
+    formatter(decimals) {
+        const ret = wasm.u256_formatter(this.__wbg_ptr, decimals);
+        return BalanceFormatter.__wrap(ret);
+    }
+    /**
      * @returns {U256}
      */
     static MAX() {
         const ret = wasm.u256_MAX();
         return U256.__wrap(ret);
-    }
-    /**
-     * @returns {U256}
-     */
-    static zero() {
-        const ret = wasm.u256_zero();
-        return U256.__wrap(ret);
-    }
-    /**
-     * @param {U256} other
-     * @returns {OverflowingResultU256}
-     */
-    overflowingMul(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_overflowingMul(this.__wbg_ptr, other.__wbg_ptr);
-        return OverflowingResultU256.__wrap(ret);
-    }
-    /**
-     * @param {U256} other
-     * @returns {OverflowingResultU256}
-     */
-    overflowingAdd(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_overflowingAdd(this.__wbg_ptr, other.__wbg_ptr);
-        return OverflowingResultU256.__wrap(ret);
-    }
-    /**
-     * @param {U256} other
-     * @returns {OverflowingResultU256}
-     */
-    overflowingSub(other) {
-        _assertClass(other, U256);
-        const ret = wasm.u256_overflowingSub(this.__wbg_ptr, other.__wbg_ptr);
-        return OverflowingResultU256.__wrap(ret);
-    }
-    /**
-     * @param {number} exp
-     * @returns {OverflowingResultU256}
-     */
-    overflowingPow(exp) {
-        const ret = wasm.u256_overflowingPow(this.__wbg_ptr, exp);
-        return OverflowingResultU256.__wrap(ret);
-    }
-    /**
-     * @param {U512} value
-     * @returns {U256}
-     */
-    static fromU512(value) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            _assertClass(value, U512);
-            var ptr0 = value.__destroy_into_raw();
-            wasm.u256_fromU512(retptr, ptr0);
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U256.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-     * @returns {U512}
-     */
-    toU512() {
-        const ret = wasm.u256_toU512(this.__wbg_ptr);
-        return U512.__wrap(ret);
     }
 }
 
@@ -6648,6 +6649,165 @@ export class U512 {
         wasm.__wbg_u512_free(ptr, 0);
     }
     /**
+     * @param {bigint} other
+     * @returns {U512}
+     */
+    addBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u512_addBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U512.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @param {bigint} other
+     * @returns {U512}
+     */
+    divBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u512_divBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U512.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @param {HTMLInputElement} input
+     * @returns {U512}
+     */
+    static fromHtmlInput(input) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u512_fromHtmlInput(retptr, addHeapObject(input));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U512.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * @param {bigint} other
+     * @returns {U512}
+     */
+    mulBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u512_mulBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U512.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @param {bigint} other
+     * @returns {U512}
+     */
+    subBigInt(other) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.u512_subBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return U512.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            heap[stack_pointer++] = undefined;
+        }
+    }
+    /**
+     * @returns {bigint}
+     */
+    toBigInt() {
+        const ret = wasm.u512_toBigInt(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @param {U512} other
+     * @returns {U512 | undefined}
+     */
+    checkedAdd(other) {
+        _assertClass(other, U512);
+        const ret = wasm.u512_checkedAdd(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U512.__wrap(ret);
+    }
+    /**
+     * @param {U512} other
+     * @returns {U512 | undefined}
+     */
+    checkedDiv(other) {
+        _assertClass(other, U512);
+        const ret = wasm.u512_checkedDiv(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U512.__wrap(ret);
+    }
+    /**
+     * @param {U512} other
+     * @returns {U512 | undefined}
+     */
+    checkedMul(other) {
+        _assertClass(other, U512);
+        const ret = wasm.u512_checkedMul(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U512.__wrap(ret);
+    }
+    /**
+     * @param {number} exp
+     * @returns {U512 | undefined}
+     */
+    checkedPow(exp) {
+        const ret = wasm.u512_checkedPow(this.__wbg_ptr, exp);
+        return ret === 0 ? undefined : U512.__wrap(ret);
+    }
+    /**
+     * @param {U512} other
+     * @returns {U512 | undefined}
+     */
+    checkedRem(other) {
+        _assertClass(other, U512);
+        const ret = wasm.u512_checkedRem(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U512.__wrap(ret);
+    }
+    /**
+     * @param {U512} other
+     * @returns {U512 | undefined}
+     */
+    checkedSub(other) {
+        _assertClass(other, U512);
+        const ret = wasm.u512_checkedSub(this.__wbg_ptr, other.__wbg_ptr);
+        return ret === 0 ? undefined : U512.__wrap(ret);
+    }
+    /**
      * @param {string} value
      */
     constructor(value) {
@@ -6665,33 +6825,6 @@ export class U512 {
             this.__wbg_ptr = r0 >>> 0;
             U512Finalization.register(this, this.__wbg_ptr, this);
             return this;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-     * @param {number} value
-     * @returns {U512}
-     */
-    static fromNumber(value) {
-        const ret = wasm.u512_fromNumber(value);
-        return U512.__wrap(ret);
-    }
-    /**
-     * @param {HTMLInputElement} input
-     * @returns {U512}
-     */
-    static fromHtmlInput(input) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u512_fromHtmlInput(retptr, addHeapObject(input));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U512.__wrap(r0);
         } finally {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
@@ -6736,212 +6869,12 @@ export class U512 {
         }
     }
     /**
-     * @returns {any}
-     */
-    toJson() {
-        const ret = wasm.u512_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {number} decimals
-     * @returns {BalanceFormatter}
-     */
-    formatter(decimals) {
-        const ret = wasm.u512_formatter(this.__wbg_ptr, decimals);
-        return BalanceFormatter.__wrap(ret);
-    }
-    /**
-     * @param {U512} other
-     * @returns {U512}
-     */
-    mul(other) {
-        _assertClass(other, U512);
-        const ret = wasm.u512_mul(this.__wbg_ptr, other.__wbg_ptr);
-        return U512.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U512}
-     */
-    mulBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u512_mulBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U512.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U512} other
-     * @returns {U512}
-     */
-    div(other) {
-        _assertClass(other, U512);
-        const ret = wasm.u512_div(this.__wbg_ptr, other.__wbg_ptr);
-        return U512.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U512}
-     */
-    divBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u512_divBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U512.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U512} other
-     * @returns {U512}
-     */
-    add(other) {
-        _assertClass(other, U512);
-        const ret = wasm.u512_add(this.__wbg_ptr, other.__wbg_ptr);
-        return U512.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U512}
-     */
-    addBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u512_addBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U512.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U512} other
-     * @returns {U512}
-     */
-    sub(other) {
-        _assertClass(other, U512);
-        const ret = wasm.u512_sub(this.__wbg_ptr, other.__wbg_ptr);
-        return U512.__wrap(ret);
-    }
-    /**
-     * @param {bigint} other
-     * @returns {U512}
-     */
-    subBigInt(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.u512_subBigInt(retptr, this.__wbg_ptr, addBorrowedObject(other));
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return U512.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            heap[stack_pointer++] = undefined;
-        }
-    }
-    /**
-     * @param {U512} other
-     * @returns {U512 | undefined}
-     */
-    checkedMul(other) {
-        _assertClass(other, U512);
-        const ret = wasm.u512_checkedMul(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U512.__wrap(ret);
-    }
-    /**
-     * @param {U512} other
-     * @returns {U512 | undefined}
-     */
-    checkedAdd(other) {
-        _assertClass(other, U512);
-        const ret = wasm.u512_checkedAdd(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U512.__wrap(ret);
-    }
-    /**
-     * @param {U512} other
-     * @returns {U512 | undefined}
-     */
-    checkedSub(other) {
-        _assertClass(other, U512);
-        const ret = wasm.u512_checkedSub(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U512.__wrap(ret);
-    }
-    /**
-     * @param {U512} other
-     * @returns {U512 | undefined}
-     */
-    checkedDiv(other) {
-        _assertClass(other, U512);
-        const ret = wasm.u512_checkedDiv(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U512.__wrap(ret);
-    }
-    /**
-     * @param {U512} other
-     * @returns {U512 | undefined}
-     */
-    checkedRem(other) {
-        _assertClass(other, U512);
-        const ret = wasm.u512_checkedRem(this.__wbg_ptr, other.__wbg_ptr);
-        return ret === 0 ? undefined : U512.__wrap(ret);
-    }
-    /**
-     * @param {number} exp
-     * @returns {U512 | undefined}
-     */
-    checkedPow(exp) {
-        const ret = wasm.u512_checkedPow(this.__wbg_ptr, exp);
-        return ret === 0 ? undefined : U512.__wrap(ret);
-    }
-    /**
-     * @returns {bigint}
-     */
-    toBigInt() {
-        const ret = wasm.u512_toBigInt(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
      * @param {U512} other
      * @returns {boolean}
      */
-    lt(other) {
+    ge(other) {
         _assertClass(other, U512);
-        const ret = wasm.u512_lt(this.__wbg_ptr, other.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @param {U512} other
-     * @returns {boolean}
-     */
-    le(other) {
-        _assertClass(other, U512);
-        const ret = wasm.u512_le(this.__wbg_ptr, other.__wbg_ptr);
+        const ret = wasm.u512_ge(this.__wbg_ptr, other.__wbg_ptr);
         return ret !== 0;
     }
     /**
@@ -6957,10 +6890,62 @@ export class U512 {
      * @param {U512} other
      * @returns {boolean}
      */
-    ge(other) {
+    le(other) {
         _assertClass(other, U512);
-        const ret = wasm.u512_ge(this.__wbg_ptr, other.__wbg_ptr);
+        const ret = wasm.u512_le(this.__wbg_ptr, other.__wbg_ptr);
         return ret !== 0;
+    }
+    /**
+     * @param {U512} other
+     * @returns {boolean}
+     */
+    lt(other) {
+        _assertClass(other, U512);
+        const ret = wasm.u512_lt(this.__wbg_ptr, other.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @param {U512} other
+     * @returns {U512}
+     */
+    add(other) {
+        _assertClass(other, U512);
+        const ret = wasm.u512_add(this.__wbg_ptr, other.__wbg_ptr);
+        return U512.__wrap(ret);
+    }
+    /**
+     * @param {U512} other
+     * @returns {U512}
+     */
+    div(other) {
+        _assertClass(other, U512);
+        const ret = wasm.u512_div(this.__wbg_ptr, other.__wbg_ptr);
+        return U512.__wrap(ret);
+    }
+    /**
+     * @param {U512} other
+     * @returns {U512}
+     */
+    mul(other) {
+        _assertClass(other, U512);
+        const ret = wasm.u512_mul(this.__wbg_ptr, other.__wbg_ptr);
+        return U512.__wrap(ret);
+    }
+    /**
+     * @param {U512} other
+     * @returns {U512}
+     */
+    sub(other) {
+        _assertClass(other, U512);
+        const ret = wasm.u512_sub(this.__wbg_ptr, other.__wbg_ptr);
+        return U512.__wrap(ret);
+    }
+    /**
+     * @returns {U512}
+     */
+    static zero() {
+        const ret = wasm.u512_zero();
+        return U512.__wrap(ret);
     }
     /**
      * @returns {string}
@@ -6982,27 +6967,34 @@ export class U512 {
         }
     }
     /**
+     * @returns {any}
+     */
+    toJson() {
+        const ret = wasm.u512_toJson(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * @param {number} value
+     * @returns {U512}
+     */
+    static fromNumber(value) {
+        const ret = wasm.u512_fromNumber(value);
+        return U512.__wrap(ret);
+    }
+    /**
+     * @param {number} decimals
+     * @returns {BalanceFormatter}
+     */
+    formatter(decimals) {
+        const ret = wasm.u512_formatter(this.__wbg_ptr, decimals);
+        return BalanceFormatter.__wrap(ret);
+    }
+    /**
      * @returns {U512}
      */
     static MAX() {
         const ret = wasm.u512_MAX();
         return U512.__wrap(ret);
-    }
-    /**
-     * @returns {U512}
-     */
-    static zero() {
-        const ret = wasm.u512_zero();
-        return U512.__wrap(ret);
-    }
-    /**
-     * @param {U512} other
-     * @returns {OverflowingResultU512}
-     */
-    overflowingMul(other) {
-        _assertClass(other, U512);
-        const ret = wasm.u512_overflowingMul(this.__wbg_ptr, other.__wbg_ptr);
-        return OverflowingResultU512.__wrap(ret);
     }
     /**
      * @param {U512} other
@@ -7017,9 +7009,9 @@ export class U512 {
      * @param {U512} other
      * @returns {OverflowingResultU512}
      */
-    overflowingSub(other) {
+    overflowingMul(other) {
         _assertClass(other, U512);
-        const ret = wasm.u512_overflowingSub(this.__wbg_ptr, other.__wbg_ptr);
+        const ret = wasm.u512_overflowingMul(this.__wbg_ptr, other.__wbg_ptr);
         return OverflowingResultU512.__wrap(ret);
     }
     /**
@@ -7028,6 +7020,15 @@ export class U512 {
      */
     overflowingPow(exp) {
         const ret = wasm.u512_overflowingPow(this.__wbg_ptr, exp);
+        return OverflowingResultU512.__wrap(ret);
+    }
+    /**
+     * @param {U512} other
+     * @returns {OverflowingResultU512}
+     */
+    overflowingSub(other) {
+        _assertClass(other, U512);
+        const ret = wasm.u512_overflowingSub(this.__wbg_ptr, other.__wbg_ptr);
         return OverflowingResultU512.__wrap(ret);
     }
 }
@@ -7058,6 +7059,28 @@ export class URef {
         wasm.__wbg_uref_free(ptr, 0);
     }
     /**
+     * @param {Uint8Array} bytes
+     * @param {number} access_rights
+     * @returns {URef}
+     */
+    static fromUint8Array(bytes, access_rights) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_export_1);
+            const len0 = WASM_VECTOR_LEN;
+            wasm.uref_fromUint8Array(retptr, ptr0, len0, access_rights);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return URef.__wrap(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
      * @param {string} uref_hex_str
      * @param {number} access_rights
      */
@@ -7081,6 +7104,25 @@ export class URef {
         }
     }
     /**
+     * @returns {string}
+     */
+    toFormattedString() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.uref_toFormattedString(retptr, this.__wbg_ptr);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            deferred1_0 = r0;
+            deferred1_1 = r1;
+            return getStringFromWasm0(r0, r1);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            wasm.__wbindgen_export_4(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
      * @param {string} formatted_str
      * @returns {URef}
      */
@@ -7099,47 +7141,6 @@ export class URef {
             return URef.__wrap(r0);
         } finally {
             wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-     * @param {Uint8Array} bytes
-     * @param {number} access_rights
-     * @returns {URef}
-     */
-    static fromUint8Array(bytes, access_rights) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_export_1);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.uref_fromUint8Array(retptr, ptr0, len0, access_rights);
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return URef.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-     * @returns {string}
-     */
-    toFormattedString() {
-        let deferred1_0;
-        let deferred1_1;
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.uref_toFormattedString(retptr, this.__wbg_ptr);
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            deferred1_0 = r0;
-            deferred1_1 = r1;
-            return getStringFromWasm0(r0, r1);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            wasm.__wbindgen_export_4(deferred1_0, deferred1_1, 1);
         }
     }
     /**
@@ -7169,6 +7170,14 @@ export class Unpaused {
         wasm.__wbg_unpaused_free(ptr, 0);
     }
     /**
+     * @param {Address} value
+     */
+    set account(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.unpaused_set_account(this.__wbg_ptr, ptr0);
+    }
+    /**
      * @param {Address} account
      */
     constructor(account) {
@@ -7191,26 +7200,18 @@ export class Unpaused {
         }
     }
     /**
-     * @returns {any}
-     */
-    toJson() {
-        const ret = wasm.paused_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set account(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.unpaused_set_account(this.__wbg_ptr, ptr0);
-    }
-    /**
      * @returns {Address}
      */
     get account() {
         const ret = wasm.paused_account(this.__wbg_ptr);
         return Address.__wrap(ret);
+    }
+    /**
+     * @returns {any}
+     */
+    toJson() {
+        const ret = wasm.paused_toJson(this.__wbg_ptr);
+        return takeObject(ret);
     }
 }
 
@@ -7230,6 +7231,14 @@ export class Withdrawal {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_withdrawal_free(ptr, 0);
+    }
+    /**
+     * @param {Address} value
+     */
+    set account(value) {
+        _assertClass(value, Address);
+        var ptr0 = value.__destroy_into_raw();
+        wasm.withdrawal_set_account(this.__wbg_ptr, ptr0);
     }
     /**
      * @param {Address} account
@@ -7257,19 +7266,11 @@ export class Withdrawal {
         }
     }
     /**
-     * @returns {any}
+     * @returns {U256}
      */
-    toJson() {
-        const ret = wasm.deposit_toJson(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * @param {Address} value
-     */
-    set account(value) {
-        _assertClass(value, Address);
-        var ptr0 = value.__destroy_into_raw();
-        wasm.withdrawal_set_account(this.__wbg_ptr, ptr0);
+    get value() {
+        const ret = wasm.burn_amount(this.__wbg_ptr);
+        return U256.__wrap(ret);
     }
     /**
      * @returns {Address}
@@ -7279,19 +7280,19 @@ export class Withdrawal {
         return Address.__wrap(ret);
     }
     /**
+     * @returns {any}
+     */
+    toJson() {
+        const ret = wasm.deposit_toJson(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
      * @param {U256} value
      */
     set value(value) {
         _assertClass(value, U256);
         var ptr0 = value.__destroy_into_raw();
         wasm.withdrawal_set_value(this.__wbg_ptr, ptr0);
-    }
-    /**
-     * @returns {U256}
-     */
-    get value() {
-        const ret = wasm.burn_amount(this.__wbg_ptr);
-        return U256.__wrap(ret);
     }
 }
 
@@ -7313,38 +7314,14 @@ export class WrappedNativeTokenWasmClient {
         wasm.__wbg_wrappednativetokenwasmclient_free(ptr, 0);
     }
     /**
-     * @param {OdraWasmClient} wasmClient
+     * Returns the balance of `address`.
      * @param {Address} address
+     * @returns {Promise<U256>}
      */
-    constructor(wasmClient, address) {
-        _assertClass(wasmClient, OdraWasmClient);
+    balanceOf(address) {
         _assertClass(address, Address);
         var ptr0 = address.__destroy_into_raw();
-        const ret = wasm.faucetablewcsprwasmclient_new(wasmClient.__wbg_ptr, ptr0);
-        this.__wbg_ptr = ret >>> 0;
-        WrappedNativeTokenWasmClientFinalization.register(this, this.__wbg_ptr, this);
-        return this;
-    }
-    /**
-     * Deposits native tokens into the contract.
-     * @param {U512} attachedValue
-     * @returns {Promise<TransactionResult>}
-     */
-    deposit(attachedValue) {
-        _assertClass(attachedValue, U512);
-        var ptr0 = attachedValue.__destroy_into_raw();
-        const ret = wasm.wrappednativetokenwasmclient_deposit(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
-     * Withdraws native tokens from the contract.
-     * @param {U256} amount
-     * @returns {Promise<TransactionResult>}
-     */
-    withdraw(amount) {
-        _assertClass(amount, U256);
-        var ptr0 = amount.__destroy_into_raw();
-        const ret = wasm.wrappednativetokenwasmclient_withdraw(this.__wbg_ptr, ptr0);
+        const ret = wasm.wrappednativetokenwasmclient_balanceOf(this.__wbg_ptr, ptr0);
         return takeObject(ret);
     }
     /**
@@ -7362,74 +7339,11 @@ export class WrappedNativeTokenWasmClient {
         return takeObject(ret);
     }
     /**
-     * Sets the allowance for `spender` to spend `amount` of the caller's tokens.
-     * @param {Address} owner
-     * @param {Address} spender
-     * @returns {Promise<U256>}
-     */
-    allowance(owner, spender) {
-        _assertClass(owner, Address);
-        var ptr0 = owner.__destroy_into_raw();
-        _assertClass(spender, Address);
-        var ptr1 = spender.__destroy_into_raw();
-        const ret = wasm.wrappednativetokenwasmclient_allowance(this.__wbg_ptr, ptr0, ptr1);
-        return takeObject(ret);
-    }
-    /**
-     * Returns the balance of `address`.
-     * @param {Address} address
-     * @returns {Promise<U256>}
-     */
-    balanceOf(address) {
-        _assertClass(address, Address);
-        var ptr0 = address.__destroy_into_raw();
-        const ret = wasm.wrappednativetokenwasmclient_balanceOf(this.__wbg_ptr, ptr0);
-        return takeObject(ret);
-    }
-    /**
      * Returns the total supply of the token.
      * @returns {Promise<U256>}
      */
     totalSupply() {
         const ret = wasm.wrappednativetokenwasmclient_totalSupply(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Returns the number of decimals used by the token.
-     * @returns {Promise<number>}
-     */
-    decimals() {
-        const ret = wasm.wrappednativetokenwasmclient_decimals(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Returns the symbol of the token.
-     * @returns {Promise<string>}
-     */
-    symbol() {
-        const ret = wasm.wrappednativetokenwasmclient_symbol(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Returns the name of the token.
-     * @returns {Promise<string>}
-     */
-    name() {
-        const ret = wasm.wrappednativetokenwasmclient_name(this.__wbg_ptr);
-        return takeObject(ret);
-    }
-    /**
-     * Approves `spender` to spend `amount` of the caller's tokens.
-     * @param {Address} spender
-     * @param {U256} amount
-     * @returns {Promise<TransactionResult>}
-     */
-    approve(spender, amount) {
-        _assertClass(spender, Address);
-        var ptr0 = spender.__destroy_into_raw();
-        _assertClass(amount, U256);
-        var ptr1 = amount.__destroy_into_raw();
-        const ret = wasm.wrappednativetokenwasmclient_approve(this.__wbg_ptr, ptr0, ptr1);
         return takeObject(ret);
     }
     /**
@@ -7450,6 +7364,55 @@ export class WrappedNativeTokenWasmClient {
         return takeObject(ret);
     }
     /**
+     * Returns the name of the token.
+     * @returns {Promise<string>}
+     */
+    name() {
+        const ret = wasm.wrappednativetokenwasmclient_name(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Returns the symbol of the token.
+     * @returns {Promise<string>}
+     */
+    symbol() {
+        const ret = wasm.wrappednativetokenwasmclient_symbol(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+     * Approves `spender` to spend `amount` of the caller's tokens.
+     * @param {Address} spender
+     * @param {U256} amount
+     * @returns {Promise<TransactionResult>}
+     */
+    approve(spender, amount) {
+        _assertClass(spender, Address);
+        var ptr0 = spender.__destroy_into_raw();
+        _assertClass(amount, U256);
+        var ptr1 = amount.__destroy_into_raw();
+        const ret = wasm.wrappednativetokenwasmclient_approve(this.__wbg_ptr, ptr0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * Deposits native tokens into the contract.
+     * @param {U512} attachedValue
+     * @returns {Promise<TransactionResult>}
+     */
+    deposit(attachedValue) {
+        _assertClass(attachedValue, U512);
+        var ptr0 = attachedValue.__destroy_into_raw();
+        const ret = wasm.wrappednativetokenwasmclient_deposit(this.__wbg_ptr, ptr0);
+        return takeObject(ret);
+    }
+    /**
+     * Returns the number of decimals used by the token.
+     * @returns {Promise<number>}
+     */
+    decimals() {
+        const ret = wasm.wrappednativetokenwasmclient_decimals(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
      * Transfers `amount` of the caller's tokens to `recipient`.
      * @param {Address} recipient
      * @param {U256} amount
@@ -7462,6 +7425,44 @@ export class WrappedNativeTokenWasmClient {
         var ptr1 = amount.__destroy_into_raw();
         const ret = wasm.wrappednativetokenwasmclient_transfer(this.__wbg_ptr, ptr0, ptr1);
         return takeObject(ret);
+    }
+    /**
+     * Withdraws native tokens from the contract.
+     * @param {U256} amount
+     * @returns {Promise<TransactionResult>}
+     */
+    withdraw(amount) {
+        _assertClass(amount, U256);
+        var ptr0 = amount.__destroy_into_raw();
+        const ret = wasm.wrappednativetokenwasmclient_withdraw(this.__wbg_ptr, ptr0);
+        return takeObject(ret);
+    }
+    /**
+     * Sets the allowance for `spender` to spend `amount` of the caller's tokens.
+     * @param {Address} owner
+     * @param {Address} spender
+     * @returns {Promise<U256>}
+     */
+    allowance(owner, spender) {
+        _assertClass(owner, Address);
+        var ptr0 = owner.__destroy_into_raw();
+        _assertClass(spender, Address);
+        var ptr1 = spender.__destroy_into_raw();
+        const ret = wasm.wrappednativetokenwasmclient_allowance(this.__wbg_ptr, ptr0, ptr1);
+        return takeObject(ret);
+    }
+    /**
+     * @param {OdraWasmClient} wasmClient
+     * @param {Address} address
+     */
+    constructor(wasmClient, address) {
+        _assertClass(wasmClient, OdraWasmClient);
+        _assertClass(address, Address);
+        var ptr0 = address.__destroy_into_raw();
+        const ret = wasm.faucetablewcsprwasmclient_new(wasmClient.__wbg_ptr, ptr0);
+        this.__wbg_ptr = ret >>> 0;
+        WrappedNativeTokenWasmClientFinalization.register(this, this.__wbg_ptr, this);
+        return this;
     }
 }
 
@@ -7555,7 +7556,7 @@ function __wbg_get_imports() {
         const ret = Config.__wrap(arg0);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_connect_1b07649fef0234a9 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_connect_3f95be0b2ca44e50 = function() { return handleError(function (arg0, arg1) {
         const ret = window.csprclick.connect(getStringFromWasm0(arg0, arg1));
         return addHeapObject(ret);
     }, arguments) };
@@ -7563,7 +7564,7 @@ function __wbg_get_imports() {
         const ret = Contracts.__wrap(arg0);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_disconnect_d38ecd0a3f8d5b41 = function() { return handleError(function () {
+    imports.wbg.__wbg_disconnect_a26d4f4eb293cb95 = function() { return handleError(function () {
         const ret = window.csprclick.disconnect();
         return addHeapObject(ret);
     }, arguments) };
@@ -7583,11 +7584,11 @@ function __wbg_get_imports() {
         const ret = fetch(getObject(arg0));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_getActiveAccountAsync_2158257d8ec4db96 = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_getActiveAccountAsync_543928b773bb61cd = function() { return handleError(function (arg0) {
         const ret = window.csprclick.getActiveAccountAsync(getObject(arg0));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_getActivePublicKey_21fe271c15317cc9 = function() { return handleError(function () {
+    imports.wbg.__wbg_getActivePublicKey_dbb54c4c4e66e82d = function() { return handleError(function () {
         const ret = window.csprclick.getActivePublicKey();
         return addHeapObject(ret);
     }, arguments) };
@@ -7627,7 +7628,7 @@ function __wbg_get_imports() {
         const ret = result;
         return ret;
     };
-    imports.wbg.__wbg_isUnlocked_bdce9e15fa797fc3 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_isUnlocked_42415915ad1b0c43 = function() { return handleError(function (arg0, arg1) {
         const ret = window.csprclick.isUnlocked(getStringFromWasm0(arg0, arg1));
         return addHeapObject(ret);
     }, arguments) };
@@ -7643,7 +7644,7 @@ function __wbg_get_imports() {
         const ret = getObject(arg0).length;
         return ret;
     };
-    imports.wbg.__wbg_log_453075a99785c891 = function(arg0, arg1) {
+    imports.wbg.__wbg_log_d1ecf41a898857b9 = function(arg0, arg1) {
         console.log(getStringFromWasm0(arg0, arg1));
     };
     imports.wbg.__wbg_marketstate_new = function(arg0) {
@@ -7665,7 +7666,7 @@ function __wbg_get_imports() {
                 const a = state0.a;
                 state0.a = 0;
                 try {
-                    return __wbg_adapter_706(a, state0.b, arg0, arg1);
+                    return __wbg_adapter_694(a, state0.b, arg0, arg1);
                 } finally {
                     state0.a = a;
                 }
@@ -7708,7 +7709,7 @@ function __wbg_get_imports() {
         const ret = getObject(arg0).next();
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_on_603e52d4683f4932 = function() { return handleError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbg_on_19b237e05006d7ca = function() { return handleError(function (arg0, arg1, arg2) {
         window.csprclick.on(getStringFromWasm0(arg0, arg1), getObject(arg2));
     }, arguments) };
     imports.wbg.__wbg_parse_def2e24ef1252aff = function() { return handleError(function (arg0, arg1) {
@@ -7726,7 +7727,7 @@ function __wbg_get_imports() {
         const ret = Promise.resolve(getObject(arg0));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_send_0ec9803e773e3faf = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+    imports.wbg.__wbg_send_e203100a1d18371c = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
         const ret = window.csprclick.send(getStringFromWasm0(arg0, arg1), getStringFromWasm0(arg2, arg3), getObject(arg4));
         return addHeapObject(ret);
     }, arguments) };
@@ -7758,18 +7759,18 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_setsignal_75b21ef3a81de905 = function(arg0, arg1) {
         getObject(arg0).signal = getObject(arg1);
     };
-    imports.wbg.__wbg_signInWithAccount_d533cbb722c84e2e = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_signInWithAccount_1453541a9f5e40a9 = function() { return handleError(function (arg0) {
         const ret = window.csprclick.signInWithAccount(AccountInfo.__wrap(arg0));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_signIn_b02d46290a9f4a91 = function() { return handleError(function () {
+    imports.wbg.__wbg_signIn_69aea954925628db = function() { return handleError(function () {
         window.csprclick.signIn();
     }, arguments) };
-    imports.wbg.__wbg_signMessage_df25336b785f84d0 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
+    imports.wbg.__wbg_signMessage_295178f0e5323e6c = function() { return handleError(function (arg0, arg1, arg2, arg3) {
         const ret = window.csprclick.signMessage(getStringFromWasm0(arg0, arg1), getStringFromWasm0(arg2, arg3));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_signOut_bcc043272ae9fc4f = function() { return handleError(function () {
+    imports.wbg.__wbg_signOut_2bf93db0e09ca6ae = function() { return handleError(function () {
         window.csprclick.signOut();
     }, arguments) };
     imports.wbg.__wbg_signal_aaf9ad74119f20a4 = function(arg0) {
@@ -7804,7 +7805,7 @@ function __wbg_get_imports() {
         const ret = JSON.stringify(getObject(arg0));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_switchAccount_abc1cd2c36fdd8e6 = function() { return handleError(function () {
+    imports.wbg.__wbg_switchAccount_cab12f7ad95fc691 = function() { return handleError(function () {
         const ret = window.csprclick.switchAccount();
         return addHeapObject(ret);
     }, arguments) };
@@ -7875,20 +7876,20 @@ function __wbg_get_imports() {
         const ret = false;
         return ret;
     };
-    imports.wbg.__wbindgen_closure_wrapper2519 = function(arg0, arg1, arg2) {
-        const ret = makeClosure(arg0, arg1, 297, __wbg_adapter_38);
+    imports.wbg.__wbindgen_closure_wrapper1698 = function(arg0, arg1, arg2) {
+        const ret = makeClosure(arg0, arg1, 280, __wbg_adapter_38);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper2521 = function(arg0, arg1, arg2) {
-        const ret = makeClosure(arg0, arg1, 297, __wbg_adapter_41);
+    imports.wbg.__wbindgen_closure_wrapper1700 = function(arg0, arg1, arg2) {
+        const ret = makeClosure(arg0, arg1, 280, __wbg_adapter_41);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper4644 = function(arg0, arg1, arg2) {
-        const ret = makeMutClosure(arg0, arg1, 687, __wbg_adapter_44);
+    imports.wbg.__wbindgen_closure_wrapper4769 = function(arg0, arg1, arg2) {
+        const ret = makeMutClosure(arg0, arg1, 693, __wbg_adapter_44);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper4794 = function(arg0, arg1, arg2) {
-        const ret = makeMutClosure(arg0, arg1, 730, __wbg_adapter_47);
+    imports.wbg.__wbindgen_closure_wrapper4899 = function(arg0, arg1, arg2) {
+        const ret = makeMutClosure(arg0, arg1, 735, __wbg_adapter_47);
         return addHeapObject(ret);
     };
     imports.wbg.__wbindgen_debug_string = function(arg0, arg1) {
