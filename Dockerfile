@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install binaryen (wasm-opt)
-ARG BINARYEN_VERSION=version_116
+ARG BINARYEN_VERSION=version_125
 RUN wget -q https://github.com/WebAssembly/binaryen/releases/download/${BINARYEN_VERSION}/binaryen-${BINARYEN_VERSION}-x86_64-linux.tar.gz \
     && tar -xzf binaryen-${BINARYEN_VERSION}-x86_64-linux.tar.gz \
     && cp binaryen-${BINARYEN_VERSION}/bin/wasm-opt /usr/local/bin/wasm-opt \
@@ -24,7 +24,7 @@ RUN rustup toolchain install nightly-2025-01-01 \
 
 # Install cargo-odra
 ARG CARGO_ODRA_GIT_REPO=https://github.com/odradev/cargo-odra
-ARG CARGO_ODRA_BRANCH=release/0.1.6
+ARG CARGO_ODRA_BRANCH=release/0.1.7
 RUN rustup toolchain install stable \
     && cargo +stable install cargo-odra --git ${CARGO_ODRA_GIT_REPO} --branch ${CARGO_ODRA_BRANCH} --locked
 
@@ -54,6 +54,7 @@ COPY . .
 # WASM_CLIENT_SK is required at build time for odra-wasm-client
 ARG WASM_CLIENT_SK
 ENV WASM_CLIENT_SK=${WASM_CLIENT_SK}
+RUN rustup target add wasm32-unknown-unknown
 RUN cargo odra build && cargo odra generate-client
 
 # The generated client goes to app_client/pkg-web - copy to expected location if needed
