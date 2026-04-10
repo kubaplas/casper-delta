@@ -5,6 +5,13 @@ import { showTransactionHashInProgress, setCurrentTransaction, currentTransactio
 // Import functions that will be set from main.ts
 let onConnectFn = null;
 let onDisconnectFn = null;
+// The last known-good active public key, extracted from CSPR.click events.
+// The WASM binary's internal `getActiveAccountAsync` callback often fails to
+// parse the SDK's account format ("Failed to parse account info"), leaving
+// the WASM's cached signing key stale.  We track the key ourselves so we can
+// fix it up before the SDK's `send()` rejects with "signing public key is not
+// active".
+let knownActivePublicKey = null;
 export function setOnConnectCallback(fn) {
     onConnectFn = fn;
 }
@@ -14,15 +21,17 @@ export function setOnDisconnectCallback(fn) {
 // ---------- CSPR.click Integration ----------
 /**
  * Fetch the active public key from the SDK and trigger the onConnect
- * callback.  Reads directly from window.csprclick (not the WASM wrapper)
- * because the WASM bridge crashes when getActivePublicKey() returns
- * undefined (no session).
+ * callback.  Prefers the public key passed directly from the event data
+ * (avoids stale getActivePublicKey() after account switch).  Falls back
+ * to reading window.csprclick (not the WASM wrapper) because the WASM
+ * bridge crashes when getActivePublicKey() returns undefined (no session).
  */
-async function handleSignIn() {
+async function handleSignIn(eventPublicKey) {
     try {
-        const csprclick = window.csprclick;
-        const publicKey = await csprclick?.getActivePublicKey?.();
+        const publicKey = eventPublicKey
+            || await window.csprclick?.getActivePublicKey?.();
         if (publicKey) {
+            knownActivePublicKey = publicKey;
             if (onConnectFn) {
                 await onConnectFn(publicKey);
             }
@@ -54,17 +63,51 @@ export function setupCsprClickCallbacks() {
             "resolved before calling setupCsprClickCallbacks().");
     }
     // --- Account events (direct SDK registration) ---
-    csprclick.on('csprclick:signed_in', async () => {
-        await handleSignIn();
+    csprclick.on('csprclick:signed_in', async (eventData) => {
+        await handleSignIn(eventData?.account?.public_key);
     });
-    csprclick.on('csprclick:switched_account', async () => {
-        await handleSignIn();
+    csprclick.on('csprclick:switched_account', async (eventData) => {
+        await handleSignIn(eventData?.account?.public_key);
     });
     csprclick.on('csprclick:signed_out', () => {
+        knownActivePublicKey = null;
         if (onDisconnectFn) {
             onDisconnectFn();
         }
     });
+    // --- Monkey-patch getActivePublicKey / send ---
+    //
+    // The WASM binary registers a `getActiveAccountAsync` callback with the
+    // SDK but often fails to parse the response ("Failed to parse account
+    // info"), so its internal cached signing key can be stale or undefined.
+    // When the WASM then calls `send(deployJson, signingKey, accountInfo)`,
+    // the SDK rejects with "signing public key is not active".
+    //
+    // We fix this by:
+    // 1. Patching `getActivePublicKey` to fall back to our event-sourced key.
+    // 2. Patching `send` to replace a stale signing key with the correct one.
+    const originalGetActivePublicKey = csprclick.getActivePublicKey?.bind(csprclick);
+    csprclick.getActivePublicKey = async function () {
+        if (originalGetActivePublicKey) {
+            try {
+                const key = await originalGetActivePublicKey();
+                if (key)
+                    return key;
+            }
+            catch { /* fall through */ }
+        }
+        return knownActivePublicKey;
+    };
+    const originalSend = csprclick.send?.bind(csprclick);
+    if (originalSend) {
+        csprclick.send = function (deployJson, signingPublicKey, accountInfo) {
+            const keyToUse = knownActivePublicKey || signingPublicKey;
+            if (accountInfo && knownActivePublicKey) {
+                accountInfo.public_key = knownActivePublicKey;
+            }
+            return originalSend(deployJson, keyToUse, accountInfo);
+        };
+    }
     // --- Transaction events (WASM layer for type conversion) ---
     if (CsprClickCallbacks && typeof CsprClickCallbacks.onTransactionStatusUpdate === 'function') {
         CsprClickCallbacks.onTransactionStatusUpdate((status, result) => {

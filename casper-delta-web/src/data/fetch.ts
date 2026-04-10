@@ -1,4 +1,4 @@
-import { setGas, Address, U256 } from "casper-delta-wasm-client";
+import { setGas, Address, U512, U256 } from "casper-delta-wasm-client";
 import { HIGH_GAS_AMOUNT } from "../config.js";
 import * as dom from "../dom.js";
 import { showError } from "../ui/modals.js";
@@ -7,6 +7,7 @@ import { showAllLoaders, hideAllLoaders } from "../ui/loaders.js";
 import {
     connected,
     address,
+    account,
     market,
     client,
     consolidatedData,
@@ -122,10 +123,9 @@ let isRefreshingAllData = false;
 let isRefreshingMarketState = false;
 
 /**
- * Refresh all data in a single RPC call.
- * If not connected, falls back to refreshMarketStateOnly.
+ * Refresh all data using consolidated endpoint
  */
-export async function refreshAllData(): Promise<void> {
+export async function refreshAllDataConsolidated(): Promise<void> {
     if (!connected || !address) {
         // If not connected, only refresh market state for price display
         await refreshMarketStateOnly();
@@ -143,8 +143,16 @@ export async function refreshAllData(): Promise<void> {
     showAllLoaders();
 
     try {
+        // Get caller address from state (set during onConnect)
+        if (!address) {
+            console.warn("No address available for data fetch");
+            setFallbackValues();
+            return;
+        }
+        
         // Convert public key string to Address type
-        const caller = Address.fromPublicKey(address!);
+        // The address from cspr.click is a raw public key hex string
+        const caller = Address.fromPublicKey(address);
 
         // Set higher gas limit for complex data fetching operation
         setGas(HIGH_GAS_AMOUNT);
@@ -185,15 +193,8 @@ export async function refreshAllData(): Promise<void> {
     refreshCsprBalance().catch(e => console.warn("Failed to fetch CSPR balance:", e));
 }
 
-// Dummy ed25519 public key used to query getAddressMarketState without a real wallet.
-// The address-specific fields (balances, allowances) are simply ignored.
-const DUMMY_PUBLIC_KEY = "01" + "0".repeat(64);
-
 /**
- * Refresh market state only (for read-only / not-signed-in mode).
- * Uses getAddressMarketState with a dummy address so we get the current
- * oracle price instead of the stale price stored in the contract.
- * Only price, liquidity and total market value are displayed.
+ * Refresh market state only (for read-only mode)
  */
 export async function refreshMarketStateOnly(): Promise<void> {
     // Prevent re-entrant calls
@@ -214,23 +215,18 @@ export async function refreshMarketStateOnly(): Promise<void> {
     dom.totalMarketValueLoader.classList.remove("hidden");
 
     try {
-        // Set higher gas limit for data fetching
+        // Set higher gas limit for market data fetching
         setGas(HIGH_GAS_AMOUNT);
+        const marketState = await executeWithRetry(() => market.getMarketState());
 
-        const dummyAddress = Address.fromPublicKey(DUMMY_PUBLIC_KEY);
-        const data = await executeWithRetry(() =>
-            market.getAddressMarketState(dummyAddress)
-        );
+        setMarketState(marketState);
 
-        const ms = data.marketState;
-        setMarketState(ms);
-
-        dom.currentPriceSpan.textContent = formatDollarPrice(ms.price);
-        dom.longLiquiditySpan.textContent = formatNumber(ms.long_liquidity);
-        dom.shortLiquiditySpan.textContent = formatNumber(ms.short_liquidity);
+        dom.currentPriceSpan.textContent = formatDollarPrice(marketState.price);
+        dom.longLiquiditySpan.textContent = formatNumber(marketState.long_liquidity);
+        dom.shortLiquiditySpan.textContent = formatNumber(marketState.short_liquidity);
 
         // Compute and display total market value
-        const totalMarketValue = ms.long_liquidity.add(ms.short_liquidity);
+        const totalMarketValue = marketState.long_liquidity.add(marketState.short_liquidity);
         dom.totalMarketValueSpan.textContent = formatNumber(totalMarketValue) + " WCSPR";
 
     } catch (e: any) {
@@ -386,3 +382,9 @@ export function setFallbackValues(): void {
     dom.totalPositionValueSpan.textContent = "—";
 }
 
+/**
+ * Refresh all application data.
+ */
+export async function refreshAllData(): Promise<void> {
+    await refreshAllDataConsolidated();
+}

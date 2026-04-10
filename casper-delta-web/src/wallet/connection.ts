@@ -10,17 +10,11 @@ let isDisconnecting = false;
 // ---------- Wallet Connection Functions ----------
 
 /**
- * Connect wallet — calls window.csprclick.connect('casper-wallet') directly
- * to bypass the CSPR.click account-selector modal and go straight to the
- * Casper Wallet extension.
+ * Connect wallet (trigger CSPR.click sign in)
  */
 export async function connect(): Promise<void> {
     try {
-        const csprclick = (window as any).csprclick;
-        if (!csprclick) {
-            throw new Error("CSPR.click SDK not loaded");
-        }
-        await csprclick.connect('casper-wallet');
+        await client.signIn();
     } catch (error) {
         console.error("Error during sign in:", error);
         throw error;
@@ -28,32 +22,14 @@ export async function connect(): Promise<void> {
 }
 
 /**
- * Handle successful connection.
- * @param publicKey — the active account's public key hex string,
- *                     passed in by the CSPR.click event handler.
+ * Handle successful connection
  */
-export async function onConnect(publicKey?: string): Promise<void> {
+export async function onConnect(publicKey: string, skipDataLoad: boolean = false): Promise<void> {
     // Reset disconnect guard when connecting
     isDisconnecting = false;
     
     setConnected(true);
-
-    // Determine the address: prefer the explicitly-passed key,
-    // fall back to asking the SDK directly.
-    let addr = publicKey;
-    if (!addr) {
-        try {
-            addr = await client.getActivePublicKey();
-        } catch (e) {
-            console.error("Unable to obtain active public key:", e);
-        }
-    }
-
-    if (!addr) {
-        console.error("onConnect called but no public key available");
-        return;
-    }
-
+    const addr = publicKey;
     setAddress(addr);
     dom.addressSpan.textContent = `${addr.slice(0, 5)}...${addr.slice(-5)}`;
     dom.connectBtn.classList.add("hidden");
@@ -69,10 +45,13 @@ export async function onConnect(publicKey?: string): Promise<void> {
     disableReadOnlyMode();
     disableDisconnectedMode();
 
-    // Small delay to ensure UI has time to clear before fetching new data
-    await new Promise(resolve => setTimeout(resolve, 100));
+    if (!skipDataLoad) {
+        // Small delay to ensure UI has time to clear before fetching new data
+        await new Promise(resolve => setTimeout(resolve, 100));
 
-    await refreshAllData();
+        await refreshAllData();
+    } else {
+    }
 }
 
 /**
@@ -87,10 +66,7 @@ export async function disconnect(): Promise<void> {
     isDisconnecting = true;
 
     try {
-        const csprclick = (window as any).csprclick;
-        if (csprclick) {
-            csprclick.signOut();
-        }
+        await client.signOut();
     } catch (e) {
         console.warn("Error during signOut:", e);
     }

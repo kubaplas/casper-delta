@@ -68,6 +68,36 @@ import {
 import { connect, disconnect, onConnect, enableDisconnectedMode } from "./wallet/connection.js";
 import { setCurrentLongCloseAmount, setCurrentShortCloseAmount } from "./data/state.js";
 
+// Track whether CSPR.click auto-restored a wallet session during init
+let walletRestoredDuringInit = false;
+let resolveWalletCheck: (() => void) | null = null;
+
+// During init phase: do UI setup only, don't load data (run() will handle it)
+async function onConnectInitPhase(publicKey: string): Promise<void> {
+    walletRestoredDuringInit = true;
+    await onConnect(publicKey, true);
+    // Resolve the wait immediately — no need to wait the full timeout
+    if (resolveWalletCheck) {
+        resolveWalletCheck();
+        resolveWalletCheck = null;
+    }
+}
+
+/**
+ * Wait for CSPR.click to potentially auto-restore a session.
+ * Resolves immediately if onSignedIn fires, or after timeout.
+ */
+function waitForWalletRestore(timeoutMs: number = 2000): Promise<void> {
+    if (walletRestoredDuringInit) return Promise.resolve();
+    return new Promise<void>(resolve => {
+        resolveWalletCheck = resolve;
+        setTimeout(() => {
+            resolveWalletCheck = null;
+            resolve();
+        }, timeoutMs);
+    });
+}
+
 // ---------- Client Initialization ----------
 async function initializeClients(): Promise<void> {
     // Initialize WASM
@@ -76,12 +106,12 @@ async function initializeClients(): Promise<void> {
     // Set refresh function for transaction handlers (resolve circular dependency)
     setRefreshFunction(refreshAllData);
 
-    // Set up CSPR.click callbacks — the SDK is guaranteed loaded at this
-    // point because run() awaits waitForCsprClick() before calling us.
+    // Set up CSPR.click callbacks after WASM is initialized
     setupCsprClickCallbacks();
 
-    // Wire up connect / disconnect handlers used by the callback layer
-    setOnConnectCallback(onConnect);
+    // Set onConnect and disconnect callbacks
+    // During init, use the init-phase callback that skips data loading
+    setOnConnectCallback(onConnectInitPhase);
     setOnDisconnectCallback(disconnect);
 
     // Initialize position closing amounts
@@ -135,10 +165,7 @@ function setupEventListeners(): void {
         dom.addressDropdownMenu.classList.add("hidden");
         try {
             dom.addressSpan.textContent = "Switching...";
-            const csprclick = (window as any).csprclick;
-            if (csprclick) {
-                csprclick.switchAccount();
-            }
+            stateClient.switchAccount();
         } catch (error) {
             console.error("Failed to switch account:", error);
             showError("Failed to switch account.");
@@ -152,21 +179,6 @@ function setupEventListeners(): void {
     document.addEventListener("click", () => {
         dom.addressDropdownMenu.classList.add("hidden");
     });
-
-    // Price info popup toggle
-    const priceInfoBtn = document.getElementById("price-info-btn");
-    const priceInfoPopup = document.getElementById("price-info-popup");
-    if (priceInfoBtn && priceInfoPopup) {
-        priceInfoBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            priceInfoPopup.classList.toggle("hidden");
-        });
-        document.addEventListener("click", (e) => {
-            if (!priceInfoPopup.contains(e.target as Node)) {
-                priceInfoPopup.classList.add("hidden");
-            }
-        });
-    }
 
     // Trading buttons
     dom.depositLongBtn.addEventListener("click", depositLong);
@@ -259,18 +271,18 @@ function setupEventListeners(): void {
 
 /**
  * Wait for CSPR.click SDK to be fully available.
- * cspr-click.js exposes window.csprClickReady — a Promise that resolves
- * once the CDN script has loaded AND window.csprclick is initialised.
+ * The SDK loads synchronously before this module, but we add a safety check.
  */
-async function waitForCsprClick(): Promise<void> {
+async function waitForCsprClick(maxWaitMs: number = 5000): Promise<void> {
     if ((window as any).csprclick) return;
-
-    const readyPromise = (window as any).csprClickReady;
-    if (!readyPromise) {
-        throw new Error("CSPR.click bootstrap script (cspr-click.js) did not run — check script loading order");
+    
+    const startTime = Date.now();
+    while (!(window as any).csprclick) {
+        if (Date.now() - startTime > maxWaitMs) {
+            throw new Error("CSPR.click SDK failed to load - please refresh the page");
+        }
+        await new Promise(resolve => setTimeout(resolve, 50));
     }
-
-    await readyPromise;
 }
 
 async function run(): Promise<void> {
@@ -319,32 +331,27 @@ async function run(): Promise<void> {
             }
         }
 
-        // Check whether the SDK already has an active session (e.g. the
-        // user was previously signed in and the session was restored).
-        // We ask window.csprclick directly (not the WASM wrapper) because
-        // getActivePublicKey() returns undefined when no session exists and
-        // the WASM bridge crashes trying to call .then() on it.
-        let sessionRestored = false;
-        try {
-            const csprclick = (window as any).csprclick;
-            const activeKey = await csprclick?.getActivePublicKey?.();
-            if (activeKey) {
-                await onConnect(activeKey);
-                sessionRestored = true;
-            }
-        } catch (_) {
-            // No active session — that's fine, user will sign in manually
-        }
+        // Wait for CSPR.click to potentially auto-restore a wallet session.
+        // Resolves immediately if onSignedIn already fired, or after 2s timeout.
+        await waitForWalletRestore();
 
-        // If session was already restored (onConnect loaded data), skip
-        // the extra refresh. Otherwise load market-only data.
-        if (!sessionRestored) {
+        // Make exactly one data call based on connection state.
+        if (walletRestoredDuringInit) {
+            try {
+                await refreshAllData();
+            } catch (e) {
+                console.warn("Failed to load initial data:", e);
+            }
+        } else {
             try {
                 await refreshMarketStateOnly();
             } catch (e) {
                 console.warn("Failed to load initial market data:", e);
             }
         }
+
+        // Switch to normal onConnect for all subsequent connections
+        setOnConnectCallback(onConnect);
     } catch (err: any) {
         console.error("Failed to initialize:", err);
         const errorMessage = err.message || err.toString();
