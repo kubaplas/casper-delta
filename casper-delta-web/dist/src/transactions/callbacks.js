@@ -1,4 +1,4 @@
-import { CsprClickCallbacks, TransactionStatus } from "casper-delta-wasm-client";
+import { CsprClickCallbacks, TransactionStatus, getCurrentAccount } from "casper-delta-wasm-client";
 import * as dom from "../dom.js";
 import { onTransactionSuccessFromCsprClick, onTransactionFailureFromCsprClick, onTransactionExpired, onTransactionCancelled, } from "./handlers.js";
 import { showTransactionHashInProgress, setCurrentTransaction, currentTransaction, onTransactionTimeout } from "./monitor.js";
@@ -58,6 +58,43 @@ async function handleSignIn(eventPublicKey) {
             knownActivePublicKey = publicKey;
             if (onConnectFn) {
                 await onConnectFn(publicKey);
+            }
+            // Verify the WASM internal ACCOUNT is set. If not, re-invoke
+            // all registered callbacks with the last event data so the WASM
+            // closure populates ACCOUNT (race condition workaround).
+            try {
+                getCurrentAccount();
+                console.log("[callbacks] WASM ACCOUNT is set correctly");
+            }
+            catch (wasmErr) {
+                console.warn("[callbacks] WASM ACCOUNT not set after sign-in, re-triggering event callbacks...", wasmErr);
+                const lastData = window._csprClickLastEventData?.['csprclick:signed_in'];
+                const callbacks = window._csprClickCallbacksByEvent?.['csprclick:signed_in'];
+                if (lastData && callbacks) {
+                    for (const cb of callbacks) {
+                        try {
+                            cb(lastData);
+                        }
+                        catch (e) {
+                            console.error("[callbacks] Re-trigger callback error:", e);
+                        }
+                    }
+                    // Check again after re-trigger
+                    try {
+                        getCurrentAccount();
+                        console.log("[callbacks] WASM ACCOUNT set after re-trigger");
+                    }
+                    catch (e2) {
+                        console.error("[callbacks] WASM ACCOUNT still not set after re-trigger:", e2);
+                    }
+                }
+                else {
+                    console.error("[callbacks] Cannot re-trigger: no stored event data or callbacks", {
+                        hasLastData: !!lastData,
+                        hasCallbacks: !!callbacks,
+                        callbackCount: callbacks?.length,
+                    });
+                }
             }
         }
         else {

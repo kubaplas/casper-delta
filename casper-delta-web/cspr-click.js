@@ -45,6 +45,12 @@ function normalizeAccountEvent(data) {
 // Wrap window.csprclick.on BEFORE the WASM module registers its listeners.
 // This listener fires before the WASM's csprclick:loaded handler because
 // cspr-click.js is loaded before the WASM init() call.
+//
+// We capture all registered callbacks per event so they can be re-invoked
+// from JS if the WASM's internal ACCOUNT is not set (race condition workaround).
+window._csprClickCallbacksByEvent = {};
+window._csprClickLastEventData = {};
+
 window.addEventListener('csprclick:loaded', function patchCsprClickOn() {
     window.removeEventListener('csprclick:loaded', patchCsprClickOn);
     if (!window.csprclick || !window.csprclick.on) {
@@ -57,12 +63,20 @@ window.addEventListener('csprclick:loaded', function patchCsprClickOn() {
         if (event === 'csprclick:signed_in' ||
             event === 'csprclick:switched_account' ||
             event === 'csprclick:unsolicited_account_change') {
+            // Store the original callback for re-triggering
+            if (!window._csprClickCallbacksByEvent[event]) {
+                window._csprClickCallbacksByEvent[event] = [];
+            }
+            window._csprClickCallbacksByEvent[event].push(callback);
+
             return realOn(event, function (eventData) {
                 console.log('[cspr-click] Account event "' + event + '" raw data:', JSON.stringify(eventData, null, 2));
                 var normalized = normalizeAccountEvent(eventData);
                 if (!normalized || !normalized.account) {
                     console.error('[cspr-click] Account event "' + event + '" has null/missing account after normalization. This will cause WrappedAccountInfo parse failure.');
                 }
+                // Store last event data for re-triggering
+                window._csprClickLastEventData[event] = normalized;
                 callback(normalized);
             });
         }
