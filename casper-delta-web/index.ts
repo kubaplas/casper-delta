@@ -65,6 +65,39 @@ app.get('/api/history', (req, res) => {
   }
 });
 
+// ---------- RPC Proxy Logging ----------
+
+function rpcProxyLogger(proxyLabel: string) {
+  return {
+    onProxyReq(proxyReq: any, req: any, _res: any) {
+      // Capture the request body for logging on error
+      if (req.body) {
+        const bodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+        (req as any)._rpcBody = bodyStr;
+      }
+    },
+    onProxyRes(proxyRes: any, req: any, _res: any) {
+      if (proxyRes.statusCode && proxyRes.statusCode >= 400) {
+        let responseBody = '';
+        proxyRes.on('data', (chunk: Buffer) => { responseBody += chunk.toString(); });
+        proxyRes.on('end', () => {
+          console.error(`[${proxyLabel}] HTTP ${proxyRes.statusCode} ${req.method} ${req.originalUrl}`);
+          console.error(`[${proxyLabel}]   Request body: ${(req as any)._rpcBody || '(empty)'}`);
+          console.error(`[${proxyLabel}]   Response body: ${responseBody.slice(0, 2000)}`);
+        });
+      }
+    },
+    onError(err: Error, req: any, _res: any) {
+      console.error(`[${proxyLabel}] Proxy error: ${err.message} — ${req.method} ${req.originalUrl}`);
+      console.error(`[${proxyLabel}]   Request body: ${(req as any)._rpcBody || '(empty)'}`);
+    },
+  };
+}
+
+// Parse JSON bodies so we can log them on proxy errors
+app.use('/rpc', express.json({ limit: '1mb' }));
+app.use('/speculative/rpc', express.json({ limit: '1mb' }));
+
 // Proxy for Casper RPC endpoints
 app.use(
   '/rpc',
@@ -73,7 +106,8 @@ app.use(
     changeOrigin: true,
     pathRewrite: {
       '^/rpc': ''
-    }
+    },
+    ...rpcProxyLogger('RPC'),
   })
 );
 
@@ -84,7 +118,8 @@ app.use(
     changeOrigin: true,
     pathRewrite: {
       '^/speculative/rpc': ''
-    }
+    },
+    ...rpcProxyLogger('SPEC-RPC'),
   })
 );
 

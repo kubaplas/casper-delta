@@ -48,17 +48,24 @@ export function setOnDisconnectCallback(fn) {
  */
 async function handleSignIn(eventPublicKey) {
     try {
-        const publicKey = eventPublicKey
-            || await window.csprclick?.getActivePublicKey?.();
+        let publicKey = eventPublicKey;
+        if (!publicKey) {
+            console.warn("[callbacks] No public key from event data, falling back to getActivePublicKey()");
+            publicKey = await window.csprclick?.getActivePublicKey?.();
+        }
         if (publicKey) {
+            console.log("[callbacks] handleSignIn: public key =", publicKey.slice(0, 10) + "...");
             knownActivePublicKey = publicKey;
             if (onConnectFn) {
                 await onConnectFn(publicKey);
             }
         }
+        else {
+            console.error("[callbacks] handleSignIn: no public key available from event or SDK");
+        }
     }
     catch (error) {
-        console.error("Failed to get active account after sign-in:", error);
+        console.error("[callbacks] handleSignIn failed:", error);
     }
 }
 /**
@@ -91,12 +98,19 @@ export function setupCsprClickCallbacks() {
     CsprClickCallbacks.onSwitchedAccount(() => { });
     // --- Account events (direct SDK registration) ---
     csprclick.on('csprclick:signed_in', async (eventData) => {
+        console.log("[callbacks] csprclick:signed_in event, account:", eventData?.account ?
+            `provider=${eventData.account.provider}, public_key=${eventData.account.public_key?.slice(0, 10)}...` :
+            `null/missing (raw: ${JSON.stringify(eventData)?.slice(0, 500)})`);
         await handleSignIn(eventData?.account?.public_key);
     });
     csprclick.on('csprclick:switched_account', async (eventData) => {
+        console.log("[callbacks] csprclick:switched_account event, account:", eventData?.account ?
+            `provider=${eventData.account.provider}, public_key=${eventData.account.public_key?.slice(0, 10)}...` :
+            `null/missing (raw: ${JSON.stringify(eventData)?.slice(0, 500)})`);
         await handleSignIn(eventData?.account?.public_key);
     });
     csprclick.on('csprclick:signed_out', () => {
+        console.log("[callbacks] csprclick:signed_out event");
         knownActivePublicKey = null;
         if (onDisconnectFn) {
             onDisconnectFn();

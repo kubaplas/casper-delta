@@ -22,9 +22,15 @@ window.clickSDKOptions = {
 // Different SDK versions may send slightly different shapes (camelCase vs
 // snake_case, string vs number for connected_at, extra unknown fields).
 function normalizeAccountEvent(data) {
-    if (!data || typeof data !== 'object') return data;
+    if (!data || typeof data !== 'object') {
+        console.warn('[cspr-click] normalizeAccountEvent: received non-object data:', data);
+        return data;
+    }
     var a = data.account;
-    if (!a || typeof a !== 'object') return data;
+    if (!a || typeof a !== 'object') {
+        console.warn('[cspr-click] normalizeAccountEvent: missing or invalid account field. Full data:', JSON.stringify(data, null, 2));
+        return data;
+    }
     // Coerce connected_at to integer (some versions send a string)
     var connAt = a.connected_at != null ? a.connected_at : a.connectedAt;
     if (typeof connAt === 'string') connAt = parseInt(connAt, 10) || 0;
@@ -41,14 +47,23 @@ function normalizeAccountEvent(data) {
 // cspr-click.js is loaded before the WASM init() call.
 window.addEventListener('csprclick:loaded', function patchCsprClickOn() {
     window.removeEventListener('csprclick:loaded', patchCsprClickOn);
-    if (!window.csprclick || !window.csprclick.on) return;
+    if (!window.csprclick || !window.csprclick.on) {
+        console.error('[cspr-click] csprclick:loaded fired but window.csprclick.on is not available');
+        return;
+    }
+    console.log('[cspr-click] SDK loaded, patching csprclick.on for account event normalization');
     var realOn = window.csprclick.on.bind(window.csprclick);
     window.csprclick.on = function (event, callback) {
         if (event === 'csprclick:signed_in' ||
             event === 'csprclick:switched_account' ||
             event === 'csprclick:unsolicited_account_change') {
             return realOn(event, function (eventData) {
-                callback(normalizeAccountEvent(eventData));
+                console.log('[cspr-click] Account event "' + event + '" raw data:', JSON.stringify(eventData, null, 2));
+                var normalized = normalizeAccountEvent(eventData);
+                if (!normalized || !normalized.account) {
+                    console.error('[cspr-click] Account event "' + event + '" has null/missing account after normalization. This will cause WrappedAccountInfo parse failure.');
+                }
+                callback(normalized);
             });
         }
         return realOn(event, callback);

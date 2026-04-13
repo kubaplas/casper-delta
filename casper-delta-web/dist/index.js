@@ -59,20 +59,52 @@ app.get('/api/history', (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+// ---------- RPC Proxy Logging ----------
+function rpcProxyLogger(proxyLabel) {
+    return {
+        onProxyReq(proxyReq, req, _res) {
+            // Capture the request body for logging on error
+            if (req.body) {
+                const bodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+                req._rpcBody = bodyStr;
+            }
+        },
+        onProxyRes(proxyRes, req, _res) {
+            if (proxyRes.statusCode && proxyRes.statusCode >= 400) {
+                let responseBody = '';
+                proxyRes.on('data', (chunk) => { responseBody += chunk.toString(); });
+                proxyRes.on('end', () => {
+                    console.error(`[${proxyLabel}] HTTP ${proxyRes.statusCode} ${req.method} ${req.originalUrl}`);
+                    console.error(`[${proxyLabel}]   Request body: ${req._rpcBody || '(empty)'}`);
+                    console.error(`[${proxyLabel}]   Response body: ${responseBody.slice(0, 2000)}`);
+                });
+            }
+        },
+        onError(err, req, _res) {
+            console.error(`[${proxyLabel}] Proxy error: ${err.message} — ${req.method} ${req.originalUrl}`);
+            console.error(`[${proxyLabel}]   Request body: ${req._rpcBody || '(empty)'}`);
+        },
+    };
+}
+// Parse JSON bodies so we can log them on proxy errors
+app.use('/rpc', express.json({ limit: '1mb' }));
+app.use('/speculative/rpc', express.json({ limit: '1mb' }));
 // Proxy for Casper RPC endpoints
 app.use('/rpc', createProxyMiddleware({
     target: 'https://testnet-rpc.odra.dev/rpc',
     changeOrigin: true,
     pathRewrite: {
         '^/rpc': ''
-    }
+    },
+    ...rpcProxyLogger('RPC'),
 }));
 app.use('/speculative/rpc', createProxyMiddleware({
     target: 'https://testnet-speculative-rpc.odra.dev/rpc',
     changeOrigin: true,
     pathRewrite: {
         '^/speculative/rpc': ''
-    }
+    },
+    ...rpcProxyLogger('SPEC-RPC'),
 }));
 // Serve the main application
 app.get('/', (req, res) => {

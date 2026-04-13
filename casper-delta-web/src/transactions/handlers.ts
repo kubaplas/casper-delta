@@ -227,5 +227,11 @@ export function onTransactionCancelled(): void {
 export function onTransactionSentFailure(error: any, message: string): void {
     hideTransactionPopup();
     enableTransactionButtons();
+    console.error(`[tx] ${message}:`, {
+        errorMessage: error?.message,
+        errorName: error?.name,
+        errorStack: error?.stack?.split('\n').slice(0, 5).join('\n'),
+        raw: String(error),
+    });
     showError(`${message}: ${error.message || error}`);
 }

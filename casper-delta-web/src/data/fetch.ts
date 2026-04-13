@@ -100,6 +100,13 @@ async function executeWithRetry<T>(fn: () => Promise<T>, maxRetries: number = 3)
                 error.message.includes('timeout')
             );
 
+            // Log full error details for debugging
+            console.error(`[RPC] Request failed (attempt ${attempt + 1}/${maxRetries + 1}):`, {
+                message: error.message,
+                name: error.name,
+                stack: error.stack?.split('\n').slice(0, 3).join('\n'),
+            });
+
             // Apply backoff for rate limits and network errors (not last attempt)
             if ((isRateLimit || isNetworkError) && !isLastAttempt) {
                 const backoffDelay = Math.pow(2, attempt) * 1000; // Exponential backoff: 1s, 2s, 4s
