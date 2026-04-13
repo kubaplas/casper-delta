@@ -2,6 +2,7 @@ import init, {
     Address,
     OdraWasmClient,
     U256,
+    getCurrentAccount,
 } from "casper-delta-wasm-client";
 
 import {
@@ -106,8 +107,48 @@ async function initializeClients(): Promise<void> {
     // Set refresh function for transaction handlers (resolve circular dependency)
     setRefreshFunction(refreshAllData);
 
-    // Set up CSPR.click callbacks after WASM is initialized
+    // Set up CSPR.click callbacks after WASM is initialized.
+    // This registers noop callbacks in the WASM CALLBACKS map and JS handlers.
     setupCsprClickCallbacks();
+
+    // CRITICAL: The WASM init() registers a listener for 'csprclick:loaded' that
+    // sets up its event closures (signed_in, switched_account, etc.) via
+    // window.csprclick.on(). But the SDK fires 'csprclick:loaded' before WASM
+    // loads, so the WASM listener never fires and its event closures are never
+    // registered. Without them, the WASM internal ACCOUNT stays NULL and
+    // getCurrentAccount() always fails.
+    //
+    // Fix: dispatch a synthetic 'csprclick:loaded' so the WASM closures register,
+    // then replay any stored sign-in event to populate ACCOUNT.
+    const win = window as any;
+    if (win.csprclick) {
+        // Track how many callbacks existed before, so we can identify the newly
+        // registered WASM closures and replay only to them (avoiding double-fire
+        // of JS handlers).
+        const signedInCountBefore = (win._csprClickCallbacksByEvent?.['csprclick:signed_in'] || []).length;
+
+        window.dispatchEvent(new CustomEvent('csprclick:loaded'));
+
+        const allCbs = win._csprClickCallbacksByEvent?.['csprclick:signed_in'] || [];
+        const wasmCbs = allCbs.slice(signedInCountBefore);
+
+        const storedSignIn = win._csprClickLastEventData?.['csprclick:signed_in'];
+        if (storedSignIn && wasmCbs.length > 0) {
+            console.log("[init] Replaying stored sign-in event to WASM closures");
+            for (const cb of wasmCbs) {
+                try { cb(storedSignIn); } catch (e: any) {
+                    console.warn("[init] Replay callback error:", e?.message || e);
+                }
+            }
+            // Verify ACCOUNT was populated
+            try {
+                getCurrentAccount();
+                console.log("[init] WASM ACCOUNT set successfully after replay");
+            } catch (e) {
+                console.warn("[init] WASM ACCOUNT still not set after replay:", e);
+            }
+        }
+    }
 
     // Set onConnect and disconnect callbacks
     // During init, use the init-phase callback that skips data loading
