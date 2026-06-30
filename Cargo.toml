@@ -73,3 +73,12 @@ strip = true
 
 [profile.dev.package."*"]
 opt-level = 3
+
+[patch.crates-io]
+odra = { git = "https://github.com/odradev/odra.git", branch = "fix/wasm-client-gas-tolerance" }
+odra-cli = { git = "https://github.com/odradev/odra.git", branch = "fix/wasm-client-gas-tolerance" }
+odra-core = { git = "https://github.com/odradev/odra.git", branch = "fix/wasm-client-gas-tolerance" }
+odra-modules = { git = "https://github.com/odradev/odra.git", branch = "fix/wasm-client-gas-tolerance" }
+odra-test = { git = "https://github.com/odradev/odra.git", branch = "fix/wasm-client-gas-tolerance" }
+odra-wasm-client = { git = "https://github.com/odradev/odra.git", branch = "fix/wasm-client-gas-tolerance" }
+odra-wasm-client-builder = { git = "https://github.com/odradev/odra.git", branch = "fix/wasm-client-gas-tolerance" }
