@@ -25,31 +25,31 @@ version = "2.6.0"
 features = []
 
 [workspace.dependencies.odra-build]
-version = "2.6.0"
+version = "2.9.0"
 features = []
 
 [workspace.dependencies.odra-cli]
-version = "2.6.0"
+version = "2.9.0"
 features = []
 
 [workspace.dependencies.odra-core]
-version = "2.6.0"
+version = "2.9.0"
 features = []
 
 [workspace.dependencies.odra-modules]
-version = "2.6.0"
+version = "2.9.0"
 features = []
 
 [workspace.dependencies.odra-test]
-version = "2.6.0"
+version = "2.9.0"
 features = []
 
 [workspace.dependencies.odra-wasm-client]
-version = "2.6.0"
+version = "2.9.0"
 features = []
 
 [workspace.dependencies.odra-wasm-client-builder]
-version = "2.6.0"
+version = "2.9.0"
 features = []
 
 [workspace.dependencies.styks-contracts]
